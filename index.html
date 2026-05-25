@@ -260,7 +260,7 @@ button {
 .dot.wrong { background: #ef4444; color: white; }
 .dot.current { box-shadow: 0 0 0 3px #f59e0b; }
 
-#game-screen, #end-screen, #stats-screen, #level-screen, #welcome-screen { display: none; }
+#game-screen, #end-screen, #stats-screen, #level-screen, #welcome-screen, #leaderboard-screen { display: none; }
 .screen-active { display: block !important; }
 
 .welcome-age-input {
@@ -278,6 +278,22 @@ button {
   font-weight: bold;
   outline: none;
   -moz-appearance: textfield;
+}
+.welcome-name-input {
+  font-size: 1.6em;
+  padding: 10px 14px;
+  text-align: center;
+  width: 100%;
+  max-width: 280px;
+  display: block;
+  margin: 0 auto 18px;
+  border: 4px solid #78350f;
+  border-radius: 18px;
+  background: #fffbeb;
+  color: #78350f;
+  font-family: inherit;
+  font-weight: bold;
+  outline: none;
 }
 .welcome-age-input::-webkit-outer-spin-button,
 .welcome-age-input::-webkit-inner-spin-button { -webkit-appearance: none; }
@@ -450,7 +466,15 @@ select {
   <section class="card" id="welcome-screen">
     <div class="celebrate">🐝</div>
     <h2 style="text-align:center;">G'day! Let's spell.</h2>
-    <p style="text-align:center; margin-bottom:14px;">How old are you?</p>
+    <p style="text-align:center; margin-bottom:8px;">What's your name?</p>
+    <input id="name-input"
+           class="welcome-name-input"
+           type="text"
+           placeholder="Your name"
+           maxlength="20"
+           autocomplete="off"
+           autocapitalize="words">
+    <p style="text-align:center; margin-bottom:8px;">How old are you?</p>
     <input id="age-input"
            class="welcome-age-input"
            type="number"
@@ -495,6 +519,7 @@ select {
     <p id="end-message" style="text-align:center; margin-bottom:14px;"></p>
     <button class="btn btn-primary btn-big" id="next-round-btn" style="width:100%;">Play again ▶</button>
     <button class="btn btn-ghost" id="level-up-btn" style="width:100%; margin-top:8px; display:none;">⬆ Move up to next level</button>
+    <button class="btn btn-ghost" id="see-leaderboard-btn" style="width:100%; margin-top:8px;">🏆 Leaderboard</button>
     <button class="btn btn-ghost" id="see-stats-btn" style="width:100%; margin-top:8px;">📊 See my stats</button>
   </section>
 
@@ -517,8 +542,25 @@ select {
     <button class="btn btn-ghost" id="reset-btn" style="width:100%; margin-top:8px; background:#fee2e2;">🗑 Reset all progress</button>
   </section>
 
+  <!-- LEADERBOARD SCREEN -->
+  <section class="card" id="leaderboard-screen">
+    <h2>🏆 Leaderboard</h2>
+    <p class="setting-help" style="margin-bottom:10px;">Best scores per age group on this device.</p>
+    <div id="leaderboard-content"></div>
+    <button class="btn btn-primary" id="back-from-leaderboard" style="width:100%; margin-top:16px;">Back to game</button>
+  </section>
+
   <!-- LEVEL PICKER -->
   <section class="card" id="level-screen">
+    <div class="parent-section" style="margin-top:0; background:#d1fae5; border-color:#065f46;">
+      <h2 style="margin-top:0;">👤 Player</h2>
+      <div class="stat-row" style="border:none; padding:6px 0;">
+        <span><strong id="current-player">—</strong></span>
+        <button class="btn btn-ghost" id="switch-player-btn" style="padding:6px 14px; font-size:0.9em;">Switch player</button>
+      </div>
+      <button class="btn btn-primary" id="open-leaderboard-btn" style="width:100%; margin-top:8px;">🏆 Leaderboard</button>
+    </div>
+
     <h2>🎚 Choose a level</h2>
     <p style="margin-bottom:8px;">Levels unlock as you get 8 out of 10 right.</p>
     <div class="level-grid" id="level-grid"></div>
@@ -563,7 +605,7 @@ select {
     <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-top:16px;">Back to game</button>
   </section>
 
-  <footer>Made for Leo 🐝 · Speak clearly into the microphone of life</footer>
+  <footer>Made for Leo 🐝 · <span id="version-stamp"></span></footer>
 </div>
 
 <script>
@@ -1424,15 +1466,20 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
+const APP_VERSION = '1.1.0';   // bumped each GitHub push
+document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
+
 const defaultState = {
+  name: null,            // current player name (asked on welcome)
   age: null,
   level: 0,
   highestLevel: 0,
   rate: 0.85,
   voiceName: null,
   useAI: false,
-  aiVoiceId: 'au_female',  // try native AU first, fall back to Kokoro bf_emma
-  words: {}
+  aiVoiceId: 'au_female',
+  words: {},
+  leaderboard: []        // [{ name, age, score, total, level, date }, ...]
 };
 
 // Voice picker combines two sources:
@@ -1966,6 +2013,24 @@ function finishRound() {
   const total = round.words.length;
   document.getElementById('end-score').textContent = `${score} / ${total}`;
 
+  // Save to leaderboard
+  if (state.name && state.age) {
+    state.leaderboard = state.leaderboard || [];
+    state.leaderboard.push({
+      name: state.name,
+      age: state.age,
+      score,
+      total,
+      level: state.level,
+      date: new Date().toISOString()
+    });
+    // Cap to most recent 500 entries to keep storage manageable
+    if (state.leaderboard.length > 500) {
+      state.leaderboard = state.leaderboard.slice(-500);
+    }
+    saveState();
+  }
+
   let emoji, title, msg;
   if (score === total) {
     emoji = '🏆'; title = 'PERFECT!'; msg = 'You spelled every word right!';
@@ -1997,12 +2062,13 @@ function finishRound() {
 // SCREENS
 // ============================================================
 function showScreen(name) {
-  ['welcome','game','end','stats','level'].forEach(s => {
+  ['welcome','game','end','stats','level','leaderboard'].forEach(s => {
     const el = document.getElementById(s + '-screen');
     el.classList.toggle('screen-active', s === name);
   });
+  const playerPrefix = state.name ? `${state.name} · ` : '';
   document.getElementById('level-tag').textContent =
-    `Age ${state.age || 7} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
+    `${playerPrefix}Age ${state.age || 7} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
 }
 
 // ============================================================
@@ -2044,6 +2110,70 @@ function renderStats() {
     trickyEl.innerHTML = tricky
       .map(([w, s]) => `<span class="word-chip">${w}<span class="count">${s.wrong}✗</span></span>`)
       .join('');
+  }
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+// Best entry per name within an age group, ranked by score then level then recency.
+function topForAge(age, limit = 10) {
+  const inAge = (state.leaderboard || []).filter(e => e.age === age);
+  const byName = new Map();
+  for (const e of inAge) {
+    const cur = byName.get(e.name);
+    if (!cur ||
+        e.score > cur.score ||
+        (e.score === cur.score && e.level > cur.level) ||
+        (e.score === cur.score && e.level === cur.level && (e.date || '') > (cur.date || ''))) {
+      byName.set(e.name, e);
+    }
+  }
+  return Array.from(byName.values())
+    .sort((a, b) =>
+      b.score - a.score ||
+      b.level - a.level ||
+      (b.date || '').localeCompare(a.date || ''))
+    .slice(0, limit);
+}
+
+function renderLeaderboard() {
+  const el = document.getElementById('leaderboard-content');
+  el.innerHTML = '';
+  const board = state.leaderboard || [];
+  if (board.length === 0) {
+    el.innerHTML = '<p style="text-align:center; padding:20px;"><em>No scores yet — finish a round!</em></p>';
+    return;
+  }
+  const ages = [...new Set(board.map(e => e.age))].sort((a, b) => a - b);
+  for (const age of ages) {
+    const entries = topForAge(age, 10);
+    if (entries.length === 0) continue;
+    const heading = document.createElement('h2');
+    heading.textContent = `Age ${age}`;
+    heading.style.marginTop = '14px';
+    heading.style.fontSize = '1.1em';
+    el.appendChild(heading);
+
+    entries.forEach((e, i) => {
+      const row = document.createElement('div');
+      row.className = 'stat-row';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+      const isMe = e.name === state.name && e.age === state.age;
+      const nameDisplay = isMe
+        ? `<strong style="color:#065f46;">${escapeHtml(e.name)} (you)</strong>`
+        : escapeHtml(e.name);
+      row.innerHTML =
+        `<span>${medal} ${nameDisplay}</span>` +
+        `<strong>${e.score}/${e.total} · Lv ${e.level + 1}</strong>`;
+      el.appendChild(row);
+    });
   }
 }
 
@@ -2101,6 +2231,8 @@ document.getElementById('answer-form').addEventListener('submit', checkAnswer);
 
 document.getElementById('menu-btn').addEventListener('click', () => {
   renderLevels();
+  document.getElementById('current-player').textContent =
+    state.name ? `${state.name} (age ${state.age || 7})` : `Age ${state.age || 7}`;
   showScreen('level');
 });
 
@@ -2114,6 +2246,10 @@ document.getElementById('level-up-btn').addEventListener('click', () => {
 document.getElementById('see-stats-btn').addEventListener('click', () => {
   renderStats();
   showScreen('stats');
+});
+document.getElementById('see-leaderboard-btn').addEventListener('click', () => {
+  renderLeaderboard();
+  showScreen('leaderboard');
 });
 
 document.getElementById('back-from-stats').addEventListener('click', () => showScreen('game'));
@@ -2142,13 +2278,35 @@ document.getElementById('rate-select').addEventListener('change', e => {
 
 // --- Welcome screen ---
 document.getElementById('start-from-welcome').addEventListener('click', () => {
+  const nameRaw = document.getElementById('name-input').value.trim();
+  if (!nameRaw) {
+    document.getElementById('name-input').focus();
+    document.getElementById('name-input').style.borderColor = '#ef4444';
+    return;
+  }
   const v = parseInt(document.getElementById('age-input').value, 10);
   const age = isNaN(v) ? 7 : Math.max(7, Math.min(16, v));
+  state.name = nameRaw.slice(0, 20);
   state.age = age;
-  // Start at Level 1 (Warm up) for that age — kid levels up by getting 8/10.
-  // Keep existing progress if higher.
   saveState();
   startRound();
+});
+
+// --- Leaderboard + Switch Player ---
+document.getElementById('open-leaderboard-btn').addEventListener('click', () => {
+  renderLeaderboard();
+  showScreen('leaderboard');
+});
+document.getElementById('back-from-leaderboard').addEventListener('click', () => showScreen('game'));
+
+document.getElementById('switch-player-btn').addEventListener('click', () => {
+  if (!confirm("Switch player? Scores stay saved in the leaderboard.")) return;
+  showScreen('welcome');
+  // Pre-fill so re-entering is fast for known kids
+  document.getElementById('name-input').value = '';
+  document.getElementById('name-input').style.borderColor = '';
+  document.getElementById('age-input').value = state.age || 7;
+  document.getElementById('name-input').focus();
 });
 
 // --- Age setting (mid-game adjustment) ---
@@ -2162,7 +2320,9 @@ document.getElementById('age-setting').addEventListener('change', e => {
   }
   state.age = v;
   saveState();
-  // Refresh visible labels and re-warm the cache for the new pool
+  // Re-pick the current round's words from the new age's pool so going Back
+  // to game uses the new difficulty (the in-progress round otherwise has old words).
+  round = { words: pickRoundWords(), index: 0, correct: 0, results: [] };
   document.getElementById('level-tag').textContent =
     `Age ${state.age} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
   renderLevels();
@@ -2263,9 +2423,15 @@ voiceIdEl.value = state.aiVoiceId || defaultState.aiVoiceId;
 refreshAIStatus();
 
 // GO!
-if (state.age == null) {
+if (state.age == null || !state.name) {
   showScreen('welcome');
-  document.getElementById('age-input').value = 7;
+  document.getElementById('name-input').value = state.name || '';
+  document.getElementById('age-input').value = state.age || 7;
+  // Focus the first empty field
+  setTimeout(() => {
+    const target = !state.name ? 'name-input' : 'age-input';
+    document.getElementById(target).focus();
+  }, 100);
 } else {
   startRound();
 }
