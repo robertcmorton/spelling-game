@@ -608,6 +608,9 @@ select {
       </select>
     </div>
 
+    <button class="btn btn-primary" id="test-voice" style="width:100%; margin-top:10px;">🔊 Test voice</button>
+    <p class="setting-help" id="ai-feedback" style="margin-top:8px; min-height:1em;"></p>
+
     <div class="parent-section">
       <h2 style="margin-top:0;">🎙 AI voice (Gemini)</h2>
       <p class="setting-help">High-quality Australian voice <strong>Achernar</strong> via Google's
@@ -623,8 +626,6 @@ select {
       </div>
       <label class="setting-help" style="margin-top:8px; display:block;">Voice — pick one to switch instantly (auto-enables AI)</label>
       <select id="voice-id" class="setting-input"></select>
-      <button class="btn btn-ghost" id="test-voice" style="margin-top:10px; width:100%;">🔊 Test voice</button>
-      <p class="setting-help" id="ai-feedback" style="margin-top:8px; min-height:1em;"></p>
     </div>
 
     <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-top:16px;">Back to game</button>
@@ -1491,7 +1492,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.2';   // bumped each GitHub push
+const APP_VERSION = '1.3.3';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1640,13 +1641,20 @@ function loadVoices() {
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
 
-// AI voice (Gemini 2.5 Flash TTS via /api/tts) with persistent IndexedDB
+// AI voice (Gemini 3.1 Flash TTS via /api/tts) with persistent IndexedDB
 // cache and background prefetch — repeats of a word never re-call Gemini.
 const audioCache = new Map();   // in-memory: voiceId::text → blob URL
 let currentAudio = null;
 let activeUserSpeak = false;     // pauses background prefetch while user is hearing audio
 let prefetchRunning = false;
 let lastTTSError = null;         // surface API errors clearly
+
+// Free-tier Gemini TTS is ~3 req/min. We back off when we see 429s so the
+// kid can keep playing (the speak path falls through to the native voice
+// while throttled), then resume Gemini once the cooldown elapses.
+let geminiThrottledUntil = 0;   // epoch ms; if > now, skip Gemini fetches
+const THROTTLE_COOLDOWN_MS = 90000;
+const PREFETCH_INTERVAL_MS = 8000;   // ~7 req/min ceiling for prefetch alone
 
 // --- IndexedDB persistent cache ---
 const DB_NAME = 'spelling-bee-cache';
@@ -1724,6 +1732,12 @@ async function getAIAudio(text, voiceId) {
     return url;
   }
 
+  // Honor the rate-limit cooldown — failing fast lets speak() drop to the
+  // native voice immediately instead of waiting for another 429.
+  if (Date.now() < geminiThrottledUntil) {
+    throw new Error('429 throttled (cooldown active)');
+  }
+
   console.info('[spelling-bee] Fetching /api/tts for', voiceId, JSON.stringify(text));
   const res = await withTimeout(
     fetch('/api/tts', {
@@ -1737,10 +1751,15 @@ async function getAIAudio(text, voiceId) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     const msg = err.error || `HTTP ${res.status}`;
-    if (res.status === 503) {
-      // Server-side told us the API key isn't set up yet
-      lastTTSError = 'GEMINI_API_KEY not configured on the server. ' +
-        '(See Vercel → Settings → Environment Variables.)';
+    // 502 from our endpoint when Gemini itself returned 429
+    const isRateLimit = res.status === 429 || /429|rate.?limit/i.test(msg) ||
+                        /429/.test(err.detail || '');
+    if (isRateLimit) {
+      geminiThrottledUntil = Date.now() + THROTTLE_COOLDOWN_MS;
+      lastTTSError = 'Rate limit — using device voice for the next 90s';
+      console.warn('[spelling-bee] Gemini rate limit hit. Cooling off for', THROTTLE_COOLDOWN_MS/1000, 's');
+    } else if (res.status === 503) {
+      lastTTSError = 'GEMINI_API_KEY not configured in Vercel.';
     } else {
       lastTTSError = msg;
     }
@@ -1754,8 +1773,9 @@ async function getAIAudio(text, voiceId) {
   return url;
 }
 
-// Background prefetch — fetches /api/tts for upcoming words ahead of the kid.
-// Yields to live user playback; runs while AI voice is active.
+// Background prefetch — fetches /api/tts for the CURRENT ROUND'S words only,
+// at ~PREFETCH_INTERVAL_MS spacing. Free-tier Gemini caps requests/minute
+// hard, so we stay well under it. Yields to live user playback.
 async function ensurePrefetch() {
   if (prefetchRunning || !state.useAI) return;
   const voiceId = effectiveAIVoice();
@@ -1764,15 +1784,10 @@ async function ensurePrefetch() {
   try {
     while (state.useAI && effectiveAIVoice()) {
       const vId = effectiveAIVoice();
-      // Priority 1: current round's remaining words
+      // Only prefetch words for the CURRENT round to keep request volume low.
       let next = null;
       if (round.words) {
         next = round.words.find(w => !audioCache.has(`${vId}::${w.word}`));
-      }
-      // Priority 2: broader pool around current (age, level)
-      if (!next) {
-        const pool = poolForCurrent();
-        next = pool.find(w => !audioCache.has(`${vId}::${w.word}`));
       }
       if (!next) {
         await new Promise(r => setTimeout(r, 5000));   // idle wait
@@ -1780,12 +1795,22 @@ async function ensurePrefetch() {
       }
       while (activeUserSpeak) await new Promise(r => setTimeout(r, 100));
       if (!state.useAI) break;
-      try { await getAIAudio(next.word, vId); }
-      catch (e) {
-        // If the API is misconfigured or rate-limited, back off significantly
-        await new Promise(r => setTimeout(r, 30000));
+      // Skip the fetch entirely while we're in a rate-limit cooldown.
+      if (Date.now() < geminiThrottledUntil) {
+        await new Promise(r => setTimeout(r, 5000));
+        continue;
       }
-      await new Promise(r => setTimeout(r, 150));   // breathing room between requests
+      try {
+        await getAIAudio(next.word, vId);
+      } catch (e) {
+        // If 429, getAIAudio set the cooldown for us; just wait it out.
+        if (Date.now() < geminiThrottledUntil) {
+          await new Promise(r => setTimeout(r, geminiThrottledUntil - Date.now() + 500));
+        } else {
+          await new Promise(r => setTimeout(r, 15000));
+        }
+      }
+      await new Promise(r => setTimeout(r, PREFETCH_INTERVAL_MS));
     }
   } finally {
     prefetchRunning = false;
@@ -1827,6 +1852,15 @@ async function speak(text, opts = {}) {
         }
       }
       // AI voice path (Gemini)
+      // While we're inside a rate-limit cooldown, skip the network round-trip
+      // and play via the native browser voice so the kid isn't stuck mid-round.
+      if (Date.now() < geminiThrottledUntil) {
+        console.info('[spelling-bee] Gemini cooldown active — using native fallback');
+        const cooldownSec = Math.ceil((geminiThrottledUntil - Date.now()) / 1000);
+        showAIFeedback(`Gemini rate limited — using device voice (resumes in ${cooldownSec}s).`, true);
+        speakBrowser(text, opts);
+        return;
+      }
       try {
         if (playBtn) playBtn.textContent = '⏳ Fetching voice…';
         const voiceId = effectiveAIVoice();
@@ -1848,12 +1882,18 @@ async function speak(text, opts = {}) {
         }
         return;
       } catch (e) {
-        // IMPORTANT: do NOT silently fall through to speakBrowser. That path uses
-        // state.voiceName (often Karen on macOS), and the result was: "I pick AI
-        // Daniel, hear Karen, think AI works" when really AI had failed.
         if (playBtn) playBtn.textContent = '🔊 Say the word';
         console.error('[spelling-bee] AI voice failed:', e);
-        showAIFeedback('AI voice error: ' + (e.message || e) + ' — pick another voice or check connection.', true);
+        // If it's a 429 / rate-limit, the cooldown is set — fall to native
+        // so the kid keeps playing, with a clear notice.
+        if (Date.now() < geminiThrottledUntil) {
+          const cooldownSec = Math.ceil((geminiThrottledUntil - Date.now()) / 1000);
+          showAIFeedback(`Gemini rate limited — using device voice (resumes in ${cooldownSec}s).`, true);
+          speakBrowser(text, opts);
+          return;
+        }
+        // Other errors stay strict (no Karen masquerade) so they're visible.
+        showAIFeedback('AI voice error: ' + (e.message || e) + ' — check the menu.', true);
         return;
       }
     }
@@ -2548,46 +2588,50 @@ voiceIdEl.addEventListener('change', async () => {
   ensurePrefetch();
 });
 
-// Strict Test Voice — plays ONLY the actually-selected voice.
-// On Gemini failure, surfaces the error rather than silently falling
-// back to the browser's default voice (which is how Karen was masquerading
-// as the AI voice in earlier versions).
+// Test Voice — dual-mode.
+//   "Use AI voice" OFF → tests the browser voice from the regular "Voice"
+//                        dropdown (state.voiceName), via speechSynthesis.
+//   "Use AI voice" ON  → tests Achernar via Gemini. First click fetches +
+//                        caches; second click plays (fresh user gesture).
+//
+// Importantly, Test no longer auto-toggles useAI on. The button reflects
+// what will actually play in the game given current settings.
 document.getElementById('test-voice').addEventListener('click', async () => {
-  if (!state.useAI) {
-    state.useAI = true;
-    useAIEl.checked = true;
-    saveState();
-  }
   await ensureVoicesLoaded();
-  const opt = findVoiceOption(state.aiVoiceId);
-  console.info('[spelling-bee] Test voice click. state.aiVoiceId =', state.aiVoiceId, 'opt =', opt);
 
-  // Native-browser voice path (Karen, Lee, etc.)
-  if (opt?.type === 'browser') {
-    const v = findNativeVoice(opt.match);
-    if (v) {
-      console.info('[spelling-bee] Playing native:', v.name, v.lang);
-      try {
-        const u = new SpeechSynthesisUtterance(TEST_PHRASE);
-        u.voice = v;
-        u.rate = Math.max(0.5, Math.min(2.0, state.rate || 1));
-        u.lang = v.lang;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-        showAIFeedback(`🔊 Playing "${v.name}" (${v.lang}) — your device's built-in voice.`);
-      } catch (e) {
-        console.error('[spelling-bee] Native play error:', e);
-        showAIFeedback('Native play error: ' + (e.message || e), true);
-      }
+  // --- Browser-voice mode (AI off) ---
+  if (!state.useAI) {
+    const v = voices.find(x => x.name === state.voiceName) ||
+              voices.find(x => (x.lang || '').toLowerCase().startsWith('en-au')) ||
+              voices.find(x => (x.lang || '').toLowerCase().startsWith('en')) ||
+              voices[0];
+    if (!v) {
+      showAIFeedback('No browser voices available on this device.', true);
       return;
     }
-    showAIFeedback(`No native "${opt.match.nameHints[0]}" on this device — falling through to Gemini Achernar…`);
+    console.info('[spelling-bee] Test (browser):', v.name, v.lang);
+    try {
+      const u = new SpeechSynthesisUtterance(TEST_PHRASE);
+      u.voice = v;
+      u.rate = Math.max(0.5, Math.min(2.0, state.rate || 1));
+      u.lang = v.lang;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+      showAIFeedback(`🔊 "${v.name}" (${v.lang}) — your device's voice.`);
+    } catch (e) {
+      console.error('[spelling-bee] Native play error:', e);
+      showAIFeedback('Play error: ' + (e.message || e), true);
+    }
+    return;
   }
 
-  // Gemini path — strict
+  // --- AI mode (Gemini Achernar) ---
+  const opt = findVoiceOption(state.aiVoiceId);
+  console.info('[spelling-bee] Test (AI):', state.aiVoiceId, opt);
+
   const voiceId = effectiveAIVoice();
   if (!voiceId) {
-    showAIFeedback('No voice resolved. Pick a voice from the dropdown.', true);
+    showAIFeedback('No AI voice resolved. Pick one from the dropdown.', true);
     return;
   }
   const cacheKey = `${voiceId}::${TEST_PHRASE}`;
@@ -2597,15 +2641,14 @@ document.getElementById('test-voice').addEventListener('click', async () => {
     try {
       showAIFeedback('Fetching from Gemini…');
       url = await getAIAudio(TEST_PHRASE, voiceId);
-      showAIFeedback(`✓ ${voiceId} ready — tap 🔊 Test voice once more to play.`);
+      showAIFeedback(`✓ ${voiceId} ready — tap 🔊 Test voice once more.`);
     } catch (e) {
       console.error('[spelling-bee] Gemini fetch failed:', e);
-      showAIFeedback('Gemini error: ' + (e.message || e), true);
+      showAIFeedback(formatTTSError(e), true);
     }
     return;
   }
 
-  // Cached — play within click gesture
   try {
     console.info('[spelling-bee] Playing cached Gemini:', voiceId);
     const audio = new Audio(url);
@@ -2615,16 +2658,30 @@ document.getElementById('test-voice').addEventListener('click', async () => {
     audio.addEventListener('loadedmetadata', () => console.info('[spelling-bee] Audio metadata. duration =', audio.duration, 's'));
     audio.addEventListener('ended', () => console.info('[spelling-bee] Audio ended'));
     await audio.play();
-    showAIFeedback(`🔊 Playing Gemini AI voice "${voiceId}".`);
+    showAIFeedback(`🔊 Achernar (Gemini AI).`);
   } catch (e) {
     console.error('[spelling-bee] Cached play failed:', e);
     if (e.name === 'NotAllowedError') {
-      showAIFeedback('Autoplay blocked. Tap 🔊 Test voice again — should play now.', true);
+      showAIFeedback('Autoplay blocked. Tap 🔊 Test voice again.', true);
     } else {
       showAIFeedback('Play error: ' + (e.message || e), true);
     }
   }
 });
+
+function formatTTSError(e) {
+  const msg = (e && e.message) || String(e);
+  if (msg.includes('429') || /rate.?limit/i.test(msg)) {
+    return 'Gemini rate limit (free tier ~3/min). Wait a moment, or enable billing on your Google Cloud project for higher quota.';
+  }
+  if (msg.includes('503')) {
+    return 'GEMINI_API_KEY not configured in Vercel. See Settings → Environment Variables.';
+  }
+  if (msg.includes('403')) {
+    return 'API key rejected (check it has access to gemini-3.1-flash-tts-preview).';
+  }
+  return 'Gemini error: ' + msg;
+}
 
 // Unlock the browser's audio playback policy on the first user interaction.
 // Lets later Audio.play() calls work even if they fire after async work
