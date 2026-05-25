@@ -11,8 +11,8 @@ Open `index.html` in any modern browser, or visit the deployed version.
 
 ## Features
 
-- **Achernar AI voice (Australian female)** — high-quality Gemini 2.5 Flash
-  TTS, fetched per word and cached locally so repeats are free.
+- **Achernar AI voice (Australian female)** — high-quality Gemini 3.1 Flash
+  TTS Preview, fetched per word and cached locally so repeats are free.
 - **Native Aussie fallback** — Karen / Lee on macOS, iOS, and Edge work
   without any setup or network.
 - **Multiplayer leaderboard** — name + age on the welcome screen. Scores
@@ -44,7 +44,7 @@ Master pool of ~470 words tagged by spelling age (5 → 17), sourced from:
 
 Single-page HTML game (`index.html`) plus two Vercel Serverless Functions:
 
-- `api/tts.js` — proxies Google Gemini 2.5 Flash TTS (Achernar voice, en-AU)
+- `api/tts.js` — proxies Google Gemini 3.1 Flash TTS Preview (Achernar voice, en-AU)
 - `api/leaderboard.js` — shared leaderboard backed by Vercel KV / Upstash Redis
 
 Vanilla JS, no build step, Web Speech API for native browser voices.
@@ -79,7 +79,7 @@ Until this is set, scores save per-device only.
 
 ## Cost
 
-- **Gemini 2.5 Flash TTS**: free tier is generous; beyond it, audio is billed
+- **Gemini 3.1 Flash TTS Preview**: free tier is generous; beyond it, audio is billed
   per character — pennies for a family-scale game. IndexedDB cache means each
   word is fetched exactly once.
 - **Vercel KV (Upstash)**: free Hobby tier covers ~10k commands/day — fine.

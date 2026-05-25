@@ -21,8 +21,8 @@ import { Redis } from '@upstash/redis';
 const RATE_KEY_PREFIX = 'spelling-bee:tts-rate:';
 const RATE_LIMIT      = 60;
 const MAX_TEXT_LEN    = 500;
-const GEMINI_MODEL    = 'gemini-2.5-flash-preview-tts';
-const DEFAULT_VOICE   = 'Achernar';   // en-AU female
+const GEMINI_MODEL    = 'gemini-3.1-flash-tts-preview';
+const DEFAULT_VOICE   = 'Achernar';   // soft, paired with en-AU prompt
 const DEFAULT_LANG    = 'en-AU';
 
 function getRedis() {
