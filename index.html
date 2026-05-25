@@ -596,7 +596,7 @@ select {
           <span id="ai-status">Off</span>
         </label>
       </div>
-      <label class="setting-help" style="margin-top:8px; display:block;">Voice (British accents are closest to Australian)</label>
+      <label class="setting-help" style="margin-top:8px; display:block;">Voice — pick one to switch instantly (auto-enables AI)</label>
       <select id="voice-id" class="setting-input"></select>
       <button class="btn btn-ghost" id="test-voice" style="margin-top:10px; width:100%;">🔊 Test voice</button>
       <p class="setting-help" id="ai-feedback" style="margin-top:8px; min-height:1em;"></p>
@@ -1466,7 +1466,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.2.0';   // bumped each GitHub push
+const APP_VERSION = '1.2.1';   // bumped each GitHub push
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
 const defaultState = {
@@ -1689,6 +1689,22 @@ async function idbClear() {
   });
 }
 
+// Update both the play button and the menu feedback so the kid sees progress
+// regardless of which screen they're on.
+function setVoiceLoadProgress(text) {
+  const playBtn = document.getElementById('play-btn');
+  if (playBtn) playBtn.textContent = text;
+  showAIFeedback(text);
+}
+
+// Reject a promise if it doesn't settle within ms milliseconds.
+function withTimeout(p, ms, msg) {
+  return Promise.race([
+    p,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), ms))
+  ]);
+}
+
 // --- Kokoro model loader (lazy, cached by browser) ---
 const KOKORO_CDNS = [
   'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm',
@@ -1715,8 +1731,8 @@ async function importKokoro() {
 async function loadKokoro() {
   if (kokoroTTS) return kokoroTTS;
   if (kokoroLoading) return kokoroLoading;
-  showAIFeedback('Loading voice model… (~85MB, one-time)');
-  kokoroLoading = (async () => {
+  setVoiceLoadProgress('⏳ Loading voice (~85MB)…');
+  kokoroLoading = withTimeout((async () => {
     const mod = await importKokoro();
     const tts = await mod.KokoroTTS.from_pretrained(
       'onnx-community/Kokoro-82M-v1.0-ONNX',
@@ -1725,25 +1741,27 @@ async function loadKokoro() {
         progress_callback: (data) => {
           if (!data) return;
           if (data.status === 'progress' && typeof data.progress === 'number') {
-            showAIFeedback(`Loading voice model… ${Math.round(data.progress)}%`);
+            setVoiceLoadProgress(`⏳ Loading voice ${Math.round(data.progress)}%`);
           } else if (data.status === 'done') {
-            showAIFeedback('Almost ready…');
+            setVoiceLoadProgress('⏳ Almost ready…');
           } else if (data.status === 'ready') {
-            showAIFeedback('✓ Voice ready');
+            setVoiceLoadProgress('✓ Voice ready');
           }
         }
       }
     );
     kokoroTTS = tts;
-    showAIFeedback('✓ Voice ready');
+    setVoiceLoadProgress('✓ Voice ready');
     console.info('[spelling-bee] Kokoro ready');
     return tts;
-  })();
+  })(), 120000, 'Voice model load timed out (>2 min) — slow network. Try a native Aussie voice or check the connection.');
   try { return await kokoroLoading; }
   catch (e) {
     kokoroLoading = null;
     console.error('[spelling-bee] Kokoro load failed:', e);
     showAIFeedback('Voice model failed to load: ' + (e.message || e), true);
+    const playBtn = document.getElementById('play-btn');
+    if (playBtn) playBtn.textContent = '🔊 Say the word';
     throw e;
   }
 }
@@ -2460,12 +2478,27 @@ useAIEl.addEventListener('change', () => {
 
 voiceIdEl.addEventListener('change', () => {
   state.aiVoiceId = voiceIdEl.value || defaultState.aiVoiceId;
+  // Picking a voice is itself a "use this voice" action — auto-enable AI voice
+  // so the kid doesn't have to also tick the toggle.
+  if (!state.useAI) {
+    state.useAI = true;
+    useAIEl.checked = true;
+  }
   saveState();
   audioCache.clear();
   delete document.getElementById('ai-feedback').dataset.warned;
   refreshAIStatus();
   showAIFeedback('');
-  if (state.useAI) ensurePrefetch();
+  // Pre-warm Kokoro in the background if the new voice needs it, so by the time
+  // the kid clicks Play the model is loaded.
+  const opt = findVoiceOption(state.aiVoiceId);
+  const needsKokoro = opt?.type === 'kokoro' ||
+    (opt?.type === 'browser' && !findNativeVoice(opt.match));
+  if (needsKokoro && !kokoroTTS) {
+    showAIFeedback('Loading voice model in the background…');
+    loadKokoro().catch(e => console.warn('[spelling-bee] preload failed:', e));
+  }
+  ensurePrefetch();
 });
 
 document.getElementById('test-voice').addEventListener('click', async () => {
