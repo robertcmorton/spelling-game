@@ -1466,7 +1466,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.1.0';   // bumped each GitHub push
+const APP_VERSION = '1.2.0';   // bumped each GitHub push
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
 const defaultState = {
@@ -2013,10 +2013,9 @@ function finishRound() {
   const total = round.words.length;
   document.getElementById('end-score').textContent = `${score} / ${total}`;
 
-  // Save to leaderboard
+  // Save round to the shared leaderboard (with local fallback).
   if (state.name && state.age) {
-    state.leaderboard = state.leaderboard || [];
-    state.leaderboard.push({
+    submitScore({
       name: state.name,
       age: state.age,
       score,
@@ -2024,11 +2023,6 @@ function finishRound() {
       level: state.level,
       date: new Date().toISOString()
     });
-    // Cap to most recent 500 entries to keep storage manageable
-    if (state.leaderboard.length > 500) {
-      state.leaderboard = state.leaderboard.slice(-500);
-    }
-    saveState();
   }
 
   let emoji, title, msg;
@@ -2114,12 +2108,74 @@ function renderStats() {
 }
 
 // ============================================================
-// LEADERBOARD
+// LEADERBOARD (shared via /api/leaderboard, local cache fallback)
 // ============================================================
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
+}
+
+let lastLoadStatus = 'idle';   // 'idle' | 'online' | 'offline' | 'unconfigured'
+
+// Try to read the shared board from the server. Merge with any local-only
+// entries (e.g. submitted while offline) so they remain visible on this device.
+async function loadLeaderboard() {
+  let remote = null;
+  try {
+    const res = await fetch('/api/leaderboard', { cache: 'no-store' });
+    if (res.status === 503) {
+      lastLoadStatus = 'unconfigured';
+    } else if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.entries)) {
+        remote = data.entries;
+        lastLoadStatus = 'online';
+      }
+    } else {
+      lastLoadStatus = 'offline';
+    }
+  } catch (e) {
+    console.warn('[leaderboard] load failed:', e);
+    lastLoadStatus = 'offline';
+  }
+
+  const local = state.leaderboard || [];
+  if (!remote) {
+    return local;
+  }
+  // Merge: dedupe by (name|age|score|level|date)
+  const sig = e => `${e.name}|${e.age}|${e.score}|${e.level}|${e.date}`;
+  const remoteSigs = new Set(remote.map(sig));
+  const localOnly = local.filter(e => !remoteSigs.has(sig(e)));
+  const merged = [...remote, ...localOnly];
+  state.leaderboard = merged;
+  saveState();
+  return merged;
+}
+
+// POST a completed round. Optimistically saves locally first so the leaderboard
+// always reflects the kid's most recent score even on a flaky network.
+async function submitScore(entry) {
+  state.leaderboard = state.leaderboard || [];
+  state.leaderboard.push(entry);
+  if (state.leaderboard.length > 500) {
+    state.leaderboard = state.leaderboard.slice(-500);
+  }
+  saveState();
+  try {
+    const res = await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.warn('[leaderboard] submit failed:', res.status, err);
+    }
+  } catch (e) {
+    console.warn('[leaderboard] submit network error:', e);
+  }
 }
 
 // Best entry per name within an age group, ranked by score then level then recency.
@@ -2143,14 +2199,38 @@ function topForAge(age, limit = 10) {
     .slice(0, limit);
 }
 
-function renderLeaderboard() {
+async function renderLeaderboard() {
   const el = document.getElementById('leaderboard-content');
+  el.innerHTML = '<p style="text-align:center; padding:20px;"><em>Loading…</em></p>';
+
+  await loadLeaderboard();
+
   el.innerHTML = '';
+
+  // Connection status pill
+  const statusEl = document.createElement('div');
+  statusEl.style.textAlign = 'center';
+  statusEl.style.marginBottom = '10px';
+  statusEl.style.fontSize = '0.85em';
+  if (lastLoadStatus === 'online') {
+    statusEl.innerHTML = '<span style="color:#065f46;">🌐 Shared with everyone</span>';
+  } else if (lastLoadStatus === 'offline') {
+    statusEl.innerHTML = '<span style="color:#991b1b;">📵 Offline — showing local scores only</span>';
+  } else if (lastLoadStatus === 'unconfigured') {
+    statusEl.innerHTML = '<span style="color:#92400e;">⚙ Shared leaderboard not configured yet — local only</span>';
+  }
+  el.appendChild(statusEl);
+
   const board = state.leaderboard || [];
   if (board.length === 0) {
-    el.innerHTML = '<p style="text-align:center; padding:20px;"><em>No scores yet — finish a round!</em></p>';
+    const empty = document.createElement('p');
+    empty.style.textAlign = 'center';
+    empty.style.padding = '20px';
+    empty.innerHTML = '<em>No scores yet — finish a round!</em>';
+    el.appendChild(empty);
     return;
   }
+
   const ages = [...new Set(board.map(e => e.age))].sort((a, b) => a - b);
   for (const age of ages) {
     const entries = topForAge(age, 10);
