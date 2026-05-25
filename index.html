@@ -328,6 +328,30 @@ button {
   border-radius: 14px;
 }
 
+.leaderboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px dashed #fbbf24;
+}
+.leaderboard-tab {
+  background: #fef3c7;
+  border: 2px solid #78350f;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-weight: bold;
+  color: #78350f;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+.leaderboard-tab.active {
+  background: #f59e0b;
+  color: white;
+}
+
 h2 {
   color: #78350f;
   margin-bottom: 12px;
@@ -1466,11 +1490,11 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.2.1';   // bumped each GitHub push
+const APP_VERSION = '1.2.2';   // bumped each GitHub push
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
 const defaultState = {
-  name: null,            // current player name (asked on welcome)
+  name: null,
   age: null,
   level: 0,
   highestLevel: 0,
@@ -1479,8 +1503,11 @@ const defaultState = {
   useAI: false,
   aiVoiceId: 'au_female',
   words: {},
-  leaderboard: []        // [{ name, age, score, total, level, date }, ...]
+  recentWords: [],       // last N words shown across rounds — used to avoid repeats
+  leaderboard: []
 };
+
+const RECENT_WORDS_LIMIT = 30;
 
 // Voice picker combines two sources:
 //   - "browser" type: native OS voice (real Australian voices on macOS/iOS/Edge)
@@ -1870,8 +1897,10 @@ async function speak(text, opts = {}) {
         try {
           await audio.play();
         } catch (playErr) {
-          // Most likely an autoplay restriction on iOS Safari — the kid can still tap Play
-          console.warn('Audio.play() rejected:', playErr);
+          console.warn('[spelling-bee] Audio.play() rejected:', playErr.name, playErr.message);
+          if (playErr && playErr.name === 'NotAllowedError') {
+            showAIFeedback('Autoplay was blocked — tap 🔊 to hear it (audio is cached now, so it will be instant).', true);
+          }
         }
         return;
       } catch (e) {
@@ -1922,17 +1951,37 @@ let round = { words: [], index: 0, correct: 0, results: [] };
 
 function pickRoundWords() {
   const pool = poolForCurrent().slice();
-  // shuffle (Fisher-Yates)
+  // Fisher-Yates shuffle
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  // bias: include up to 3 words the kid got wrong more than right
-  const tricky = pool
-    .filter(w => state.words[w.word] && state.words[w.word].wrong > state.words[w.word].right)
-    .slice(0, 3);
-  const others = pool.filter(w => !tricky.includes(w));
-  return [...tricky, ...others].slice(0, ROUND_LENGTH);
+  // Avoid recently-shown words for variety. If the pool is too small to
+  // afford that, fall back to the full shuffled pool.
+  const recent = new Set(state.recentWords || []);
+  let working = pool.filter(w => !recent.has(w.word));
+  if (working.length < ROUND_LENGTH) working = pool;
+
+  // Tricky-word bias: at most ONE word per round (was 3) and only ~50% of the
+  // time — so the kid mostly sees fresh content but occasionally revisits a
+  // word they got wrong before.
+  const trickyCandidates = working.filter(w =>
+    state.words[w.word] && state.words[w.word].wrong > state.words[w.word].right);
+  const tricky = (trickyCandidates.length > 0 && Math.random() < 0.5)
+    ? [trickyCandidates[0]]
+    : [];
+
+  const others = working.filter(w => !tricky.includes(w));
+  const picked = [...tricky, ...others].slice(0, ROUND_LENGTH);
+
+  // Remember these words so the next round avoids them
+  state.recentWords = [...(state.recentWords || []), ...picked.map(w => w.word)];
+  if (state.recentWords.length > RECENT_WORDS_LIMIT) {
+    state.recentWords = state.recentWords.slice(-RECENT_WORDS_LIMIT);
+  }
+  saveState();
+
+  return picked;
 }
 
 function startRound() {
@@ -2217,6 +2266,8 @@ function topForAge(age, limit = 10) {
     .slice(0, limit);
 }
 
+let selectedLeaderboardAge = null;
+
 async function renderLeaderboard() {
   const el = document.getElementById('leaderboard-content');
   el.innerHTML = '<p style="text-align:center; padding:20px;"><em>Loading…</em></p>';
@@ -2233,14 +2284,21 @@ async function renderLeaderboard() {
   if (lastLoadStatus === 'online') {
     statusEl.innerHTML = '<span style="color:#065f46;">🌐 Shared with everyone</span>';
   } else if (lastLoadStatus === 'offline') {
-    statusEl.innerHTML = '<span style="color:#991b1b;">📵 Offline — showing local scores only</span>';
+    statusEl.innerHTML = '<span style="color:#991b1b;">📵 Offline — local scores only</span>';
   } else if (lastLoadStatus === 'unconfigured') {
-    statusEl.innerHTML = '<span style="color:#92400e;">⚙ Shared leaderboard not configured yet — local only</span>';
+    statusEl.innerHTML = '<span style="color:#92400e;">⚙ Shared leaderboard not configured yet</span>';
   }
   el.appendChild(statusEl);
 
   const board = state.leaderboard || [];
-  if (board.length === 0) {
+
+  // Ages with at least one entry, plus the current player's age (so the
+  // current player sees their own tab even before they've played).
+  const ageSet = new Set(board.map(e => Number(e.age)).filter(a => Number.isFinite(a)));
+  if (state.age) ageSet.add(state.age);
+  const ages = [...ageSet].sort((a, b) => a - b);
+
+  if (ages.length === 0) {
     const empty = document.createElement('p');
     empty.style.textAlign = 'center';
     empty.style.padding = '20px';
@@ -2249,30 +2307,50 @@ async function renderLeaderboard() {
     return;
   }
 
-  const ages = [...new Set(board.map(e => e.age))].sort((a, b) => a - b);
-  for (const age of ages) {
-    const entries = topForAge(age, 10);
-    if (entries.length === 0) continue;
-    const heading = document.createElement('h2');
-    heading.textContent = `Age ${age}`;
-    heading.style.marginTop = '14px';
-    heading.style.fontSize = '1.1em';
-    el.appendChild(heading);
-
-    entries.forEach((e, i) => {
-      const row = document.createElement('div');
-      row.className = 'stat-row';
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
-      const isMe = e.name === state.name && e.age === state.age;
-      const nameDisplay = isMe
-        ? `<strong style="color:#065f46;">${escapeHtml(e.name)} (you)</strong>`
-        : escapeHtml(e.name);
-      row.innerHTML =
-        `<span>${medal} ${nameDisplay}</span>` +
-        `<strong>${e.score}/${e.total} · Lv ${e.level + 1}</strong>`;
-      el.appendChild(row);
-    });
+  // Default to current player's age. Sticky across re-renders for tab clicks.
+  if (selectedLeaderboardAge === null || !ages.includes(selectedLeaderboardAge)) {
+    selectedLeaderboardAge = ages.includes(state.age) ? state.age : ages[0];
   }
+
+  // Tabs
+  const tabsEl = document.createElement('div');
+  tabsEl.className = 'leaderboard-tabs';
+  ages.forEach(age => {
+    const btn = document.createElement('button');
+    btn.className = 'leaderboard-tab';
+    if (age === selectedLeaderboardAge) btn.classList.add('active');
+    btn.textContent = age === state.age ? `Age ${age} (you)` : `Age ${age}`;
+    btn.onclick = () => {
+      selectedLeaderboardAge = age;
+      renderLeaderboard();
+    };
+    tabsEl.appendChild(btn);
+  });
+  el.appendChild(tabsEl);
+
+  // Entries for the selected age only
+  const entries = topForAge(selectedLeaderboardAge, 10);
+  if (entries.length === 0) {
+    const empty = document.createElement('p');
+    empty.style.textAlign = 'center';
+    empty.style.padding = '20px';
+    empty.innerHTML = `<em>No scores for Age ${selectedLeaderboardAge} yet — be the first!</em>`;
+    el.appendChild(empty);
+    return;
+  }
+  entries.forEach((e, i) => {
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+    const isMe = e.name === state.name && e.age === state.age;
+    const nameDisplay = isMe
+      ? `<strong style="color:#065f46;">${escapeHtml(e.name)} (you)</strong>`
+      : escapeHtml(e.name);
+    row.innerHTML =
+      `<span>${medal} ${nameDisplay}</span>` +
+      `<strong>${e.score}/${e.total} · Lv ${e.level + 1}</strong>`;
+    el.appendChild(row);
+  });
 }
 
 // ============================================================
@@ -2504,26 +2582,58 @@ voiceIdEl.addEventListener('change', () => {
 document.getElementById('test-voice').addEventListener('click', async () => {
   showAIFeedback('Testing…');
   await ensureVoicesLoaded();
-  // Diagnostic: report what voice will actually play
   const opt = findVoiceOption(state.aiVoiceId);
-  let diag = '';
+
+  // If the user picked the voice but useAI was off, enable it now
   if (!state.useAI) {
-    diag = '"Use AI voice" is off — playing default browser voice.';
-  } else if (opt?.type === 'browser') {
-    const v = findNativeVoice(opt.match);
-    diag = v
-      ? `✓ Using native "${v.name}" (${v.lang}) on your device.`
-      : `No native AU voice on this device. Available en-AU voices: ${voices.filter(x => (x.lang||'').toLowerCase().startsWith('en-au')).map(x=>x.name).join(', ') || 'none'}. Falling back to Kokoro ${opt.fallback}.`;
-  } else if (opt?.type === 'kokoro') {
-    diag = `Using Kokoro AI voice ${opt.id}.`;
+    state.useAI = true;
+    useAIEl.checked = true;
+    saveState();
   }
-  showAIFeedback(diag);
+
+  // If the voice will need Kokoro and the model isn't loaded yet, load it
+  // FIRST then ask for a fresh tap. Doing the load inside the same handler
+  // would burn the autoplay-allowed window, so audio.play() gets blocked
+  // by the time the model finishes — which is exactly what the user saw.
+  const needsKokoro = (opt?.type === 'kokoro') ||
+    (opt?.type === 'browser' && !findNativeVoice(opt?.match));
+  if (needsKokoro && !kokoroTTS) {
+    showAIFeedback('Loading voice model… (up to 2 min on first use)');
+    try {
+      await loadKokoro();
+      showAIFeedback('✓ Voice ready — tap Test voice again to hear it.');
+    } catch (e) {
+      showAIFeedback('Voice load failed: ' + (e.message || e), true);
+    }
+    return;   // require a fresh user click for play()
+  }
+
+  // Voice is ready (or native) — play within the click's gesture window.
   try {
+    console.info('[spelling-bee] Test voice play');
     await speak("G'day! I'll say words for you to spell.");
+    refreshAIStatus();
   } catch (e) {
-    showAIFeedback('Error: ' + e.message, true);
+    showAIFeedback('Error: ' + (e.message || e), true);
   }
 });
+
+// Unlock the browser's audio playback policy on the first user interaction.
+// Lets later Audio.play() calls work even if they fire after async work
+// (e.g. Kokoro model load) that breaks the user-activation chain.
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  try {
+    const a = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+    a.volume = 0.01;
+    a.play().catch(() => {});
+  } catch (e) {}
+}
+['click','touchstart','keydown'].forEach(ev =>
+  document.addEventListener(ev, unlockAudio, { once: true, passive: true })
+);
 
 // Keep voice list in sync if it loads late (some browsers)
 window.setTimeout(loadVoices, 500);
