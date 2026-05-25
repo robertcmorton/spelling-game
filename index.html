@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spelling Bee!</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%9D%3C/text%3E%3C/svg%3E">
 <style>
 * {
   box-sizing: border-box;
@@ -1492,7 +1493,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.5';   // bumped each GitHub push
+const APP_VERSION = '1.3.6';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1658,6 +1659,7 @@ loadVoices();
 // AI voice (Gemini 3.1 Flash TTS via /api/tts) with persistent IndexedDB
 // cache and background prefetch — repeats of a word never re-call Gemini.
 const audioCache = new Map();   // in-memory: voiceId::text → blob URL
+const inFlight   = new Map();   // in-memory: voiceId::text → Promise (dedup parallel callers)
 let currentAudio = null;
 let activeUserSpeak = false;     // pauses background prefetch while user is hearing audio
 let prefetchRunning = false;
@@ -1697,6 +1699,19 @@ async function idbGet(key) {
     } catch (e) { resolve(null); }
   });
 }
+// Lightweight existence check — uses getKey so we don't load the blob.
+async function idbHas(key) {
+  const db = await openDB();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE, 'readonly');
+      const r = tx.objectStore(STORE).getKey(key);
+      r.onsuccess = () => resolve(r.result !== undefined);
+      r.onerror = () => resolve(false);
+    } catch (e) { resolve(false); }
+  });
+}
 async function idbPut(key, blob) {
   const db = await openDB();
   if (!db) return;
@@ -1731,100 +1746,161 @@ function withTimeout(p, ms, msg) {
 }
 
 // Get audio for a word from /api/tts.
-// Cache flow: in-memory Map → IndexedDB → network. Repeats are free.
+// Cache flow: in-memory → in-flight dedup → IndexedDB → network.
+// Two callers asking for the same key at the same time share ONE request.
 async function getAIAudio(text, voiceId) {
   voiceId = voiceId || effectiveAIVoice() || state.aiVoiceId;
   if (!voiceId) throw new Error('No AI voice selected');
   const key = `${voiceId}::${text}`;
 
+  // 1. In-memory cache — synchronous fast path
   if (audioCache.has(key)) return audioCache.get(key);
 
-  const cached = await idbGet(key);
-  if (cached) {
-    const url = URL.createObjectURL(cached);
-    audioCache.set(key, url);
-    return url;
-  }
+  // 2. In-flight dedup — if another caller already started fetching the same
+  //    key, wait on their Promise instead of starting a duplicate request.
+  if (inFlight.has(key)) return inFlight.get(key);
 
-  // Honor the rate-limit cooldown — failing fast lets speak() drop to the
-  // native voice immediately instead of waiting for another 429.
-  if (Date.now() < geminiThrottledUntil) {
-    throw new Error('429 throttled (cooldown active)');
-  }
-
-  console.info('[spelling-bee] Fetching /api/tts for', voiceId, JSON.stringify(text));
-  const res = await withTimeout(
-    fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice: voiceId })
-    }),
-    30000,
-    'TTS request timed out — check connection'
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg = err.error || `HTTP ${res.status}`;
-    // 502 from our endpoint when Gemini itself returned 429
-    const isRateLimit = res.status === 429 || /429|rate.?limit/i.test(msg) ||
-                        /429/.test(err.detail || '');
-    if (isRateLimit) {
-      geminiThrottledUntil = Date.now() + THROTTLE_COOLDOWN_MS;
-      lastTTSError = 'Rate limit — using device voice for the next 90s';
-      console.warn('[spelling-bee] Gemini rate limit hit. Cooling off for', THROTTLE_COOLDOWN_MS/1000, 's');
-    } else if (res.status === 503) {
-      lastTTSError = 'GEMINI_API_KEY not configured in Vercel.';
-    } else {
-      lastTTSError = msg;
+  const promise = (async () => {
+    // 3. IndexedDB cache (persistent across reloads)
+    const cached = await idbGet(key);
+    if (cached) {
+      const url = URL.createObjectURL(cached);
+      audioCache.set(key, url);
+      return url;
     }
-    throw new Error(msg);
+
+    // 4. Honor the rate-limit cooldown — failing fast lets speak() drop to
+    //    the native voice instead of waiting for another 429.
+    if (Date.now() < geminiThrottledUntil) {
+      throw new Error('429 throttled (cooldown active)');
+    }
+
+    // 5. Network fetch
+    console.info('[spelling-bee] Fetching /api/tts for', voiceId, JSON.stringify(text));
+    const res = await withTimeout(
+      fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: voiceId })
+      }),
+      30000,
+      'TTS request timed out — check connection'
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err.error || `HTTP ${res.status}`;
+      const isRateLimit = res.status === 429 || /429|rate.?limit/i.test(msg) ||
+                          /429/.test(err.detail || '');
+      if (isRateLimit) {
+        geminiThrottledUntil = Date.now() + THROTTLE_COOLDOWN_MS;
+        lastTTSError = 'Rate limit — using device voice for the next 90s';
+        console.warn('[spelling-bee] Gemini rate limit hit. Cooling off for', THROTTLE_COOLDOWN_MS/1000, 's');
+      } else if (res.status === 503) {
+        lastTTSError = 'GEMINI_API_KEY not configured in Vercel.';
+      } else {
+        lastTTSError = msg;
+      }
+      throw new Error(msg);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    audioCache.set(key, url);
+    idbPut(key, blob);  // fire-and-forget persist
+    lastTTSError = null;
+    return url;
+  })();
+
+  inFlight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    inFlight.delete(key);
   }
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  audioCache.set(key, url);
-  idbPut(key, blob);  // fire-and-forget persist
-  lastTTSError = null;
-  return url;
 }
 
-// Background prefetch — fetches /api/tts for the CURRENT ROUND'S words only,
-// at ~PREFETCH_INTERVAL_MS spacing. Free-tier Gemini caps requests/minute
-// hard, so we stay well under it. Yields to live user playback.
+// Returns the sentence form spoken by "In a sentence" — same shape as a
+// real spelling-bee judge: word, then sentence, then word again.
+function sentenceFormFor(w) {
+  return `${w.word}. ${w.sentence}. ${w.word}.`;
+}
+
+// True if we already have BOTH the word and the sentence-form audio for
+// this word — in memory or IndexedDB. No network call, no blob load.
+async function isWordPairCached(w, voiceId) {
+  const wKey = `${voiceId}::${w.word}`;
+  const sKey = `${voiceId}::${sentenceFormFor(w)}`;
+  const wOK = audioCache.has(wKey) || await idbHas(wKey);
+  const sOK = audioCache.has(sKey) || await idbHas(sKey);
+  return wOK && sOK;
+}
+
+// Builds the prefetch queue: current round → current level's pool → next
+// level's pool. Two levels deep means cache extends past the kid's current
+// level so advancing levels feels instant. De-duped by word string.
+function buildPrefetchQueue() {
+  const queue = [];
+  const seen = new Set();
+  const add = w => { if (w && !seen.has(w.word)) { queue.push(w); seen.add(w.word); } };
+  if (round.words) round.words.forEach(add);          // priority 1: this round
+  poolForCurrent().forEach(add);                       // priority 2: current level
+  if (state.level < LEVEL_NAMES.length - 1) {          // priority 3: next level
+    poolForAgeAndLevel(state.age || 7, state.level + 1).forEach(add);
+  }
+  return queue;
+}
+
+// Background prefetch. For each uncached word in the queue, fires the word
+// fetch and the sentence-form fetch IN PARALLEL (Promise.all of two getAIAudio
+// calls). Then waits PREFETCH_INTERVAL_MS before the next pair.
+//
+// Critically: isWordPairCached checks BOTH the in-memory map AND IndexedDB,
+// so words cached in a previous session never trigger a new Gemini request.
+// getAIAudio also dedups in-flight requests, so a live speak() call for the
+// same word won't trigger a parallel fetch from prefetch.
 async function ensurePrefetch() {
   if (prefetchRunning || !state.useAI) return;
   const voiceId = effectiveAIVoice();
-  if (!voiceId) return;   // native browser voice — nothing to prefetch
+  if (!voiceId) return;
   prefetchRunning = true;
   try {
     while (state.useAI && effectiveAIVoice()) {
       const vId = effectiveAIVoice();
-      // Only prefetch words for the CURRENT round to keep request volume low.
+      const queue = buildPrefetchQueue();
+
+      // Find first word that isn't fully cached (word + sentence)
       let next = null;
-      if (round.words) {
-        next = round.words.find(w => !audioCache.has(`${vId}::${w.word}`));
+      for (const w of queue) {
+        if (!await isWordPairCached(w, vId)) { next = w; break; }
       }
       if (!next) {
-        await new Promise(r => setTimeout(r, 5000));   // idle wait
+        // Everything cached — idle until the round/level changes
+        await new Promise(r => setTimeout(r, 10000));
         continue;
       }
+
       while (activeUserSpeak) await new Promise(r => setTimeout(r, 100));
       if (!state.useAI) break;
-      // Skip the fetch entirely while we're in a rate-limit cooldown.
       if (Date.now() < geminiThrottledUntil) {
+        // Don't waste time spinning while cooled off
         await new Promise(r => setTimeout(r, 5000));
         continue;
       }
+
       try {
-        await getAIAudio(next.word, vId);
-      } catch (e) {
-        // If 429, getAIAudio set the cooldown for us; just wait it out.
-        if (Date.now() < geminiThrottledUntil) {
-          await new Promise(r => setTimeout(r, geminiThrottledUntil - Date.now() + 500));
-        } else {
-          await new Promise(r => setTimeout(r, 15000));
-        }
+        // Fire BOTH variants in parallel. Each getAIAudio respects the
+        // cache; if one is cached and the other isn't, only the missing
+        // one actually hits /api/tts.
+        await Promise.all([
+          getAIAudio(next.word, vId).catch(() => null),
+          getAIAudio(sentenceFormFor(next), vId).catch(() => null)
+        ]);
+      } catch (e) { /* allSettled-ish via .catch above */ }
+
+      if (Date.now() < geminiThrottledUntil) {
+        await new Promise(r => setTimeout(r, geminiThrottledUntil - Date.now() + 500));
+      } else {
+        await new Promise(r => setTimeout(r, PREFETCH_INTERVAL_MS));
       }
-      await new Promise(r => setTimeout(r, PREFETCH_INTERVAL_MS));
     }
   } finally {
     prefetchRunning = false;
@@ -2005,8 +2081,19 @@ function presentWord() {
   input.focus();
   setFeedback('', '');
   renderProgress();
-  // auto-say after a tiny pause so screen is ready
-  setTimeout(() => speak(round.words[round.index].word), 200);
+  // Auto-say the word AND fire the sentence-form fetch in parallel so
+  // "In a sentence" plays instantly (from cache) when the kid taps it.
+  setTimeout(() => {
+    const w = round.words[round.index];
+    speak(w.word);   // plays "Say the word"; "Slower" reuses the same cache entry
+    if (state.useAI) {
+      const voiceId = effectiveAIVoice();
+      if (voiceId && Date.now() >= geminiThrottledUntil) {
+        getAIAudio(sentenceFormFor(w), voiceId)
+          .catch(e => console.warn('[spelling-bee] sentence prefetch failed:', e.message || e));
+      }
+    }
+  }, 200);
 }
 
 function renderProgress() {
