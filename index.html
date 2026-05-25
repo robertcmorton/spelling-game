@@ -1492,7 +1492,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.4';   // bumped each GitHub push
+const APP_VERSION = '1.3.5';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1503,8 +1503,9 @@ const defaultState = {
   highestLevel: 0,
   rate: 0.85,
   voiceName: null,
-  useAI: true,
+  useAI: false,
   aiVoiceId: 'gemini_achernar',
+  migrationVersion: 0,    // bumped by one-shot migrations below
   words: {},
   recentWords: [],       // last N words shown across rounds — used to avoid repeats
   leaderboard: []
@@ -1578,15 +1579,19 @@ let state = loadState();
 if (state.aiVoiceId && !VOICE_OPTIONS.find(v => v.id === state.aiVoiceId)) {
   console.info('[spelling-bee] Migrating stale voice id', state.aiVoiceId, '→', defaultState.aiVoiceId);
   state.aiVoiceId = defaultState.aiVoiceId;
-  state.useAI = true;
   saveState();
 }
-// Migration v1.3.4: useAI default flipped from false → true. Existing users
-// on the Gemini voice but with the old useAI:false (carried over from v1.3.0)
-// would still land on the browser voice. Flip them ON.
-if (!state.useAI && state.aiVoiceId === 'gemini_achernar') {
-  console.info('[spelling-bee] Enabling AI voice by default for existing user');
-  state.useAI = true;
+
+// One-shot migrations keyed by migrationVersion. Each block applies once per
+// user; after it runs, state.migrationVersion is bumped so the block never
+// triggers again — the user's subsequent choices stick.
+const CURRENT_MIGRATION_VERSION = 2;
+if ((state.migrationVersion || 0) < 2) {
+  // v1.3.5: force useAI=false once for everyone to manage Gemini rate-limit usage.
+  // If the user then enables AI manually, that choice persists from then on.
+  console.info('[spelling-bee] One-shot v2 migration: forcing useAI=false');
+  state.useAI = false;
+  state.migrationVersion = 2;
   saveState();
 }
 
