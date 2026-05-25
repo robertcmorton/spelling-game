@@ -1490,7 +1490,8 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.2.2';   // bumped each GitHub push
+const APP_VERSION = '1.2.3';   // bumped each GitHub push
+const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
 const defaultState = {
@@ -1889,10 +1890,13 @@ async function speak(text, opts = {}) {
       try {
         if (playBtn) playBtn.textContent = '⏳ Loading voice…';
         const voiceId = effectiveKokoroVoice();
+        if (!voiceId) throw new Error('No Kokoro voice resolved for ' + state.aiVoiceId);
+        console.info('[spelling-bee] Game speak via Kokoro', voiceId, '"' + text + '"');
         const url = await getAIAudio(text, voiceId);
         if (playBtn) playBtn.textContent = '🔊 Say the word';
         const audio = new Audio(url);
-        audio.playbackRate = opts.rate || state.rate;
+        audio.volume = 1.0;
+        audio.playbackRate = Math.max(0.5, Math.min(2.0, opts.rate || state.rate));
         currentAudio = audio;
         try {
           await audio.play();
@@ -1904,11 +1908,16 @@ async function speak(text, opts = {}) {
         }
         return;
       } catch (e) {
+        // IMPORTANT: do NOT silently fall through to speakBrowser. That path uses
+        // state.voiceName (often Karen on macOS), and the result was: "I pick AI
+        // Daniel, hear Karen, think AI works" when really AI had failed.
         if (playBtn) playBtn.textContent = '🔊 Say the word';
-        console.error('AI voice failed:', e);
-        showAIFeedback('AI voice error: ' + (e.message || e) + ' — using browser voice.', true);
+        console.error('[spelling-bee] AI voice failed:', e);
+        showAIFeedback('AI voice error: ' + (e.message || e) + ' — pick another voice or check connection.', true);
+        return;
       }
     }
+    // useAI was OFF — play the user's explicit plain-browser voice choice
     speakBrowser(text, opts);
   } finally {
     if (playBtn && playBtn.textContent.startsWith('⏳')) {
@@ -2554,10 +2563,8 @@ useAIEl.addEventListener('change', () => {
   }
 });
 
-voiceIdEl.addEventListener('change', () => {
+voiceIdEl.addEventListener('change', async () => {
   state.aiVoiceId = voiceIdEl.value || defaultState.aiVoiceId;
-  // Picking a voice is itself a "use this voice" action — auto-enable AI voice
-  // so the kid doesn't have to also tick the toggle.
   if (!state.useAI) {
     state.useAI = true;
     useAIEl.checked = true;
@@ -2567,54 +2574,119 @@ voiceIdEl.addEventListener('change', () => {
   delete document.getElementById('ai-feedback').dataset.warned;
   refreshAIStatus();
   showAIFeedback('');
-  // Pre-warm Kokoro in the background if the new voice needs it, so by the time
-  // the kid clicks Play the model is loaded.
+
   const opt = findVoiceOption(state.aiVoiceId);
-  const needsKokoro = opt?.type === 'kokoro' ||
-    (opt?.type === 'browser' && !findNativeVoice(opt.match));
-  if (needsKokoro && !kokoroTTS) {
-    showAIFeedback('Loading voice model in the background…');
-    loadKokoro().catch(e => console.warn('[spelling-bee] preload failed:', e));
+  console.info('[spelling-bee] Voice changed to', state.aiVoiceId, opt);
+
+  if (opt?.type === 'browser') {
+    const v = findNativeVoice(opt.match);
+    if (v) {
+      showAIFeedback(`✓ Voice ready: ${v.name} (${v.lang})`);
+      ensurePrefetch();
+      return;
+    }
+    showAIFeedback(`No native "${opt.match.nameHints[0]}" — will use Kokoro ${opt.fallback}.`);
+  }
+
+  // Kokoro voice — load model AND pre-generate the test phrase so the next
+  // Test voice click plays from cache instantly within the gesture window.
+  const voiceId = effectiveKokoroVoice();
+  if (!voiceId) {
+    showAIFeedback('No usable voice — picking au_female would use Karen if installed.', true);
+    return;
+  }
+  showAIFeedback('Loading voice model… (~85MB on first use)');
+  try {
+    await loadKokoro();
+    showAIFeedback('Preparing test sample…');
+    await getAIAudio(TEST_PHRASE, voiceId);
+    showAIFeedback(`✓ ${voiceId} ready — tap 🔊 Test voice to hear it.`);
+    console.info('[spelling-bee] Pre-gen done for', voiceId);
+  } catch (e) {
+    console.error('[spelling-bee] Voice prepare failed:', e);
+    showAIFeedback('Voice prepare failed: ' + (e.message || e), true);
   }
   ensurePrefetch();
 });
 
+// Strict Test Voice — plays ONLY the actually-selected voice.
+// On Kokoro failure, surfaces the error rather than silently falling
+// back to the browser's default voice (which is how Karen was masquerading
+// as the AI voice in earlier versions).
 document.getElementById('test-voice').addEventListener('click', async () => {
-  showAIFeedback('Testing…');
-  await ensureVoicesLoaded();
-  const opt = findVoiceOption(state.aiVoiceId);
-
-  // If the user picked the voice but useAI was off, enable it now
   if (!state.useAI) {
     state.useAI = true;
     useAIEl.checked = true;
     saveState();
   }
+  await ensureVoicesLoaded();
+  const opt = findVoiceOption(state.aiVoiceId);
+  console.info('[spelling-bee] Test voice click. state.aiVoiceId =', state.aiVoiceId, 'opt =', opt);
 
-  // If the voice will need Kokoro and the model isn't loaded yet, load it
-  // FIRST then ask for a fresh tap. Doing the load inside the same handler
-  // would burn the autoplay-allowed window, so audio.play() gets blocked
-  // by the time the model finishes — which is exactly what the user saw.
-  const needsKokoro = (opt?.type === 'kokoro') ||
-    (opt?.type === 'browser' && !findNativeVoice(opt?.match));
-  if (needsKokoro && !kokoroTTS) {
-    showAIFeedback('Loading voice model… (up to 2 min on first use)');
-    try {
-      await loadKokoro();
-      showAIFeedback('✓ Voice ready — tap Test voice again to hear it.');
-    } catch (e) {
-      showAIFeedback('Voice load failed: ' + (e.message || e), true);
+  // Native-browser voice path (Karen, Lee, etc.)
+  if (opt?.type === 'browser') {
+    const v = findNativeVoice(opt.match);
+    if (v) {
+      console.info('[spelling-bee] Playing native:', v.name, v.lang);
+      try {
+        const u = new SpeechSynthesisUtterance(TEST_PHRASE);
+        u.voice = v;
+        u.rate = Math.max(0.5, Math.min(2.0, state.rate || 1));
+        u.lang = v.lang;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+        showAIFeedback(`🔊 Playing "${v.name}" (${v.lang}) — your device's built-in voice.`);
+      } catch (e) {
+        console.error('[spelling-bee] Native play error:', e);
+        showAIFeedback('Native play error: ' + (e.message || e), true);
+      }
+      return;
     }
-    return;   // require a fresh user click for play()
+    showAIFeedback(`No native "${opt.match.nameHints[0]}" on this device — falling through to Kokoro AI…`);
   }
 
-  // Voice is ready (or native) — play within the click's gesture window.
+  // Kokoro path — strict
+  const voiceId = effectiveKokoroVoice();
+  if (!voiceId) {
+    showAIFeedback('No Kokoro voice resolved. Pick a 🇬🇧/🇺🇸 voice from the dropdown.', true);
+    return;
+  }
+  const cacheKey = `${voiceId}::${TEST_PHRASE}`;
+  let url = audioCache.get(cacheKey);
+
+  if (!url) {
+    // Audio not cached — load model + generate. Since both involve async work
+    // that breaks the user-gesture window, we tell the user to tap again.
+    try {
+      showAIFeedback('Loading & generating sample…');
+      await loadKokoro();
+      url = await getAIAudio(TEST_PHRASE, voiceId);
+      showAIFeedback(`✓ ${voiceId} ready — tap 🔊 Test voice once more to play.`);
+    } catch (e) {
+      console.error('[spelling-bee] AI prepare failed:', e);
+      showAIFeedback('AI voice failed to load: ' + (e.message || e), true);
+    }
+    return;
+  }
+
+  // Cached — play within click gesture
   try {
-    console.info('[spelling-bee] Test voice play');
-    await speak("G'day! I'll say words for you to spell.");
-    refreshAIStatus();
+    console.info('[spelling-bee] Playing cached Kokoro:', voiceId);
+    const audio = new Audio(url);
+    audio.volume = 1.0;
+    audio.playbackRate = Math.max(0.5, Math.min(2.0, state.rate || 1));
+    audio.addEventListener('error', () => console.error('[spelling-bee] Audio element error', audio.error));
+    audio.addEventListener('loadedmetadata', () => console.info('[spelling-bee] Audio metadata. duration =', audio.duration, 's'));
+    audio.addEventListener('ended', () => console.info('[spelling-bee] Audio ended'));
+    await audio.play();
+    showAIFeedback(`🔊 Playing Kokoro AI voice "${voiceId}".`);
   } catch (e) {
-    showAIFeedback('Error: ' + (e.message || e), true);
+    console.error('[spelling-bee] Cached play failed:', e);
+    if (e.name === 'NotAllowedError') {
+      showAIFeedback('Autoplay blocked. Tap 🔊 Test voice again — should play now.', true);
+    } else {
+      showAIFeedback('Play error: ' + (e.message || e), true);
+    }
   }
 });
 
