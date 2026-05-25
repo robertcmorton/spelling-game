@@ -1496,7 +1496,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.11';  // bumped each GitHub push
+const APP_VERSION = '1.3.12';  // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1856,15 +1856,17 @@ async function getAIAudio(text, voiceId) {
   }
 }
 
-// Text used for "Say the word" / "Slower". We say the word TWICE with a
-// pause — same as a real spelling-bee judge. Two reasons:
-//   1. Gemini was treating bare single words as conversation (e.g. "good"
-//      → "good on ya"). Giving it two period-bounded tokens forces literal
-//      pronunciation.
-//   2. Matches the bookend prosody in sentenceFormFor() so the kid hears
-//      the same pronunciation in "Say the word" and "In a sentence".
+// Text used for "Say the word" / "Slower". Single word + period.
+// The period gives Gemini sentence-final intonation, matching the
+// bookend "${w}." inside sentenceFormFor() — so pronunciation should
+// be consistent between "Say the word" and "In a sentence".
+//
+// Trade-off vs "${w}. ${w}." (judge-double):
+//   - Audio output ~50% shorter → ~half the per-word cost
+//   - Risk: some short common words (e.g. "good") may still hallucinate
+//     as conversation. If that returns, switch back to judge-double here.
 function wordTextFor(w) {
-  return `${w.word}. ${w.word}.`;
+  return `${w.word}.`;
 }
 
 // Returns the sentence form spoken by "In a sentence" — same shape as a
