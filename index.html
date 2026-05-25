@@ -4,28 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spelling Bee!</title>
-<!--
-  Import map fixes the Kokoro chain. The jsDelivr +esm bundle uses absolute
-  paths like /npm/@huggingface/transformers@... which resolve to the page's
-  origin in the browser — 404 on Vercel. Mapping bare specifiers to fully-
-  qualified URLs makes the chain resolve correctly regardless of host.
-  path / fs/promises are Node-only and stubbed with empty modules — the
-  Kokoro voice loader uses Object.hasOwn(i, "readFile") to detect Node and
-  falls back to the browser fetch path.
--->
-<script type="importmap">
-{
-  "imports": {
-    "kokoro-js": "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.js",
-    "@huggingface/transformers": "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1/dist/transformers.web.js",
-    "phonemizer": "https://cdn.jsdelivr.net/npm/phonemizer@1.2.1/dist/phonemizer.js",
-    "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0-dev.20250409-89f8206ba4/dist/ort.bundle.min.mjs",
-    "onnxruntime-common": "https://cdn.jsdelivr.net/npm/onnxruntime-common@1.22.0-dev.20250409-89f8206ba4/dist/esm/index.js",
-    "path": "data:text/javascript,export default {};",
-    "fs/promises": "data:text/javascript,export default {};"
-  }
-}
-</script>
 <style>
 * {
   box-sizing: border-box;
@@ -631,10 +609,11 @@ select {
     </div>
 
     <div class="parent-section">
-      <h2 style="margin-top:0;">🎙 AI voice (Kokoro)</h2>
-      <p class="setting-help">High-quality open-source voice from
-        <a href="https://huggingface.co/hexgrad/Kokoro-82M" target="_blank" rel="noopener">Kokoro-82M</a>.
-        Runs entirely in your browser — no account or key needed. First time downloads ~85&nbsp;MB; after that it works offline.</p>
+      <h2 style="margin-top:0;">🎙 AI voice (Gemini)</h2>
+      <p class="setting-help">High-quality Australian voice <strong>Achernar</strong> via Google's
+        <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini 2.5 Flash TTS</a>.
+        Requires a free <code>GEMINI_API_KEY</code> set in the Vercel project; otherwise the app uses
+        your device's built-in Aussie voice (Karen / Lee).</p>
       <div class="stat-row" style="border:none; padding:6px 0;">
         <span><strong>Use AI voice</strong></span>
         <label style="display:inline-flex; align-items:center; gap:8px; font-weight:bold;">
@@ -1512,35 +1491,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.2.5';   // bumped each GitHub push
-
-// --- Polyfill: ReadableStream async iteration ---
-// Safari before 18 doesn't implement Symbol.asyncIterator on ReadableStream.
-// phonemizer's espeak-ng WASM unpacker uses `for await (const chunk of stream)`
-// on the output of `pipeThrough(new DecompressionStream("gzip"))`, which throws
-// "undefined is not a function (near '...A of e...')" without this polyfill.
-if (typeof ReadableStream !== 'undefined' &&
-    !ReadableStream.prototype[Symbol.asyncIterator]) {
-  ReadableStream.prototype[Symbol.asyncIterator] = function () {
-    const reader = this.getReader();
-    return {
-      next() {
-        return reader.read().then(({ done, value }) =>
-          done ? { done: true, value: undefined } : { done: false, value }
-        );
-      },
-      return() {
-        reader.releaseLock();
-        return Promise.resolve({ done: true, value: undefined });
-      },
-      [Symbol.asyncIterator]() { return this; }
-    };
-  };
-  console.info('[spelling-bee] Polyfilled ReadableStream Symbol.asyncIterator');
-}
-if (typeof DecompressionStream === 'undefined') {
-  console.warn('[spelling-bee] DecompressionStream not supported — phonemizer will fail');
-}
+const APP_VERSION = '1.3.0';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1552,7 +1503,7 @@ const defaultState = {
   rate: 0.85,
   voiceName: null,
   useAI: false,
-  aiVoiceId: 'au_female',
+  aiVoiceId: 'gemini_achernar',
   words: {},
   recentWords: [],       // last N words shown across rounds — used to avoid repeats
   leaderboard: []
@@ -1560,28 +1511,24 @@ const defaultState = {
 
 const RECENT_WORDS_LIMIT = 30;
 
-// Voice picker combines two sources:
-//   - "browser" type: native OS voice (real Australian voices on macOS/iOS/Edge)
-//   - "kokoro" type: Kokoro-82M open-source AI voice (in-browser, no AU voices exist)
-// When the user picks an AU option but no AU voice is installed on their device,
-// we transparently fall back to the closest Kokoro British voice.
+// Voice options:
+//   - "browser" type: native OS voice (Karen / Lee on macOS/iOS/Edge) — instant, free
+//   - "gemini" type: Google Gemini 2.5 Flash TTS via /api/tts (Achernar, en-AU) — high quality AI
+// If user picks a native AU voice and none is installed, we fall through to Gemini.
 const VOICE_OPTIONS = [
-  { id: 'au_female', label: '🇦🇺 Aussie female (Karen / Catherine)', type: 'browser',
+  { id: 'gemini_achernar',
+    label: '🇦🇺 Achernar — Australian female (Gemini AI)',
+    type: 'gemini' },
+  { id: 'au_female',
+    label: '🇦🇺 Aussie female (Karen / Catherine — your device)',
+    type: 'browser',
     match: { lang: 'en-au', nameHints: ['Karen', 'Catherine', 'Tessa', 'Karen (Premium)', 'Karen (Enhanced)'] },
-    fallback: 'bf_emma' },
-  { id: 'au_male',   label: '🇦🇺 Aussie male (Lee / Daniel)', type: 'browser',
+    fallback: 'gemini_achernar' },
+  { id: 'au_male',
+    label: '🇦🇺 Aussie male (Lee / Daniel — your device)',
+    type: 'browser',
     match: { lang: 'en-au', nameHints: ['Lee', 'Daniel', 'Lee (Premium)', 'Lee (Enhanced)'] },
-    fallback: 'bm_daniel' },
-  { id: 'bf_emma',     label: '🇬🇧 Emma — British female (AI, Aussie-leaning)', type: 'kokoro' },
-  { id: 'bm_daniel',   label: '🇬🇧 Daniel — British male (AI, Aussie-leaning)', type: 'kokoro' },
-  { id: 'bf_isabella', label: '🇬🇧 Isabella — British female (AI)', type: 'kokoro' },
-  { id: 'bm_george',   label: '🇬🇧 George — British male (AI)', type: 'kokoro' },
-  { id: 'bm_lewis',    label: '🇬🇧 Lewis — British male (AI)', type: 'kokoro' },
-  { id: 'af_heart',    label: '🇺🇸 Heart — US female warm (AI)', type: 'kokoro' },
-  { id: 'af_bella',    label: '🇺🇸 Bella — US female (AI)', type: 'kokoro' },
-  { id: 'af_nicole',   label: '🇺🇸 Nicole — US female (AI)', type: 'kokoro' },
-  { id: 'am_michael',  label: '🇺🇸 Michael — US male (AI)', type: 'kokoro' },
-  { id: 'am_adam',     label: '🇺🇸 Adam — US male (AI)', type: 'kokoro' }
+    fallback: 'gemini_achernar' }
 ];
 
 function findVoiceOption(id) {
@@ -1590,17 +1537,13 @@ function findVoiceOption(id) {
 
 function findNativeVoice(match) {
   if (!match || !voices.length) return null;
-  const lang = (match.lang || '').toLowerCase();           // e.g. 'en-au'
-  const langPrefix = lang.slice(0, 5);                     // 'en-au'
+  const lang = (match.lang || '').toLowerCase();
+  const langPrefix = lang.slice(0, 5);
   const hints = match.nameHints || [];
-
-  // 1. Exact name + AU language
   for (const name of hints) {
     const v = voices.find(x => x.name === name && (x.lang || '').toLowerCase().startsWith(langPrefix));
     if (v) return v;
   }
-  // 2. Substring match in AU language — handles "Karen (Premium)", "Karen (Enhanced)",
-  //    "Microsoft Catherine - English (Australia)", etc.
   for (const name of hints) {
     const v = voices.find(x =>
       x.name.toLowerCase().includes(name.toLowerCase()) &&
@@ -1608,15 +1551,9 @@ function findNativeVoice(match) {
     );
     if (v) return v;
   }
-  // 3. No fallback to "any en-AU voice" — that risks mixing genders (e.g.
-  //    male Lee when the user picked au_female). Return null and let the
-  //    caller drop to Kokoro.
   return null;
 }
 
-// Wait briefly for speechSynthesis to populate its voice list. The list is
-// async on first page load — without this, speak() runs before voices arrive
-// and the native-Aussie-voice check returns null, dropping to Kokoro unnecessarily.
 async function ensureVoicesLoaded(timeoutMs = 1500) {
   if (voices.length > 0) return;
   loadVoices();
@@ -1627,13 +1564,13 @@ async function ensureVoicesLoaded(timeoutMs = 1500) {
   }
 }
 
-// Returns the Kokoro voice ID to use for prefetch/playback, or null if no AI generation needed.
-function effectiveKokoroVoice() {
+// Returns the API voice ID to use for fetch/playback, or null if native playback.
+function effectiveAIVoice() {
   const opt = findVoiceOption(state.aiVoiceId);
   if (!opt) return null;
-  if (opt.type === 'kokoro') return opt.id;
+  if (opt.type === 'gemini') return opt.id;
   if (opt.type === 'browser') {
-    return findNativeVoice(opt.match) ? null : (opt.fallback || 'bf_emma');
+    return findNativeVoice(opt.match) ? null : (opt.fallback || 'gemini_achernar');
   }
   return null;
 }
@@ -1645,6 +1582,14 @@ function levelForAge(age) {
 }
 
 let state = loadState();
+
+// Migration: v1.3.0 removed Kokoro voices. If the saved aiVoiceId is no
+// longer in VOICE_OPTIONS, reset it so the dropdown shows a valid value.
+if (state.aiVoiceId && !VOICE_OPTIONS.find(v => v.id === state.aiVoiceId)) {
+  console.info('[spelling-bee] Migrating stale voice id', state.aiVoiceId, '→', defaultState.aiVoiceId);
+  state.aiVoiceId = defaultState.aiVoiceId;
+  saveState();
+}
 
 function loadState() {
   try {
@@ -1706,14 +1651,13 @@ function loadVoices() {
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
 
-// AI voice (Kokoro-82M, in-browser) with persistent IndexedDB cache and
-// background prefetch — keeps the player from waiting on generation.
+// AI voice (Gemini 2.5 Flash TTS via /api/tts) with persistent IndexedDB
+// cache and background prefetch — repeats of a word never re-call Gemini.
 const audioCache = new Map();   // in-memory: voiceId::text → blob URL
 let currentAudio = null;
-let kokoroTTS = null;
-let kokoroLoading = null;
 let activeUserSpeak = false;     // pauses background prefetch while user is hearing audio
 let prefetchRunning = false;
+let lastTTSError = null;         // surface API errors clearly
 
 // --- IndexedDB persistent cache ---
 const DB_NAME = 'spelling-bee-cache';
@@ -1767,14 +1711,6 @@ async function idbClear() {
   });
 }
 
-// Update both the play button and the menu feedback so the kid sees progress
-// regardless of which screen they're on.
-function setVoiceLoadProgress(text) {
-  const playBtn = document.getElementById('play-btn');
-  if (playBtn) playBtn.textContent = text;
-  showAIFeedback(text);
-}
-
 // Reject a promise if it doesn't settle within ms milliseconds.
 function withTimeout(p, ms, msg) {
   return Promise.race([
@@ -1783,95 +1719,62 @@ function withTimeout(p, ms, msg) {
   ]);
 }
 
-// --- Kokoro model loader (via import map in <head>) ---
-async function importKokoro() {
-  console.info('[spelling-bee] Loading kokoro-js via importmap');
-  try {
-    const mod = await import('kokoro-js');
-    if (!mod || !mod.KokoroTTS) {
-      throw new Error('kokoro-js loaded but KokoroTTS export missing');
-    }
-    return mod;
-  } catch (e) {
-    console.error('[spelling-bee] kokoro-js import failed:', e);
-    // Browser doesn't support import maps? Fall back to old +esm URL.
-    // The +esm version has the absolute-path bug but at least loads on browsers
-    // without importmap support; the page will surface generation failures.
-    console.warn('[spelling-bee] Falling back to +esm URL (may have absolute-path issues)');
-    return await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm');
-  }
-}
-
-async function loadKokoro() {
-  if (kokoroTTS) return kokoroTTS;
-  if (kokoroLoading) return kokoroLoading;
-  setVoiceLoadProgress('⏳ Loading voice (~85MB)…');
-  kokoroLoading = withTimeout((async () => {
-    const mod = await importKokoro();
-    const tts = await mod.KokoroTTS.from_pretrained(
-      'onnx-community/Kokoro-82M-v1.0-ONNX',
-      {
-        dtype: 'q8',
-        progress_callback: (data) => {
-          if (!data) return;
-          if (data.status === 'progress' && typeof data.progress === 'number') {
-            setVoiceLoadProgress(`⏳ Loading voice ${Math.round(data.progress)}%`);
-          } else if (data.status === 'done') {
-            setVoiceLoadProgress('⏳ Almost ready…');
-          } else if (data.status === 'ready') {
-            setVoiceLoadProgress('✓ Voice ready');
-          }
-        }
-      }
-    );
-    kokoroTTS = tts;
-    setVoiceLoadProgress('✓ Voice ready');
-    console.info('[spelling-bee] Kokoro ready');
-    return tts;
-  })(), 120000, 'Voice model load timed out (>2 min) — slow network. Try a native Aussie voice or check the connection.');
-  try { return await kokoroLoading; }
-  catch (e) {
-    kokoroLoading = null;
-    console.error('[spelling-bee] Kokoro load failed:', e);
-    showAIFeedback('Voice model failed to load: ' + (e.message || e), true);
-    const playBtn = document.getElementById('play-btn');
-    if (playBtn) playBtn.textContent = '🔊 Say the word';
-    throw e;
-  }
-}
-
-// Get audio for a word. Checks in-memory → IndexedDB → generates via Kokoro.
+// Get audio for a word from /api/tts.
+// Cache flow: in-memory Map → IndexedDB → network. Repeats are free.
 async function getAIAudio(text, voiceId) {
-  voiceId = voiceId || effectiveKokoroVoice() || state.aiVoiceId;
+  voiceId = voiceId || effectiveAIVoice() || state.aiVoiceId;
+  if (!voiceId) throw new Error('No AI voice selected');
   const key = `${voiceId}::${text}`;
+
   if (audioCache.has(key)) return audioCache.get(key);
-  // Persistent cache
+
   const cached = await idbGet(key);
   if (cached) {
     const url = URL.createObjectURL(cached);
     audioCache.set(key, url);
     return url;
   }
-  // Generate
-  const tts = await loadKokoro();
-  const audio = await tts.generate(text, { voice: voiceId });
-  const blob = audio.toBlob();
+
+  console.info('[spelling-bee] Fetching /api/tts for', voiceId, JSON.stringify(text));
+  const res = await withTimeout(
+    fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice: voiceId })
+    }),
+    30000,
+    'TTS request timed out — check connection'
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = err.error || `HTTP ${res.status}`;
+    if (res.status === 503) {
+      // Server-side told us the API key isn't set up yet
+      lastTTSError = 'GEMINI_API_KEY not configured on the server. ' +
+        '(See Vercel → Settings → Environment Variables.)';
+    } else {
+      lastTTSError = msg;
+    }
+    throw new Error(msg);
+  }
+  const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   audioCache.set(key, url);
   idbPut(key, blob);  // fire-and-forget persist
+  lastTTSError = null;
   return url;
 }
 
-// Background prefetch — keeps generating audio for words in the player's pool
-// so they're ready before the kid asks. Yields to active user playback.
+// Background prefetch — fetches /api/tts for upcoming words ahead of the kid.
+// Yields to live user playback; runs while AI voice is active.
 async function ensurePrefetch() {
   if (prefetchRunning || !state.useAI) return;
-  const voiceId = effectiveKokoroVoice();
-  if (!voiceId) return;   // browser-native voice — nothing to prefetch
+  const voiceId = effectiveAIVoice();
+  if (!voiceId) return;   // native browser voice — nothing to prefetch
   prefetchRunning = true;
   try {
-    while (state.useAI && effectiveKokoroVoice()) {
-      const vId = effectiveKokoroVoice();
+    while (state.useAI && effectiveAIVoice()) {
+      const vId = effectiveAIVoice();
       // Priority 1: current round's remaining words
       let next = null;
       if (round.words) {
@@ -1883,15 +1786,17 @@ async function ensurePrefetch() {
         next = pool.find(w => !audioCache.has(`${vId}::${w.word}`));
       }
       if (!next) {
-        await new Promise(r => setTimeout(r, 3000));   // idle wait
+        await new Promise(r => setTimeout(r, 5000));   // idle wait
         continue;
       }
-      // Yield to active user-triggered speech
       while (activeUserSpeak) await new Promise(r => setTimeout(r, 100));
       if (!state.useAI) break;
       try { await getAIAudio(next.word, vId); }
-      catch (e) { /* skip word, model may not be loaded yet */ }
-      await new Promise(r => setTimeout(r, 80));   // breathing room
+      catch (e) {
+        // If the API is misconfigured or rate-limited, back off significantly
+        await new Promise(r => setTimeout(r, 30000));
+      }
+      await new Promise(r => setTimeout(r, 150));   // breathing room between requests
     }
   } finally {
     prefetchRunning = false;
@@ -1924,20 +1829,20 @@ async function speak(text, opts = {}) {
           speakWithVoice(text, nativeVoice, opts);
           return;
         }
-        // Not installed on this device — fall through to Kokoro fallback
-        const note = `No native ${opt.match.nameHints[0]}-style voice on this device — using Kokoro AI as fallback.`;
+        // Not installed on this device — fall through to Gemini fallback
+        const note = `No native ${opt.match.nameHints[0]}-style voice on this device — using Gemini Achernar as fallback.`;
         const fbEl = document.getElementById('ai-feedback');
         if (fbEl && !fbEl.dataset.warned) {
           showAIFeedback(note, true);
           fbEl.dataset.warned = '1';
         }
       }
-      // Kokoro AI voice
+      // AI voice path (Gemini)
       try {
-        if (playBtn) playBtn.textContent = '⏳ Loading voice…';
-        const voiceId = effectiveKokoroVoice();
-        if (!voiceId) throw new Error('No Kokoro voice resolved for ' + state.aiVoiceId);
-        console.info('[spelling-bee] Game speak via Kokoro', voiceId, '"' + text + '"');
+        if (playBtn) playBtn.textContent = '⏳ Fetching voice…';
+        const voiceId = effectiveAIVoice();
+        if (!voiceId) throw new Error('No AI voice resolved for ' + state.aiVoiceId);
+        console.info('[spelling-bee] Game speak via Gemini', voiceId, '"' + text + '"');
         const url = await getAIAudio(text, voiceId);
         if (playBtn) playBtn.textContent = '🔊 Say the word';
         const audio = new Audio(url);
@@ -2565,7 +2470,7 @@ const useAIEl    = document.getElementById('use-ai');
 const voiceIdEl  = document.getElementById('voice-id');
 const aiStatusEl = document.getElementById('ai-status');
 
-// Populate voice select (browser-native AU first, then Kokoro AI voices)
+// Populate voice select (Gemini AU first, then native browser voices)
 VOICE_OPTIONS.forEach(v => {
   const opt = document.createElement('option');
   opt.value = v.id;
@@ -2582,10 +2487,13 @@ function refreshAIStatus() {
   const opt = findVoiceOption(state.aiVoiceId);
   if (opt?.type === 'browser') {
     const v = findNativeVoice(opt.match);
-    aiStatusEl.textContent = v ? `On (${v.name})` : 'On (no native AU — using AI)';
+    aiStatusEl.textContent = v ? `On (${v.name})` : 'On (no native AU — using Gemini)';
     aiStatusEl.style.color = '#065f46';
+  } else if (opt?.type === 'gemini') {
+    aiStatusEl.textContent = lastTTSError ? 'On (server error)' : 'On (Gemini Achernar)';
+    aiStatusEl.style.color = lastTTSError ? '#991b1b' : '#065f46';
   } else {
-    aiStatusEl.textContent = kokoroTTS ? 'On (AI ready)' : 'On (AI loads on first use)';
+    aiStatusEl.textContent = 'On';
     aiStatusEl.style.color = '#065f46';
   }
 }
@@ -2597,11 +2505,9 @@ useAIEl.addEventListener('change', () => {
   if (state.useAI) {
     const opt = findVoiceOption(state.aiVoiceId);
     if (opt?.type === 'browser' && findNativeVoice(opt.match)) {
-      showAIFeedback(`Using your device's "${findNativeVoice(opt.match).name}" voice — no download needed.`);
-    } else {
-      showAIFeedback('AI voice will download ~85MB on first use, then runs offline.');
-      // Pre-load model in the background
-      loadKokoro().then(() => ensurePrefetch()).catch(e => showAIFeedback('Load failed: ' + e.message, true));
+      showAIFeedback(`Using your device's "${findNativeVoice(opt.match).name}" voice — instant, free.`);
+    } else if (opt?.type === 'gemini') {
+      showAIFeedback('Each word is fetched from Gemini and cached locally so repeats are free.');
     }
     ensurePrefetch();
   } else {
@@ -2631,20 +2537,18 @@ voiceIdEl.addEventListener('change', async () => {
       ensurePrefetch();
       return;
     }
-    showAIFeedback(`No native "${opt.match.nameHints[0]}" — will use Kokoro ${opt.fallback}.`);
+    showAIFeedback(`No native "${opt.match.nameHints[0]}" — will use Gemini Achernar instead.`);
   }
 
-  // Kokoro voice — load model AND pre-generate the test phrase so the next
-  // Test voice click plays from cache instantly within the gesture window.
-  const voiceId = effectiveKokoroVoice();
+  // Gemini voice — pre-fetch the test phrase so the next Test voice click
+  // plays from cache instantly within the gesture window.
+  const voiceId = effectiveAIVoice();
   if (!voiceId) {
-    showAIFeedback('No usable voice — picking au_female would use Karen if installed.', true);
+    showAIFeedback('No usable voice — pick au_female (uses Karen if installed).', true);
     return;
   }
-  showAIFeedback('Loading voice model… (~85MB on first use)');
+  showAIFeedback('Preparing test sample from Gemini…');
   try {
-    await loadKokoro();
-    showAIFeedback('Preparing test sample…');
     await getAIAudio(TEST_PHRASE, voiceId);
     showAIFeedback(`✓ ${voiceId} ready — tap 🔊 Test voice to hear it.`);
     console.info('[spelling-bee] Pre-gen done for', voiceId);
@@ -2656,7 +2560,7 @@ voiceIdEl.addEventListener('change', async () => {
 });
 
 // Strict Test Voice — plays ONLY the actually-selected voice.
-// On Kokoro failure, surfaces the error rather than silently falling
+// On Gemini failure, surfaces the error rather than silently falling
 // back to the browser's default voice (which is how Karen was masquerading
 // as the AI voice in earlier versions).
 document.getElementById('test-voice').addEventListener('click', async () => {
@@ -2688,36 +2592,33 @@ document.getElementById('test-voice').addEventListener('click', async () => {
       }
       return;
     }
-    showAIFeedback(`No native "${opt.match.nameHints[0]}" on this device — falling through to Kokoro AI…`);
+    showAIFeedback(`No native "${opt.match.nameHints[0]}" on this device — falling through to Gemini Achernar…`);
   }
 
-  // Kokoro path — strict
-  const voiceId = effectiveKokoroVoice();
+  // Gemini path — strict
+  const voiceId = effectiveAIVoice();
   if (!voiceId) {
-    showAIFeedback('No Kokoro voice resolved. Pick a 🇬🇧/🇺🇸 voice from the dropdown.', true);
+    showAIFeedback('No voice resolved. Pick a voice from the dropdown.', true);
     return;
   }
   const cacheKey = `${voiceId}::${TEST_PHRASE}`;
   let url = audioCache.get(cacheKey);
 
   if (!url) {
-    // Audio not cached — load model + generate. Since both involve async work
-    // that breaks the user-gesture window, we tell the user to tap again.
     try {
-      showAIFeedback('Loading & generating sample…');
-      await loadKokoro();
+      showAIFeedback('Fetching from Gemini…');
       url = await getAIAudio(TEST_PHRASE, voiceId);
       showAIFeedback(`✓ ${voiceId} ready — tap 🔊 Test voice once more to play.`);
     } catch (e) {
-      console.error('[spelling-bee] AI prepare failed:', e);
-      showAIFeedback('AI voice failed to load: ' + (e.message || e), true);
+      console.error('[spelling-bee] Gemini fetch failed:', e);
+      showAIFeedback('Gemini error: ' + (e.message || e), true);
     }
     return;
   }
 
   // Cached — play within click gesture
   try {
-    console.info('[spelling-bee] Playing cached Kokoro:', voiceId);
+    console.info('[spelling-bee] Playing cached Gemini:', voiceId);
     const audio = new Audio(url);
     audio.volume = 1.0;
     audio.playbackRate = Math.max(0.5, Math.min(2.0, state.rate || 1));
@@ -2725,7 +2626,7 @@ document.getElementById('test-voice').addEventListener('click', async () => {
     audio.addEventListener('loadedmetadata', () => console.info('[spelling-bee] Audio metadata. duration =', audio.duration, 's'));
     audio.addEventListener('ended', () => console.info('[spelling-bee] Audio ended'));
     await audio.play();
-    showAIFeedback(`🔊 Playing Kokoro AI voice "${voiceId}".`);
+    showAIFeedback(`🔊 Playing Gemini AI voice "${voiceId}".`);
   } catch (e) {
     console.error('[spelling-bee] Cached play failed:', e);
     if (e.name === 'NotAllowedError') {
@@ -2738,7 +2639,7 @@ document.getElementById('test-voice').addEventListener('click', async () => {
 
 // Unlock the browser's audio playback policy on the first user interaction.
 // Lets later Audio.play() calls work even if they fire after async work
-// (e.g. Kokoro model load) that breaks the user-activation chain.
+// (e.g. Gemini fetch round-trip) that breaks the user-activation chain.
 let audioUnlocked = false;
 function unlockAudio() {
   if (audioUnlocked) return;
