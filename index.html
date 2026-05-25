@@ -1496,7 +1496,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.10';  // bumped each GitHub push
+const APP_VERSION = '1.3.11';  // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1676,12 +1676,25 @@ let activeUserSpeak = false;     // pauses background prefetch while user is hea
 let prefetchRunning = false;
 let lastTTSError = null;         // surface API errors clearly
 
-// Free-tier Gemini TTS is ~3 req/min. We back off when we see 429s so the
-// kid can keep playing (the speak path falls through to the native voice
-// while throttled), then resume Gemini once the cooldown elapses.
-let geminiThrottledUntil = 0;   // epoch ms; if > now, skip Gemini fetches
-const THROTTLE_COOLDOWN_MS = 90000;
-const PREFETCH_INTERVAL_MS = 8000;   // ~7 req/min ceiling for prefetch alone
+// Free-tier Gemini TTS is ~3 req/min AND has a daily quota that can be just
+// a few dozen requests for preview models. We back off exponentially on
+// consecutive 429s so we stop hammering Google's API when the daily quota
+// is genuinely exhausted (kid still plays via the native-voice fallback).
+//
+//   1st 429: 90s    cooldown   (rate-limit, will probably resolve)
+//   2nd:     3 min
+//   3rd:     6 min
+//   4th:     12 min
+//   5th:     24 min
+//   6th:     48 min
+//   ...                       (capped at 24h)
+//
+// One successful fetch resets the counter to 0.
+let geminiThrottledUntil = 0;
+let geminiConsecutive429s = 0;
+const THROTTLE_BASE_MS    = 90 * 1000;
+const THROTTLE_MAX_MS     = 24 * 60 * 60 * 1000;
+const PREFETCH_INTERVAL_MS = 8000;   // (prefetch disabled in v1.3.9, kept for reference)
 
 // --- IndexedDB persistent cache ---
 const DB_NAME = 'spelling-bee-cache';
@@ -1803,9 +1816,21 @@ async function getAIAudio(text, voiceId) {
       const isRateLimit = res.status === 429 || /429|rate.?limit/i.test(msg) ||
                           /429/.test(err.detail || '');
       if (isRateLimit) {
-        geminiThrottledUntil = Date.now() + THROTTLE_COOLDOWN_MS;
-        lastTTSError = 'Rate limit — using device voice for the next 90s';
-        console.warn('[spelling-bee] Gemini rate limit hit. Cooling off for', THROTTLE_COOLDOWN_MS/1000, 's');
+        geminiConsecutive429s++;
+        // 90s, 3min, 6min, 12min, 24min, 48min, ... capped at 24h.
+        const cooldownMs = Math.min(
+          THROTTLE_BASE_MS * Math.pow(2, geminiConsecutive429s - 1),
+          THROTTLE_MAX_MS
+        );
+        geminiThrottledUntil = Date.now() + cooldownMs;
+        const minutes = Math.round(cooldownMs / 60000);
+        const human = cooldownMs < 60000 ? `${Math.round(cooldownMs/1000)}s`
+                    : minutes < 60         ? `${minutes} min`
+                    :                        `${Math.round(minutes/60)} h`;
+        lastTTSError = cooldownMs >= 5 * 60 * 1000
+          ? `Gemini quota likely exhausted. Using device voice for ${human}. Enable billing on Google Cloud project for higher quota.`
+          : `Rate limit — using device voice for ${human}.`;
+        console.warn(`[spelling-bee] Gemini 429 #${geminiConsecutive429s}. Cooling off ${human}.`);
       } else if (res.status === 503) {
         lastTTSError = 'GEMINI_API_KEY not configured in Vercel.';
       } else {
@@ -1817,6 +1842,8 @@ async function getAIAudio(text, voiceId) {
     const url = URL.createObjectURL(blob);
     audioCache.set(key, url);
     idbPut(key, blob);  // fire-and-forget persist
+    // Reset the 429 streak — Gemini is responding again
+    geminiConsecutive429s = 0;
     lastTTSError = null;
     return url;
   })();
@@ -2550,6 +2577,7 @@ document.getElementById('start-from-welcome').addEventListener('click', () => {
   // rate-limit cooldown so the kid gets an AI voice attempt immediately
   // instead of inheriting the previous session's fallback-to-native.
   geminiThrottledUntil = 0;
+  geminiConsecutive429s = 0;
   lastTTSError = null;
   startRound();
 });
