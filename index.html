@@ -1512,7 +1512,35 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.2.4';   // bumped each GitHub push
+const APP_VERSION = '1.2.5';   // bumped each GitHub push
+
+// --- Polyfill: ReadableStream async iteration ---
+// Safari before 18 doesn't implement Symbol.asyncIterator on ReadableStream.
+// phonemizer's espeak-ng WASM unpacker uses `for await (const chunk of stream)`
+// on the output of `pipeThrough(new DecompressionStream("gzip"))`, which throws
+// "undefined is not a function (near '...A of e...')" without this polyfill.
+if (typeof ReadableStream !== 'undefined' &&
+    !ReadableStream.prototype[Symbol.asyncIterator]) {
+  ReadableStream.prototype[Symbol.asyncIterator] = function () {
+    const reader = this.getReader();
+    return {
+      next() {
+        return reader.read().then(({ done, value }) =>
+          done ? { done: true, value: undefined } : { done: false, value }
+        );
+      },
+      return() {
+        reader.releaseLock();
+        return Promise.resolve({ done: true, value: undefined });
+      },
+      [Symbol.asyncIterator]() { return this; }
+    };
+  };
+  console.info('[spelling-bee] Polyfilled ReadableStream Symbol.asyncIterator');
+}
+if (typeof DecompressionStream === 'undefined') {
+  console.warn('[spelling-bee] DecompressionStream not supported — phonemizer will fail');
+}
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
