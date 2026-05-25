@@ -1493,7 +1493,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.6';   // bumped each GitHub push
+const APP_VERSION = '1.3.7';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1974,16 +1974,17 @@ async function speak(text, opts = {}) {
       } catch (e) {
         if (playBtn) playBtn.textContent = '🔊 Say the word';
         console.error('[spelling-bee] AI voice failed:', e);
-        // If it's a 429 / rate-limit, the cooldown is set — fall to native
-        // so the kid keeps playing, with a clear notice.
+        // Universal fallback: on ANY Gemini error during gameplay (rate
+        // limit, spending cap reached, 503 no-key, network failure, bad
+        // response), drop to the native device voice so the kid never
+        // gets silence. The notice tells the parent what's wrong.
         if (Date.now() < geminiThrottledUntil) {
           const cooldownSec = Math.ceil((geminiThrottledUntil - Date.now()) / 1000);
           showAIFeedback(`Gemini rate limited — using device voice (resumes in ${cooldownSec}s).`, true);
-          speakBrowser(text, opts);
-          return;
+        } else {
+          showAIFeedback('AI voice unavailable — using device voice. ' + (e.message || e), true);
         }
-        // Other errors stay strict (no Karen masquerade) so they're visible.
-        showAIFeedback('AI voice error: ' + (e.message || e) + ' — check the menu.', true);
+        speakBrowser(text, opts);
         return;
       }
     }
@@ -2521,14 +2522,32 @@ document.getElementById('see-leaderboard-btn').addEventListener('click', () => {
 document.getElementById('back-from-stats').addEventListener('click', () => showScreen('game'));
 document.getElementById('back-from-level').addEventListener('click', () => showScreen('game'));
 
-document.getElementById('reset-btn').addEventListener('click', () => {
-  if (confirm('Reset all spelling progress? This cannot be undone.')) {
-    state = { ...defaultState };
-    saveState();
-    renderStats();
-    renderLevels();
-    startRound();
+document.getElementById('reset-btn').addEventListener('click', async () => {
+  if (!confirm('Reset ALL progress — local stats AND the shared leaderboard on the server. This cannot be undone.')) return;
+  // Reset local state (per-word stats, level, leaderboard, recent words, name+age stay so kid keeps playing)
+  const keepName = state.name;
+  const keepAge = state.age;
+  state = { ...defaultState, name: keepName, age: keepAge, migrationVersion: state.migrationVersion };
+  saveState();
+  // Wipe the shared leaderboard on the server (best effort — local reset
+  // still happens even if the DELETE fails)
+  try {
+    const res = await fetch('/api/leaderboard', { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.warn('[spelling-bee] Server leaderboard reset returned', res.status, err);
+    } else {
+      console.info('[spelling-bee] Server leaderboard cleared');
+    }
+  } catch (e) {
+    console.warn('[spelling-bee] Server leaderboard reset network error', e);
   }
+  // Clear IndexedDB audio cache so any test audio cached for old voice ids doesn't linger
+  await idbClear();
+  audioCache.clear();
+  renderStats();
+  renderLevels();
+  startRound();
 });
 
 document.getElementById('voice-select').addEventListener('change', e => {

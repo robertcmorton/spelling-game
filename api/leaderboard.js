@@ -114,7 +114,24 @@ export default async function handler(req, res) {
     }
   }
 
-  res.setHeader('Allow', 'GET, POST');
+  if (req.method === 'DELETE') {
+    // Wipe the shared leaderboard. Rate-limited per IP via the same
+    // bucket so it can't be hammered.
+    try {
+      const ip = clientIp(req);
+      const rateKey = RATE_KEY_PREFIX + 'del:' + ip;
+      const count = await redis.incr(rateKey);
+      if (count === 1) await redis.expire(rateKey, 60);
+      if (count > 5) return res.status(429).json({ error: 'too many resets, try later' });
+
+      await redis.del(LEADERBOARD_KEY);
+      return res.status(200).json({ ok: true, cleared: true });
+    } catch (e) {
+      return res.status(500).json({ error: e.message || 'delete failed' });
+    }
+  }
+
+  res.setHeader('Allow', 'GET, POST, DELETE');
   return res.status(405).json({ error: 'Method not allowed' });
 }
 
