@@ -1465,15 +1465,41 @@ function findVoiceOption(id) {
 
 function findNativeVoice(match) {
   if (!match || !voices.length) return null;
-  const lang = (match.lang || '').toLowerCase();
-  for (const name of match.nameHints || []) {
+  const lang = (match.lang || '').toLowerCase();           // e.g. 'en-au'
+  const langPrefix = lang.slice(0, 5);                     // 'en-au'
+  const hints = match.nameHints || [];
+
+  // 1. Exact name + AU language
+  for (const name of hints) {
+    const v = voices.find(x => x.name === name && (x.lang || '').toLowerCase().startsWith(langPrefix));
+    if (v) return v;
+  }
+  // 2. Substring match in AU language — handles "Karen (Premium)", "Karen (Enhanced)",
+  //    "Microsoft Catherine - English (Australia)", etc.
+  for (const name of hints) {
     const v = voices.find(x =>
-      x.name === name && (x.lang || '').toLowerCase().startsWith(lang.slice(0, 5))
+      x.name.toLowerCase().includes(name.toLowerCase()) &&
+      (x.lang || '').toLowerCase().startsWith(langPrefix)
     );
     if (v) return v;
   }
-  // any voice in the target language
-  return voices.find(v => (v.lang || '').toLowerCase() === lang) || null;
+  // 3. No fallback to "any en-AU voice" — that risks mixing genders (e.g.
+  //    male Lee when the user picked au_female). Return null and let the
+  //    caller drop to Kokoro.
+  return null;
+}
+
+// Wait briefly for speechSynthesis to populate its voice list. The list is
+// async on first page load — without this, speak() runs before voices arrive
+// and the native-Aussie-voice check returns null, dropping to Kokoro unnecessarily.
+async function ensureVoicesLoaded(timeoutMs = 1500) {
+  if (voices.length > 0) return;
+  loadVoices();
+  const deadline = Date.now() + timeoutMs;
+  while (voices.length === 0 && Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, 50));
+    loadVoices();
+  }
 }
 
 // Returns the Kokoro voice ID to use for prefetch/playback, or null if no AI generation needed.
@@ -1617,31 +1643,62 @@ async function idbClear() {
 }
 
 // --- Kokoro model loader (lazy, cached by browser) ---
+const KOKORO_CDNS = [
+  'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm',
+  'https://esm.sh/kokoro-js@1.2.1',
+  'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/+esm'
+];
+
+async function importKokoro() {
+  let lastErr;
+  for (const url of KOKORO_CDNS) {
+    try {
+      console.info('[spelling-bee] Loading kokoro-js from', url);
+      const mod = await import(/* @vite-ignore */ url);
+      if (mod && mod.KokoroTTS) return mod;
+      lastErr = new Error('Module loaded but KokoroTTS export missing from ' + url);
+    } catch (e) {
+      console.warn('[spelling-bee] CDN failed:', url, e);
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('All Kokoro CDNs failed');
+}
+
 async function loadKokoro() {
   if (kokoroTTS) return kokoroTTS;
   if (kokoroLoading) return kokoroLoading;
   showAIFeedback('Loading voice model… (~85MB, one-time)');
   kokoroLoading = (async () => {
-    const mod = await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm');
+    const mod = await importKokoro();
     const tts = await mod.KokoroTTS.from_pretrained(
       'onnx-community/Kokoro-82M-v1.0-ONNX',
       {
         dtype: 'q8',
         progress_callback: (data) => {
-          if (data && data.status === 'progress' && typeof data.progress === 'number') {
+          if (!data) return;
+          if (data.status === 'progress' && typeof data.progress === 'number') {
             showAIFeedback(`Loading voice model… ${Math.round(data.progress)}%`);
-          } else if (data && data.status === 'done') {
+          } else if (data.status === 'done') {
             showAIFeedback('Almost ready…');
+          } else if (data.status === 'ready') {
+            showAIFeedback('✓ Voice ready');
           }
         }
       }
     );
     kokoroTTS = tts;
     showAIFeedback('✓ Voice ready');
+    console.info('[spelling-bee] Kokoro ready');
     return tts;
   })();
   try { return await kokoroLoading; }
-  catch (e) { kokoroLoading = null; throw e; }
+  catch (e) {
+    kokoroLoading = null;
+    console.error('[spelling-bee] Kokoro load failed:', e);
+    showAIFeedback('Voice model failed to load: ' + (e.message || e), true);
+    throw e;
+  }
 }
 
 // Get audio for a word. Checks in-memory → IndexedDB → generates via Kokoro.
@@ -1713,40 +1770,56 @@ function stopAllSpeech() {
 async function speak(text, opts = {}) {
   stopAllSpeech();
   activeUserSpeak = true;
+  const playBtn = document.getElementById('play-btn');
   try {
     if (state.useAI && state.aiVoiceId) {
+      // Make sure speechSynthesis voices are loaded BEFORE deciding native-vs-AI
+      await ensureVoicesLoaded();
+
       const opt = findVoiceOption(state.aiVoiceId);
-      // Native browser voice (e.g. real Aussie Karen / Lee)
+
+      // Native browser voice (e.g. real Aussie Karen / Lee on macOS/iOS/Edge)
       if (opt && opt.type === 'browser') {
         const nativeVoice = findNativeVoice(opt.match);
         if (nativeVoice) {
           speakWithVoice(text, nativeVoice, opts);
           return;
         }
-        // Not installed — fall through to Kokoro fallback
-        const note = `No "${opt.match.nameHints[0]}" voice installed on this device — using Kokoro AI fallback.`;
-        if (!document.getElementById('ai-feedback').dataset.warned) {
+        // Not installed on this device — fall through to Kokoro fallback
+        const note = `No native ${opt.match.nameHints[0]}-style voice on this device — using Kokoro AI as fallback.`;
+        const fbEl = document.getElementById('ai-feedback');
+        if (fbEl && !fbEl.dataset.warned) {
           showAIFeedback(note, true);
-          document.getElementById('ai-feedback').dataset.warned = '1';
+          fbEl.dataset.warned = '1';
         }
       }
       // Kokoro AI voice
       try {
+        if (playBtn) playBtn.textContent = '⏳ Loading voice…';
         const voiceId = effectiveKokoroVoice();
         const url = await getAIAudio(text, voiceId);
+        if (playBtn) playBtn.textContent = '🔊 Say the word';
         const audio = new Audio(url);
         audio.playbackRate = opts.rate || state.rate;
         currentAudio = audio;
-        await audio.play();
+        try {
+          await audio.play();
+        } catch (playErr) {
+          // Most likely an autoplay restriction on iOS Safari — the kid can still tap Play
+          console.warn('Audio.play() rejected:', playErr);
+        }
         return;
       } catch (e) {
-        console.warn('AI voice failed, falling back to browser:', e);
-        showAIFeedback('AI voice error — using browser voice. ' + e.message, true);
+        if (playBtn) playBtn.textContent = '🔊 Say the word';
+        console.error('AI voice failed:', e);
+        showAIFeedback('AI voice error: ' + (e.message || e) + ' — using browser voice.', true);
       }
     }
     speakBrowser(text, opts);
   } finally {
-    // Give the audio element a moment to start before clearing the flag
+    if (playBtn && playBtn.textContent.startsWith('⏳')) {
+      playBtn.textContent = '🔊 Say the word';
+    }
     setTimeout(() => { activeUserSpeak = false; }, 50);
   }
 }
@@ -2157,9 +2230,23 @@ voiceIdEl.addEventListener('change', () => {
 
 document.getElementById('test-voice').addEventListener('click', async () => {
   showAIFeedback('Testing…');
+  await ensureVoicesLoaded();
+  // Diagnostic: report what voice will actually play
+  const opt = findVoiceOption(state.aiVoiceId);
+  let diag = '';
+  if (!state.useAI) {
+    diag = '"Use AI voice" is off — playing default browser voice.';
+  } else if (opt?.type === 'browser') {
+    const v = findNativeVoice(opt.match);
+    diag = v
+      ? `✓ Using native "${v.name}" (${v.lang}) on your device.`
+      : `No native AU voice on this device. Available en-AU voices: ${voices.filter(x => (x.lang||'').toLowerCase().startsWith('en-au')).map(x=>x.name).join(', ') || 'none'}. Falling back to Kokoro ${opt.fallback}.`;
+  } else if (opt?.type === 'kokoro') {
+    diag = `Using Kokoro AI voice ${opt.id}.`;
+  }
+  showAIFeedback(diag);
   try {
     await speak("G'day! I'll say words for you to spell.");
-    refreshAIStatus();
   } catch (e) {
     showAIFeedback('Error: ' + e.message, true);
   }
