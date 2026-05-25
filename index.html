@@ -4,6 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spelling Bee!</title>
+<!--
+  Import map fixes the Kokoro chain. The jsDelivr +esm bundle uses absolute
+  paths like /npm/@huggingface/transformers@... which resolve to the page's
+  origin in the browser — 404 on Vercel. Mapping bare specifiers to fully-
+  qualified URLs makes the chain resolve correctly regardless of host.
+  path / fs/promises are Node-only and stubbed with empty modules — the
+  Kokoro voice loader uses Object.hasOwn(i, "readFile") to detect Node and
+  falls back to the browser fetch path.
+-->
+<script type="importmap">
+{
+  "imports": {
+    "kokoro-js": "https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.js",
+    "@huggingface/transformers": "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1/dist/transformers.web.js",
+    "phonemizer": "https://cdn.jsdelivr.net/npm/phonemizer@1.2.1/dist/phonemizer.js",
+    "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0-dev.20250409-89f8206ba4/dist/ort.bundle.min.mjs",
+    "onnxruntime-common": "https://cdn.jsdelivr.net/npm/onnxruntime-common@1.22.0-dev.20250409-89f8206ba4/dist/esm/index.js",
+    "path": "data:text/javascript,export default {};",
+    "fs/promises": "data:text/javascript,export default {};"
+  }
+}
+</script>
 <style>
 * {
   box-sizing: border-box;
@@ -1490,7 +1512,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.2.3';   // bumped each GitHub push
+const APP_VERSION = '1.2.4';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1733,27 +1755,23 @@ function withTimeout(p, ms, msg) {
   ]);
 }
 
-// --- Kokoro model loader (lazy, cached by browser) ---
-const KOKORO_CDNS = [
-  'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm',
-  'https://esm.sh/kokoro-js@1.2.1',
-  'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.0/+esm'
-];
-
+// --- Kokoro model loader (via import map in <head>) ---
 async function importKokoro() {
-  let lastErr;
-  for (const url of KOKORO_CDNS) {
-    try {
-      console.info('[spelling-bee] Loading kokoro-js from', url);
-      const mod = await import(/* @vite-ignore */ url);
-      if (mod && mod.KokoroTTS) return mod;
-      lastErr = new Error('Module loaded but KokoroTTS export missing from ' + url);
-    } catch (e) {
-      console.warn('[spelling-bee] CDN failed:', url, e);
-      lastErr = e;
+  console.info('[spelling-bee] Loading kokoro-js via importmap');
+  try {
+    const mod = await import('kokoro-js');
+    if (!mod || !mod.KokoroTTS) {
+      throw new Error('kokoro-js loaded but KokoroTTS export missing');
     }
+    return mod;
+  } catch (e) {
+    console.error('[spelling-bee] kokoro-js import failed:', e);
+    // Browser doesn't support import maps? Fall back to old +esm URL.
+    // The +esm version has the absolute-path bug but at least loads on browsers
+    // without importmap support; the page will surface generation failures.
+    console.warn('[spelling-bee] Falling back to +esm URL (may have absolute-path issues)');
+    return await import('https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm');
   }
-  throw lastErr || new Error('All Kokoro CDNs failed');
 }
 
 async function loadKokoro() {
