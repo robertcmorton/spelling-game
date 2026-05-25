@@ -1496,7 +1496,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.9';   // bumped each GitHub push
+const APP_VERSION = '1.3.10';  // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -2546,6 +2546,11 @@ document.getElementById('start-from-welcome').addEventListener('click', () => {
   state.name = nameRaw.slice(0, 20);
   state.age = age;
   saveState();
+  // A new player session is a fresh start — clear any leftover Gemini
+  // rate-limit cooldown so the kid gets an AI voice attempt immediately
+  // instead of inheriting the previous session's fallback-to-native.
+  geminiThrottledUntil = 0;
+  lastTTSError = null;
   startRound();
 });
 
