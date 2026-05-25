@@ -597,10 +597,6 @@ select {
              style="width:80px; font-family:inherit; font-size:1em; padding:6px 10px; border:3px solid #78350f; border-radius:12px; background:white; color:#78350f; font-weight:bold; text-align:center;">
     </div>
     <div class="stat-row">
-      <span>Voice</span>
-      <select id="voice-select"></select>
-    </div>
-    <div class="stat-row">
       <span>Speed</span>
       <select id="rate-select">
         <option value="0.7">Slow</option>
@@ -609,25 +605,32 @@ select {
       </select>
     </div>
 
+    <div class="stat-row">
+      <span><strong>🎙 Use AI voice</strong></span>
+      <label style="display:inline-flex; align-items:center; gap:8px; font-weight:bold;">
+        <input type="checkbox" id="use-ai" style="width:22px; height:22px; accent-color:#78350f;">
+        <span id="ai-status">Off</span>
+      </label>
+    </div>
+
+    <!-- AI voice dropdown — visible only when "Use AI voice" is on -->
+    <div class="stat-row" id="ai-voice-row">
+      <span>Voice</span>
+      <select id="voice-id" style="max-width: 60%;"></select>
+    </div>
+
+    <!-- Browser-voice dropdown — visible only when "Use AI voice" is off -->
+    <div class="stat-row" id="browser-voice-row">
+      <span>Voice</span>
+      <select id="voice-select"></select>
+    </div>
+
     <button class="btn btn-primary" id="test-voice" style="width:100%; margin-top:10px;">🔊 Test voice</button>
     <p class="setting-help" id="ai-feedback" style="margin-top:8px; min-height:1em;"></p>
-
-    <div class="parent-section">
-      <h2 style="margin-top:0;">🎙 AI voice (Gemini)</h2>
-      <p class="setting-help">High-quality Australian voice <strong>Achernar</strong> via Google's
-        <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini 3.1 Flash TTS (Preview)</a>.
-        Requires a free <code>GEMINI_API_KEY</code> set in the Vercel project; otherwise the app uses
-        your device's built-in Aussie voice (Karen / Lee).</p>
-      <div class="stat-row" style="border:none; padding:6px 0;">
-        <span><strong>Use AI voice</strong></span>
-        <label style="display:inline-flex; align-items:center; gap:8px; font-weight:bold;">
-          <input type="checkbox" id="use-ai" style="width:22px; height:22px; accent-color:#78350f;">
-          <span id="ai-status">Off</span>
-        </label>
-      </div>
-      <label class="setting-help" style="margin-top:8px; display:block;">Voice — pick one to switch instantly (auto-enables AI)</label>
-      <select id="voice-id" class="setting-input"></select>
-    </div>
+    <p class="setting-help" style="opacity:0.75; margin-top:4px;">
+      AI voice uses <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini Achernar</a>
+      (Australian female). On any AI error the app falls back to your device voice so the kid never gets silence.
+    </p>
 
     <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-top:16px;">Back to game</button>
   </section>
@@ -1493,7 +1496,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.7';   // bumped each GitHub push
+const APP_VERSION = '1.3.8';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1504,7 +1507,7 @@ const defaultState = {
   highestLevel: 0,
   rate: 0.85,
   voiceName: null,
-  useAI: false,
+  useAI: true,
   aiVoiceId: 'gemini_achernar',
   migrationVersion: 0,    // bumped by one-shot migrations below
   words: {},
@@ -1586,13 +1589,21 @@ if (state.aiVoiceId && !VOICE_OPTIONS.find(v => v.id === state.aiVoiceId)) {
 // One-shot migrations keyed by migrationVersion. Each block applies once per
 // user; after it runs, state.migrationVersion is bumped so the block never
 // triggers again — the user's subsequent choices stick.
-const CURRENT_MIGRATION_VERSION = 2;
+const CURRENT_MIGRATION_VERSION = 3;
 if ((state.migrationVersion || 0) < 2) {
   // v1.3.5: force useAI=false once for everyone to manage Gemini rate-limit usage.
-  // If the user then enables AI manually, that choice persists from then on.
   console.info('[spelling-bee] One-shot v2 migration: forcing useAI=false');
   state.useAI = false;
   state.migrationVersion = 2;
+  saveState();
+}
+if ((state.migrationVersion || 0) < 3) {
+  // v1.3.8: now that universal native fallback is in place and a Gemini
+  // spending cap is set, flip everyone back ON. Subsequent toggle-OFF
+  // by the user persists (migration only runs once per user).
+  console.info('[spelling-bee] One-shot v3 migration: forcing useAI=true');
+  state.useAI = true;
+  state.migrationVersion = 3;
   saveState();
 }
 
@@ -2647,20 +2658,24 @@ function refreshAIStatus() {
   }
 }
 
+// Show only the relevant voice dropdown for the current useAI state.
+function updateVoiceUIVisibility() {
+  const aiRow = document.getElementById('ai-voice-row');
+  const browserRow = document.getElementById('browser-voice-row');
+  if (aiRow)      aiRow.style.display      = state.useAI ? '' : 'none';
+  if (browserRow) browserRow.style.display = state.useAI ? 'none' : '';
+}
+
 useAIEl.addEventListener('change', () => {
   state.useAI = useAIEl.checked;
   saveState();
   refreshAIStatus();
+  updateVoiceUIVisibility();
   if (state.useAI) {
-    const opt = findVoiceOption(state.aiVoiceId);
-    if (opt?.type === 'browser' && findNativeVoice(opt.match)) {
-      showAIFeedback(`Using your device's "${findNativeVoice(opt.match).name}" voice — instant, free.`);
-    } else if (opt?.type === 'gemini') {
-      showAIFeedback('Each word is fetched from Gemini and cached locally so repeats are free.');
-    }
+    showAIFeedback('Each word is fetched from Gemini and cached locally. Errors fall back to your device voice.');
     ensurePrefetch();
   } else {
-    showAIFeedback('');
+    showAIFeedback('Using device voice — no Gemini requests.');
   }
 });
 
@@ -2829,6 +2844,7 @@ document.getElementById('age-setting').value = state.age || 7;
 useAIEl.checked = state.useAI;
 voiceIdEl.value = state.aiVoiceId || defaultState.aiVoiceId;
 refreshAIStatus();
+updateVoiceUIVisibility();
 
 // GO!
 if (state.age == null || !state.name) {
