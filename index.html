@@ -1491,7 +1491,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.1';   // bumped each GitHub push
+const APP_VERSION = '1.3.2';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1511,24 +1511,13 @@ const defaultState = {
 
 const RECENT_WORDS_LIMIT = 30;
 
-// Voice options:
-//   - "browser" type: native OS voice (Karen / Lee on macOS/iOS/Edge) — instant, free
-//   - "gemini" type: Google Gemini 2.5 Flash TTS via /api/tts (Achernar, en-AU) — high quality AI
-// If user picks a native AU voice and none is installed, we fall through to Gemini.
+// Voice options — currently a single Gemini AI voice. Native browser
+// voices are still used as a fallback if /api/tts returns 503 (no key
+// set up) but they're not user-selectable from the dropdown.
 const VOICE_OPTIONS = [
   { id: 'gemini_achernar',
     label: '🇦🇺 Achernar — Australian female (Gemini AI)',
-    type: 'gemini' },
-  { id: 'au_female',
-    label: '🇦🇺 Aussie female (Karen / Catherine — your device)',
-    type: 'browser',
-    match: { lang: 'en-au', nameHints: ['Karen', 'Catherine', 'Tessa', 'Karen (Premium)', 'Karen (Enhanced)'] },
-    fallback: 'gemini_achernar' },
-  { id: 'au_male',
-    label: '🇦🇺 Aussie male (Lee / Daniel — your device)',
-    type: 'browser',
-    match: { lang: 'en-au', nameHints: ['Lee', 'Daniel', 'Lee (Premium)', 'Lee (Enhanced)'] },
-    fallback: 'gemini_achernar' }
+    type: 'gemini' }
 ];
 
 function findVoiceOption(id) {
