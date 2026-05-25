@@ -1492,7 +1492,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.3';   // bumped each GitHub push
+const APP_VERSION = '1.3.4';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1503,7 +1503,7 @@ const defaultState = {
   highestLevel: 0,
   rate: 0.85,
   voiceName: null,
-  useAI: false,
+  useAI: true,
   aiVoiceId: 'gemini_achernar',
   words: {},
   recentWords: [],       // last N words shown across rounds — used to avoid repeats
@@ -1578,6 +1578,15 @@ let state = loadState();
 if (state.aiVoiceId && !VOICE_OPTIONS.find(v => v.id === state.aiVoiceId)) {
   console.info('[spelling-bee] Migrating stale voice id', state.aiVoiceId, '→', defaultState.aiVoiceId);
   state.aiVoiceId = defaultState.aiVoiceId;
+  state.useAI = true;
+  saveState();
+}
+// Migration v1.3.4: useAI default flipped from false → true. Existing users
+// on the Gemini voice but with the old useAI:false (carried over from v1.3.0)
+// would still land on the browser voice. Flip them ON.
+if (!state.useAI && state.aiVoiceId === 'gemini_achernar') {
+  console.info('[spelling-bee] Enabling AI voice by default for existing user');
+  state.useAI = true;
   saveState();
 }
 
