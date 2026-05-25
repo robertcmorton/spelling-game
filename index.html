@@ -1496,7 +1496,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.8';   // bumped each GitHub push
+const APP_VERSION = '1.3.9';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1829,6 +1829,17 @@ async function getAIAudio(text, voiceId) {
   }
 }
 
+// Text used for "Say the word" / "Slower". We say the word TWICE with a
+// pause — same as a real spelling-bee judge. Two reasons:
+//   1. Gemini was treating bare single words as conversation (e.g. "good"
+//      → "good on ya"). Giving it two period-bounded tokens forces literal
+//      pronunciation.
+//   2. Matches the bookend prosody in sentenceFormFor() so the kid hears
+//      the same pronunciation in "Say the word" and "In a sentence".
+function wordTextFor(w) {
+  return `${w.word}. ${w.word}.`;
+}
+
 // Returns the sentence form spoken by "In a sentence" — same shape as a
 // real spelling-bee judge: word, then sentence, then word again.
 function sentenceFormFor(w) {
@@ -1838,7 +1849,7 @@ function sentenceFormFor(w) {
 // True if we already have BOTH the word and the sentence-form audio for
 // this word — in memory or IndexedDB. No network call, no blob load.
 async function isWordPairCached(w, voiceId) {
-  const wKey = `${voiceId}::${w.word}`;
+  const wKey = `${voiceId}::${wordTextFor(w)}`;
   const sKey = `${voiceId}::${sentenceFormFor(w)}`;
   const wOK = audioCache.has(wKey) || await idbHas(wKey);
   const sOK = audioCache.has(sKey) || await idbHas(sKey);
@@ -1860,62 +1871,18 @@ function buildPrefetchQueue() {
   return queue;
 }
 
-// Background prefetch. For each uncached word in the queue, fires the word
-// fetch and the sentence-form fetch IN PARALLEL (Promise.all of two getAIAudio
-// calls). Then waits PREFETCH_INTERVAL_MS before the next pair.
+// Background prefetch — DISABLED in v1.3.9 to preserve Gemini quota.
 //
-// Critically: isWordPairCached checks BOTH the in-memory map AND IndexedDB,
-// so words cached in a previous session never trigger a new Gemini request.
-// getAIAudio also dedups in-flight requests, so a live speak() call for the
-// same word won't trigger a parallel fetch from prefetch.
+// Lazy-loading strategy instead:
+//   • Word audio: fetched when presentWord() auto-plays (or on Play/Slower).
+//   • Sentence audio: fetched only when "In a sentence" is tapped.
+//   • Everything is cached in IndexedDB forever, so each unique word costs
+//     at most one /api/tts request per device for its lifetime.
+//
+// If you want to re-enable prefetch later, the implementation is in git
+// history (commit c1269f3). Costs ~10x more API calls than lazy loading.
 async function ensurePrefetch() {
-  if (prefetchRunning || !state.useAI) return;
-  const voiceId = effectiveAIVoice();
-  if (!voiceId) return;
-  prefetchRunning = true;
-  try {
-    while (state.useAI && effectiveAIVoice()) {
-      const vId = effectiveAIVoice();
-      const queue = buildPrefetchQueue();
-
-      // Find first word that isn't fully cached (word + sentence)
-      let next = null;
-      for (const w of queue) {
-        if (!await isWordPairCached(w, vId)) { next = w; break; }
-      }
-      if (!next) {
-        // Everything cached — idle until the round/level changes
-        await new Promise(r => setTimeout(r, 10000));
-        continue;
-      }
-
-      while (activeUserSpeak) await new Promise(r => setTimeout(r, 100));
-      if (!state.useAI) break;
-      if (Date.now() < geminiThrottledUntil) {
-        // Don't waste time spinning while cooled off
-        await new Promise(r => setTimeout(r, 5000));
-        continue;
-      }
-
-      try {
-        // Fire BOTH variants in parallel. Each getAIAudio respects the
-        // cache; if one is cached and the other isn't, only the missing
-        // one actually hits /api/tts.
-        await Promise.all([
-          getAIAudio(next.word, vId).catch(() => null),
-          getAIAudio(sentenceFormFor(next), vId).catch(() => null)
-        ]);
-      } catch (e) { /* allSettled-ish via .catch above */ }
-
-      if (Date.now() < geminiThrottledUntil) {
-        await new Promise(r => setTimeout(r, geminiThrottledUntil - Date.now() + 500));
-      } else {
-        await new Promise(r => setTimeout(r, PREFETCH_INTERVAL_MS));
-      }
-    }
-  } finally {
-    prefetchRunning = false;
-  }
+  return;   // intentional no-op
 }
 
 function stopAllSpeech() {
@@ -2097,14 +2064,9 @@ function presentWord() {
   // "In a sentence" plays instantly (from cache) when the kid taps it.
   setTimeout(() => {
     const w = round.words[round.index];
-    speak(w.word);   // plays "Say the word"; "Slower" reuses the same cache entry
-    if (state.useAI) {
-      const voiceId = effectiveAIVoice();
-      if (voiceId && Date.now() >= geminiThrottledUntil) {
-        getAIAudio(sentenceFormFor(w), voiceId)
-          .catch(e => console.warn('[spelling-bee] sentence prefetch failed:', e.message || e));
-      }
-    }
+    speak(wordTextFor(w));   // judge-style: word + period + word + period
+    // No sentence prefetch. "In a sentence" fetches lazily on click — if
+    // the kid never clicks it, we never burn API quota on sentences.
   }, 200);
 }
 
@@ -2496,14 +2458,13 @@ function renderLevels() {
 // EVENTS
 // ============================================================
 document.getElementById('play-btn').addEventListener('click', () => {
-  speak(round.words[round.index].word);
+  speak(wordTextFor(round.words[round.index]));
 });
 document.getElementById('slower-btn').addEventListener('click', () => {
-  speak(round.words[round.index].word, { rate: 0.55 });
+  speak(wordTextFor(round.words[round.index]), { rate: 0.55 });
 });
 document.getElementById('sentence-btn').addEventListener('click', () => {
-  const cur = round.words[round.index];
-  speak(`${cur.word}. ${cur.sentence}. ${cur.word}.`, { rate: state.rate });
+  speak(sentenceFormFor(round.words[round.index]), { rate: state.rate });
 });
 document.getElementById('answer-form').addEventListener('submit', checkAnswer);
 
