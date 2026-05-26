@@ -54,6 +54,8 @@ const VOICE_ID      = 'gemini_achernar'; // matches state.aiVoiceId in the front
 const OUT_DIR       = path.join('public', 'audio');
 const REQUEST_PACE_MS = 300;             // delay between successful requests
 const RATE_LIMIT_BACKOFF_MS = 60000;
+const MAX_429_RETRIES_PER_TASK = 3;      // give up on a single file after this many 429s
+const MAX_CONSECUTIVE_FAILS    = 10;     // bail out of the whole run after this many failures in a row
 
 // These two functions must match wordTextFor() and sentenceFormFor() in index.html.
 const wordTextFor    = w => `${w.word}.`;
@@ -159,6 +161,9 @@ async function fetchGemini(text) {
 
 // --- Main loop ---
 let generated = 0, skipped = 0, failed = 0;
+let consecutiveFails = 0;
+let bailedEarly = false;
+
 for (let n = 0; n < tasks.length; n++) {
   const task = tasks[n];
   const outPath = path.join(OUT_DIR, `${task.hash}.wav`);
@@ -166,19 +171,24 @@ for (let n = 0; n < tasks.length; n++) {
 
   if (existsSync(outPath)) {
     skipped++;
-    // Don't spam the log for skipped files
-    if (skipped <= 3 || n === tasks.length - 1) console.log(`${prefix} ${task.label}: skip (already exists)`);
+    // Only log skips for first few + last
+    if (skipped <= 3 || n === tasks.length - 1) console.log(`${prefix} ${task.label}: skip`);
     continue;
   }
 
-  let attempt = 0;
-  while (true) {
-    attempt++;
+  let succeeded = false;
+  for (let attempt = 1; attempt <= MAX_429_RETRIES_PER_TASK + 1; attempt++) {
     process.stdout.write(`${prefix} ${task.label} → ${task.hash.slice(0, 8)}.wav ... `);
     try {
       const res = await fetchGemini(task.text);
       if (res.status === 429) {
-        console.log('429 (cooling 60s)');
+        if (attempt > MAX_429_RETRIES_PER_TASK) {
+          console.log(`429 (gave up after ${MAX_429_RETRIES_PER_TASK} retries)`);
+          failed++;
+          consecutiveFails++;
+          break;
+        }
+        console.log(`429 (cooling ${RATE_LIMIT_BACKOFF_MS / 1000}s, retry ${attempt}/${MAX_429_RETRIES_PER_TASK})`);
         await new Promise(r => setTimeout(r, RATE_LIMIT_BACKOFF_MS));
         continue;
       }
@@ -187,6 +197,7 @@ for (let n = 0; n < tasks.length; n++) {
         console.log(`FAIL ${res.status}`);
         console.error('   ', body.slice(0, 300));
         failed++;
+        consecutiveFails++;
         break;
       }
       const data = await res.json();
@@ -194,6 +205,7 @@ for (let n = 0; n < tasks.length; n++) {
       if (!inline?.data) {
         console.log('FAIL (no audio in response)');
         failed++;
+        consecutiveFails++;
         break;
       }
       const pcm = Buffer.from(inline.data, 'base64');
@@ -203,26 +215,53 @@ for (let n = 0; n < tasks.length; n++) {
       await writeFile(outPath, wav);
       console.log(`ok (${(wav.length / 1024).toFixed(0)} KB)`);
       generated++;
+      consecutiveFails = 0;
+      succeeded = true;
       break;
     } catch (e) {
       console.log(`error: ${e.message}`);
       failed++;
+      consecutiveFails++;
       break;
     }
   }
 
-  // Small pacing delay between successful requests
-  if (n < tasks.length - 1) {
+  // Bail out cleanly when something is clearly wrong (quota exhausted, API down)
+  if (consecutiveFails >= MAX_CONSECUTIVE_FAILS) {
+    bailedEarly = true;
+    console.log();
+    console.log(`Stopping early: ${MAX_CONSECUTIVE_FAILS} consecutive failures.`);
+    console.log('Likely cause: Gemini quota exhausted (or daily cap hit).');
+    console.log('What to do:');
+    console.log('  - Wait for quota reset (often Pacific midnight), or');
+    console.log('  - Bump the spending cap in Cloud Console → Billing → Budgets, then');
+    console.log('  - Re-run "npm run generate-audio" — it picks up where it stopped.');
+    break;
+  }
+
+  // Small pacing delay between requests
+  if (succeeded && n < tasks.length - 1) {
     await new Promise(r => setTimeout(r, REQUEST_PACE_MS));
   }
 }
 
-// --- Write the hash index so the frontend can skip 404 lookups ---
+// --- Write/refresh the hash index so the frontend can skip 404 lookups ---
+// Include ALL hashes (planned + already-existing), so the frontend knows to
+// try every static URL. Hashes whose files don't exist yet will 404 and the
+// frontend will fall back to /api/tts.
 const indexHashes = tasks.map(t => t.hash);
 await writeFile(path.join(OUT_DIR, 'index.json'), JSON.stringify(indexHashes));
 
 console.log();
-console.log(`Done. generated=${generated} skipped=${skipped} failed=${failed}`);
-console.log(`Output: ${OUT_DIR}/ (${tasks.length} hashes in index.json)`);
-console.log();
-console.log('Next: git add public/audio && git commit -m "Pre-generated audio" && git push');
+console.log(`Run summary: generated=${generated} skipped=${skipped} failed=${failed}`);
+console.log(`Output: ${OUT_DIR}/`);
+if (!bailedEarly && failed === 0) {
+  console.log();
+  console.log('All audio generated. Next:');
+  console.log('  git add public/audio/');
+  console.log('  git commit -m "Pre-generated audio"');
+  console.log('  git push');
+} else if (failed > 0) {
+  console.log();
+  console.log(`${failed} tasks failed this run. Re-run "npm run generate-audio" later to retry.`);
+}
