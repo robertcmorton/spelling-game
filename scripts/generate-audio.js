@@ -52,10 +52,18 @@ const VOICE_NAME    = 'Achernar';        // Gemini voice
 const LANG_CODE     = 'en-AU';
 const VOICE_ID      = 'gemini_achernar'; // matches state.aiVoiceId in the frontend
 const OUT_DIR       = path.join('public', 'audio');
-const REQUEST_PACE_MS = 300;             // delay between successful requests
-const RATE_LIMIT_BACKOFF_MS = 60000;
-const MAX_429_RETRIES_PER_TASK = 3;      // give up on a single file after this many 429s
-const MAX_CONSECUTIVE_FAILS    = 10;     // bail out of the whole run after this many failures in a row
+// Gemini 3.1 Flash TTS Preview rate limits (same across all billing tiers):
+//   10 RPM (requests per minute)
+//   100 RPD (requests per day)
+// Pace at 7s between requests to stay well under 10 RPM. The daily cap (100)
+// is hard — once hit, you can't generate more until midnight Pacific. With
+// ~828 unique audios total, expect to spread the run over ~8-9 days.
+// Override via env vars if you're on a non-preview model with higher limits.
+const REQUEST_PACE_MS          = parseInt(process.env.PACE_MS || '7000', 10);
+const RATE_LIMIT_BACKOFF_MS    = 60000;
+const MAX_429_RETRIES_PER_TASK = 2;
+const MAX_CONSECUTIVE_FAILS    = 5;      // bail fast — daily cap is binary, not worth retrying
+const MAX_NEW_GENERATIONS_PER_RUN = parseInt(process.env.MAX_PER_RUN || '95', 10);  // stop ~5 under daily cap as safety margin
 
 // These two functions must match wordTextFor() and sentenceFormFor() in index.html.
 const wordTextFor    = w => `${w.word}.`;
@@ -174,6 +182,15 @@ for (let n = 0; n < tasks.length; n++) {
     // Only log skips for first few + last
     if (skipped <= 3 || n === tasks.length - 1) console.log(`${prefix} ${task.label}: skip`);
     continue;
+  }
+
+  // Voluntary daily cap — stop cleanly before Google's 100 RPD hard cap kicks in.
+  if (generated >= MAX_NEW_GENERATIONS_PER_RUN) {
+    console.log();
+    console.log(`Reached MAX_NEW_GENERATIONS_PER_RUN (${MAX_NEW_GENERATIONS_PER_RUN}). Stopping to stay under the 100/day quota.`);
+    console.log(`Re-run tomorrow (quota resets at midnight Pacific / ~5pm AEST) to continue from where we stopped.`);
+    bailedEarly = true;
+    break;
   }
 
   let succeeded = false;
