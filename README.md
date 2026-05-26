@@ -44,8 +44,14 @@ Master pool of ~470 words tagged by spelling age (5 → 17), sourced from:
 
 Single-page HTML game (`index.html`) plus two Vercel Serverless Functions:
 
-- `api/tts.js` — proxies Google Gemini 3.1 Flash TTS Preview (Achernar voice, en-AU)
+- `api/tts.js` — proxies Google Gemini 3.1 Flash TTS Preview (Achernar voice, en-AU).
+  Used as a fallback for any word that isn't in the pre-generated static set below.
 - `api/leaderboard.js` — shared leaderboard backed by Vercel KV / Upstash Redis
+
+Static audio for every known word is pre-generated and served from
+`public/audio/<sha1>.wav`. The frontend tries the static URL first, falls
+back to the API only for new words. This means the app costs **$0 ongoing
+in Gemini fees** for the standard word lists.
 
 Vanilla JS, no build step, Web Speech API for native browser voices.
 
@@ -76,6 +82,44 @@ native Aussie voice (Karen / Lee on macOS / iOS / Edge).
    `KV_REST_API_TOKEN` automatically.
 
 Until this is set, scores save per-device only.
+
+## Pre-generating audio (run once, then never again)
+
+The single biggest cost saving is pre-generating audio for every word in
+`MASTER_WORDS` and committing the .wav files to the repo. Vercel then
+serves them from its CDN — no Gemini API calls at runtime.
+
+Estimated one-time cost: ~$2 of Gemini quota (≈940 audio files).
+Estimated ongoing cost: **$0**.
+
+### Steps
+
+```bash
+# 1. Clone the repo locally (Node 18+ required)
+git clone https://github.com/robertcmorton/spelling-game.git
+cd spelling-game
+
+# 2. Put your Gemini key in .env.local
+cp .env.local.example .env.local
+# edit .env.local — paste your key from https://aistudio.google.com
+
+# 3. Run the generation script (15-30 min, paced to avoid rate limits)
+npm run generate-audio
+
+# 4. Commit the audio + index and push
+git add public/audio/
+git commit -m "Pre-generated audio"
+git push
+```
+
+The script is **resumable** — re-running it skips files that already exist.
+If a word fails (rate limit, network blip), just re-run; it'll pick up where
+it left off.
+
+### Adding new words later
+
+If you edit `MASTER_WORDS` in `index.html` to add words, re-run the script.
+It only generates the new ones. Then commit and push as usual.
 
 ## Cost
 

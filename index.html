@@ -1496,7 +1496,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.3.12';  // bumped each GitHub push
+const APP_VERSION = '1.4.0';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1769,20 +1769,59 @@ function withTimeout(p, ms, msg) {
   ]);
 }
 
-// Get audio for a word from /api/tts.
-// Cache flow: in-memory → in-flight dedup → IndexedDB → network.
-// Two callers asking for the same key at the same time share ONE request.
+// SHA-1 hex of "voiceId::text". MUST match hashKey() in scripts/generate-audio.js
+// so the static .wav filenames line up between the script and the frontend.
+async function hashTextKey(voiceId, text) {
+  const enc = new TextEncoder();
+  const data = enc.encode(`${voiceId}::${text}`);
+  const buf = await crypto.subtle.digest('SHA-1', data);
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Loaded once, lazily — set of all hashes that exist as /audio/<hash>.wav
+// files on the server. Lets us skip the HEAD/GET round-trip for words that
+// we know aren't pre-generated.
+let staticIndexPromise = null;
+async function staticIndex() {
+  if (!staticIndexPromise) {
+    staticIndexPromise = fetch('/audio/index.json', { cache: 'force-cache' })
+      .then(r => r.ok ? r.json() : [])
+      .then(arr => new Set(arr))
+      .catch(() => new Set());
+  }
+  return staticIndexPromise;
+}
+
+// Try to fetch pre-generated audio from /public/audio/<hash>.wav. Returns
+// a Blob on hit, null on miss. Free (no Gemini call, just a CDN hit).
+async function tryStaticAudio(voiceId, text) {
+  try {
+    const idx = await staticIndex();
+    const hash = await hashTextKey(voiceId, text);
+    if (!idx.has(hash)) return null;
+    const res = await fetch(`/audio/${hash}.wav`, { cache: 'force-cache' });
+    if (!res.ok) return null;
+    return await res.blob();
+  } catch (e) {
+    return null;
+  }
+}
+
+// Get audio for a word.
+// Cache flow:
+//   1. in-memory map
+//   2. in-flight dedup
+//   3. IndexedDB
+//   4. /public/audio/<hash>.wav  ← pre-generated, free
+//   5. /api/tts                  ← live Gemini, costs money, last resort
 async function getAIAudio(text, voiceId) {
   voiceId = voiceId || effectiveAIVoice() || state.aiVoiceId;
   if (!voiceId) throw new Error('No AI voice selected');
   const key = `${voiceId}::${text}`;
 
-  // 1. In-memory cache — synchronous fast path
   if (audioCache.has(key)) return audioCache.get(key);
-
-  // 2. In-flight dedup — if another caller already started fetching the same
-  //    key, wait on their Promise instead of starting a duplicate request.
-  if (inFlight.has(key)) return inFlight.get(key);
+  if (inFlight.has(key))   return inFlight.get(key);
 
   const promise = (async () => {
     // 3. IndexedDB cache (persistent across reloads)
@@ -1793,7 +1832,16 @@ async function getAIAudio(text, voiceId) {
       return url;
     }
 
-    // 4. Honor the rate-limit cooldown — failing fast lets speak() drop to
+    // 4. Pre-generated static audio served by Vercel CDN — zero API cost
+    const staticBlob = await tryStaticAudio(voiceId, text);
+    if (staticBlob) {
+      const url = URL.createObjectURL(staticBlob);
+      audioCache.set(key, url);
+      idbPut(key, staticBlob);  // persist so we skip the network entirely next time
+      return url;
+    }
+
+    // 5. Honor the rate-limit cooldown — failing fast lets speak() drop to
     //    the native voice instead of waiting for another 429.
     if (Date.now() < geminiThrottledUntil) {
       throw new Error('429 throttled (cooldown active)');
