@@ -5,7 +5,8 @@
   "description": "Browser spelling-bee game with shared leaderboard",
   "type": "module",
   "scripts": {
-    "generate-audio": "node scripts/generate-audio.js"
+    "generate-audio": "node scripts/generate-audio.js",
+    "keep-updating": "node scripts/keep-updating-from-gemini.js"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3"
