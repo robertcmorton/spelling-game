@@ -586,6 +586,23 @@ select {
       <button class="btn btn-primary" id="open-leaderboard-btn" style="width:100%; margin-top:8px;">🏆 Leaderboard</button>
     </div>
 
+    <!-- Competition word list (e.g. NSW Spelling Bee) — appears when imported -->
+    <div class="parent-section" id="wordlist-section" style="margin-top:0; background:#fde68a; border-color:#78350f;">
+      <h2 style="margin-top:0;">📋 Word list</h2>
+      <div class="stat-row" style="border:none; padding:6px 0;">
+        <span id="active-list-label"><strong>Standard</strong> (by age)</span>
+        <button class="btn btn-ghost" id="import-list-btn" style="padding:6px 12px; font-size:0.85em;">Import list</button>
+      </div>
+      <input type="file" id="import-file" accept="application/json,.json" style="display:none;">
+      <div id="psb-levels" style="display:none;">
+        <p class="setting-help" style="margin:6px 0;">🐝 Tap a competition level:</p>
+        <div class="level-grid" id="psb-level-grid"></div>
+        <button class="btn btn-ghost" id="use-standard-btn" style="width:100%; margin-top:8px; font-size:0.85em;">↩ Switch back to standard (by age)</button>
+        <button class="btn btn-ghost" id="remove-list-btn" style="width:100%; margin-top:6px; font-size:0.8em; background:#fee2e2;">🗑 Remove imported list</button>
+      </div>
+      <p class="setting-help" id="import-feedback" style="margin-top:6px; min-height:1em;"></p>
+    </div>
+
     <h2>🎚 Choose a level</h2>
     <p style="margin-bottom:8px;">Levels unlock as you get 8 out of 10 right.</p>
     <div class="level-grid" id="level-grid"></div>
@@ -1496,7 +1513,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.4.0';   // bumped each GitHub push
+const APP_VERSION = '1.5.0';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -1512,10 +1529,34 @@ const defaultState = {
   migrationVersion: 0,    // bumped by one-shot migrations below
   words: {},
   recentWords: [],       // last N words shown across rounds — used to avoid repeats
-  leaderboard: []
+  leaderboard: [],
+  wordSource: 'standard', // 'standard' (age-based) | 'psb' (imported competition list)
+  psbLevel: null          // selected competition level key (e.g. "2")
 };
 
 const RECENT_WORDS_LIMIT = 30;
+
+// ============================================================
+// IMPORTED COMPETITION WORD LIST (e.g. NSW Premier's Spelling Bee)
+// Stored ONLY in this browser's localStorage — never sent to the server
+// or committed to the repo, to respect the publisher's copyright terms.
+// ============================================================
+const PSB_KEY = 'spelling-bee-competition-list';
+function loadPSBList() {
+  try { const raw = localStorage.getItem(PSB_KEY); return raw ? JSON.parse(raw) : null; }
+  catch (e) { return null; }
+}
+function savePSBList(obj) {
+  try { localStorage.setItem(PSB_KEY, JSON.stringify(obj)); } catch (e) {}
+}
+function clearPSBList() {
+  try { localStorage.removeItem(PSB_KEY); } catch (e) {}
+}
+let psbList = loadPSBList();   // { name, levels: { "2": [...words], ... } }
+function psbLevelKeys() {
+  if (!psbList || !psbList.levels) return [];
+  return Object.keys(psbList.levels).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+}
 
 // Voice options — currently a single Gemini AI voice. Native browser
 // voices are still used as a fallback if /api/tts returns 503 (no key
@@ -1919,7 +1960,9 @@ function wordTextFor(w) {
 
 // Returns the sentence form spoken by "In a sentence" — same shape as a
 // real spelling-bee judge: word, then sentence, then word again.
+// Competition words have no sentence; fall back to just saying the word.
 function sentenceFormFor(w) {
+  if (!w.sentence) return `${w.word}. ${w.word}.`;
   return `${w.word}. ${w.sentence}. ${w.word}.`;
 }
 
@@ -2085,7 +2128,14 @@ const LEVEL_UP_THRESHOLD = 8;
 let round = { words: [], index: 0, correct: 0, results: [] };
 
 function pickRoundWords() {
-  const pool = poolForCurrent().slice();
+  let pool;
+  if (state.wordSource === 'psb' && psbList && psbList.levels[state.psbLevel]) {
+    // Competition words are plain strings with no example sentence.
+    pool = psbList.levels[state.psbLevel].map(w => ({ word: w, sentence: '' }));
+  } else {
+    pool = poolForCurrent();
+  }
+  pool = pool.slice();
   // Fisher-Yates shuffle
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -2137,11 +2187,12 @@ function presentWord() {
   input.focus();
   setFeedback('', '');
   renderProgress();
-  // Auto-say the word AND fire the sentence-form fetch in parallel so
-  // "In a sentence" plays instantly (from cache) when the kid taps it.
+  // Hide "In a sentence" for competition words (they have no example sentence).
+  const curWord = round.words[round.index];
+  const sentBtn = document.getElementById('sentence-btn');
+  if (sentBtn) sentBtn.style.display = curWord.sentence ? '' : 'none';
   setTimeout(() => {
-    const w = round.words[round.index];
-    speak(wordTextFor(w));   // judge-style: word + period + word + period
+    speak(wordTextFor(curWord));   // say the word
     // No sentence prefetch. "In a sentence" fetches lazily on click — if
     // the kid never clicks it, we never burn API quota on sentences.
   }, 200);
@@ -2222,7 +2273,10 @@ function finishRound() {
   document.getElementById('end-score').textContent = `${score} / ${total}`;
 
   // Save round to the shared leaderboard (with local fallback).
-  if (state.name && state.age) {
+  // Competition (PSB) practice rounds are NOT submitted — they'd mix
+  // competition levels into the age-based casual leaderboard. Per-word
+  // stats are still tracked (see checkAnswer) so progress is recorded.
+  if (state.name && state.age && state.wordSource !== 'psb') {
     submitScore({
       name: state.name,
       age: state.age,
@@ -2249,13 +2303,22 @@ function finishRound() {
   document.getElementById('end-message').textContent = msg;
 
   const lvlBtn = document.getElementById('level-up-btn');
-  const canLevelUp = score >= LEVEL_UP_THRESHOLD && state.level < LEVEL_NAMES.length - 1;
-  lvlBtn.style.display = canLevelUp ? 'block' : 'none';
-  if (canLevelUp) {
-    lvlBtn.textContent = `⬆ Move up to Level ${state.level + 2}: ${LEVEL_NAMES[state.level + 1]}`;
-    if (state.level + 1 > state.highestLevel) {
-      state.highestLevel = state.level + 1;
-      saveState();
+  if (state.wordSource === 'psb') {
+    // Competition mode: level up = next PSB level (e.g. Level 2 → 3)
+    const keys = psbLevelKeys();
+    const idx = keys.indexOf(state.psbLevel);
+    const canUp = score >= LEVEL_UP_THRESHOLD && idx >= 0 && idx < keys.length - 1;
+    lvlBtn.style.display = canUp ? 'block' : 'none';
+    if (canUp) lvlBtn.textContent = `⬆ Move up to Level ${keys[idx + 1]}`;
+  } else {
+    const canLevelUp = score >= LEVEL_UP_THRESHOLD && state.level < LEVEL_NAMES.length - 1;
+    lvlBtn.style.display = canLevelUp ? 'block' : 'none';
+    if (canLevelUp) {
+      lvlBtn.textContent = `⬆ Move up to Level ${state.level + 2}: ${LEVEL_NAMES[state.level + 1]}`;
+      if (state.level + 1 > state.highestLevel) {
+        state.highestLevel = state.level + 1;
+        saveState();
+      }
     }
   }
 }
@@ -2269,8 +2332,13 @@ function showScreen(name) {
     el.classList.toggle('screen-active', s === name);
   });
   const playerPrefix = state.name ? `${state.name} · ` : '';
-  document.getElementById('level-tag').textContent =
-    `${playerPrefix}Age ${state.age || 7} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
+  if (state.wordSource === 'psb' && psbList) {
+    document.getElementById('level-tag').textContent =
+      `${playerPrefix}🐝 Bee · Level ${state.psbLevel}`;
+  } else {
+    document.getElementById('level-tag').textContent =
+      `${playerPrefix}Age ${state.age || 7} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
+  }
 }
 
 // ============================================================
@@ -2532,6 +2600,115 @@ function renderLevels() {
 }
 
 // ============================================================
+// COMPETITION WORD LIST UI
+// ============================================================
+function showImportFeedback(msg, isError) {
+  const el = document.getElementById('import-feedback');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.color = isError ? '#991b1b' : '#065f46';
+}
+
+function renderWordlistSection() {
+  const label = document.getElementById('active-list-label');
+  const psbDiv = document.getElementById('psb-levels');
+  if (!label || !psbDiv) return;
+
+  if (psbList && psbLevelKeys().length) {
+    psbDiv.style.display = 'block';
+    label.innerHTML = (state.wordSource === 'psb')
+      ? `<strong>🐝 ${escapeHtml(psbList.name)}</strong> · Level ${state.psbLevel}`
+      : `<strong>Standard</strong> (by age)`;
+
+    const grid = document.getElementById('psb-level-grid');
+    grid.innerHTML = '';
+    psbLevelKeys().forEach(k => {
+      const words = psbList.levels[k];
+      const btn = document.createElement('button');
+      btn.className = 'level-btn';
+      if (state.wordSource === 'psb' && state.psbLevel === k) btn.classList.add('current');
+      const sample = words.slice(0, 3).join(', ');
+      btn.innerHTML = `
+        <span class="level-num">Lv ${k}</span>
+        <strong>${words.length} words</strong><br>
+        <small>${escapeHtml(sample)}…</small>
+      `;
+      btn.onclick = () => {
+        state.wordSource = 'psb';
+        state.psbLevel = k;
+        saveState();
+        renderWordlistSection();
+        startRound();
+      };
+      grid.appendChild(btn);
+    });
+  } else {
+    psbDiv.style.display = 'none';
+    label.innerHTML = `<strong>Standard</strong> (by age)`;
+  }
+}
+
+// Import a competition word list (JSON) from the user's device. The data is
+// stored ONLY in this browser — never uploaded to the server or the repo.
+document.getElementById('import-list-btn').addEventListener('click', () => {
+  document.getElementById('import-file').click();
+});
+document.getElementById('import-file').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const src = data.levels && typeof data.levels === 'object' ? data.levels : data;
+      const levels = {};
+      let count = 0;
+      for (const rawKey of Object.keys(src)) {
+        const arr = src[rawKey];
+        if (!Array.isArray(arr)) continue;
+        const words = arr.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim());
+        if (!words.length) continue;
+        const m = String(rawKey).match(/\d+/);
+        const key = m ? m[0] : String(rawKey);
+        levels[key] = (levels[key] || []).concat(words);
+        count += words.length;
+      }
+      if (count === 0) throw new Error('no word lists found in file');
+      psbList = { name: data.name || data.source || 'Competition word list', levels };
+      savePSBList(psbList);
+      state.wordSource = 'psb';
+      state.psbLevel = psbLevelKeys()[0];
+      saveState();
+      renderWordlistSection();
+      showImportFeedback(`✓ Loaded ${count} words across ${psbLevelKeys().length} levels. Tap a level to start.`);
+    } catch (err) {
+      console.error('[spelling-bee] import failed', err);
+      showImportFeedback('Could not read that file: ' + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';   // allow re-importing the same filename later
+});
+
+document.getElementById('use-standard-btn').addEventListener('click', () => {
+  state.wordSource = 'standard';
+  saveState();
+  renderWordlistSection();
+  renderLevels();
+  showImportFeedback('Switched to standard (age-based) words.');
+});
+
+document.getElementById('remove-list-btn').addEventListener('click', () => {
+  if (!confirm('Remove the imported competition word list from this device?')) return;
+  clearPSBList();
+  psbList = null;
+  state.wordSource = 'standard';
+  saveState();
+  renderWordlistSection();
+  showImportFeedback('Removed. Using standard words.');
+});
+
+// ============================================================
 // EVENTS
 // ============================================================
 document.getElementById('play-btn').addEventListener('click', () => {
@@ -2547,6 +2724,7 @@ document.getElementById('answer-form').addEventListener('submit', checkAnswer);
 
 document.getElementById('menu-btn').addEventListener('click', () => {
   renderLevels();
+  renderWordlistSection();
   document.getElementById('current-player').textContent =
     state.name ? `${state.name} (age ${state.age || 7})` : `Age ${state.age || 7}`;
   showScreen('level');
@@ -2554,8 +2732,14 @@ document.getElementById('menu-btn').addEventListener('click', () => {
 
 document.getElementById('next-round-btn').addEventListener('click', startRound);
 document.getElementById('level-up-btn').addEventListener('click', () => {
-  state.level = Math.min(state.level + 1, LEVELS.length - 1);
-  if (state.level > state.highestLevel) state.highestLevel = state.level;
+  if (state.wordSource === 'psb') {
+    const keys = psbLevelKeys();
+    const idx = keys.indexOf(state.psbLevel);
+    if (idx >= 0 && idx < keys.length - 1) state.psbLevel = keys[idx + 1];
+  } else {
+    state.level = Math.min(state.level + 1, LEVEL_NAMES.length - 1);
+    if (state.level > state.highestLevel) state.highestLevel = state.level;
+  }
   saveState();
   startRound();
 });
@@ -2889,6 +3073,18 @@ useAIEl.checked = state.useAI;
 voiceIdEl.value = state.aiVoiceId || defaultState.aiVoiceId;
 refreshAIStatus();
 updateVoiceUIVisibility();
+
+// Competition list bootstrap: if state says 'psb' but the list is gone
+// (removed, or different device), fall back to standard so nothing breaks.
+if (state.wordSource === 'psb' && (!psbList || !psbList.levels[state.psbLevel])) {
+  if (psbList && psbLevelKeys().length) {
+    state.psbLevel = psbLevelKeys()[0];   // list exists but level key stale
+  } else {
+    state.wordSource = 'standard';
+  }
+  saveState();
+}
+renderWordlistSection();
 
 // GO!
 if (state.age == null || !state.name) {
