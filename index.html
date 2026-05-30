@@ -591,9 +591,23 @@ select {
       <h2 style="margin-top:0;">📋 Word list</h2>
       <div class="stat-row" style="border:none; padding:6px 0;">
         <span id="active-list-label"><strong>Standard</strong> (by age)</span>
-        <button class="btn btn-ghost" id="import-list-btn" style="padding:6px 12px; font-size:0.85em;">Import list</button>
+        <span style="display:flex; gap:6px;">
+          <button class="btn btn-ghost" id="paste-list-btn" style="padding:6px 12px; font-size:0.85em;">Paste list</button>
+          <button class="btn btn-ghost" id="import-list-btn" style="padding:6px 12px; font-size:0.85em;">Import file</button>
+        </span>
       </div>
-      <input type="file" id="import-file" accept="application/json,.json" style="display:none;">
+      <input type="file" id="import-file" accept="application/json,.json,text/plain" style="display:none;">
+
+      <!-- Paste-to-load: no file picker needed, works on any device -->
+      <div id="paste-box" style="display:none; margin:6px 0;">
+        <p class="setting-help" style="margin:4px 0;">Paste the word list below. Accepts the JSON file's contents, OR plain text with <code>Level 2</code> / <code>Level 3</code> … headings and words separated by spaces, commas or new lines.</p>
+        <textarea id="paste-area" rows="6" style="width:100%; font-family:inherit; font-size:0.9em; padding:8px; border:3px solid #78350f; border-radius:10px; background:#fffbeb; color:#78350f; resize:vertical;" placeholder="Paste here…"></textarea>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <button class="btn btn-primary" id="load-paste-btn" style="flex:1; font-size:0.9em;">Load words</button>
+          <button class="btn btn-ghost" id="cancel-paste-btn" style="font-size:0.9em;">Cancel</button>
+        </div>
+      </div>
+
       <div id="psb-levels" style="display:none;">
         <p class="setting-help" style="margin:6px 0;">🐝 Tap a competition level:</p>
         <div class="level-grid" id="psb-level-grid"></div>
@@ -1513,7 +1527,7 @@ const __DISCARDED_LEVELS_BELOW__ = [
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v1';
 
-const APP_VERSION = '1.5.0';   // bumped each GitHub push
+const APP_VERSION = '1.5.1';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -2648,8 +2662,66 @@ function renderWordlistSection() {
   }
 }
 
-// Import a competition word list (JSON) from the user's device. The data is
-// stored ONLY in this browser — never uploaded to the server or the repo.
+// Parse raw text (file contents or pasted text) into a { name, levels } list.
+// Accepts two formats:
+//   1. JSON: { name?, levels: { "2": [...], ... } }  (or a bare {levels} object)
+//   2. Plain text with "Level N" headings, e.g.
+//        Level 2
+//        abide accord acute, alcove
+//        Level 3
+//        abdomen, accomplished ...
+//      Words split on commas / whitespace / newlines.
+function parseWordlistText(text) {
+  text = (text || '').trim();
+  if (!text) throw new Error('nothing to load');
+
+  // Try JSON first
+  if (text[0] === '{' || text[0] === '[') {
+    const data = JSON.parse(text);
+    const src = data.levels && typeof data.levels === 'object' ? data.levels : data;
+    const levels = {};
+    let count = 0;
+    for (const rawKey of Object.keys(src)) {
+      const arr = src[rawKey];
+      if (!Array.isArray(arr)) continue;
+      const words = arr.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim());
+      if (!words.length) continue;
+      const m = String(rawKey).match(/\d+/);
+      levels[m ? m[0] : String(rawKey)] = (levels[m ? m[0] : String(rawKey)] || []).concat(words);
+      count += words.length;
+    }
+    if (!count) throw new Error('no words found in JSON');
+    return { name: data.name || data.source || 'Competition word list', levels, count };
+  }
+
+  // Plain text with "Level N" headings
+  const levels = {};
+  let current = '1', count = 0;
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const lvl = line.match(/^level\s*([0-9]+)/i);
+    if (lvl) { current = lvl[1]; if (!levels[current]) levels[current] = []; continue; }
+    const words = line.split(/[,\s]+/).map(w => w.trim()).filter(Boolean);
+    if (!words.length) continue;
+    levels[current] = (levels[current] || []).concat(words);
+    count += words.length;
+  }
+  if (!count) throw new Error('no words found — add "Level 2" style headings');
+  return { name: 'Competition word list', levels, count };
+}
+
+function applyImportedList(parsed) {
+  psbList = { name: parsed.name, levels: parsed.levels };
+  savePSBList(psbList);
+  state.wordSource = 'psb';
+  state.psbLevel = psbLevelKeys()[0];
+  saveState();
+  renderWordlistSection();
+  showImportFeedback(`✓ Loaded ${parsed.count} words across ${psbLevelKeys().length} levels. Tap a level to start.`);
+}
+
+// File import — stored ONLY in this browser, never uploaded.
 document.getElementById('import-list-btn').addEventListener('click', () => {
   document.getElementById('import-file').click();
 });
@@ -2658,36 +2730,35 @@ document.getElementById('import-file').addEventListener('change', (e) => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    try {
-      const data = JSON.parse(reader.result);
-      const src = data.levels && typeof data.levels === 'object' ? data.levels : data;
-      const levels = {};
-      let count = 0;
-      for (const rawKey of Object.keys(src)) {
-        const arr = src[rawKey];
-        if (!Array.isArray(arr)) continue;
-        const words = arr.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim());
-        if (!words.length) continue;
-        const m = String(rawKey).match(/\d+/);
-        const key = m ? m[0] : String(rawKey);
-        levels[key] = (levels[key] || []).concat(words);
-        count += words.length;
-      }
-      if (count === 0) throw new Error('no word lists found in file');
-      psbList = { name: data.name || data.source || 'Competition word list', levels };
-      savePSBList(psbList);
-      state.wordSource = 'psb';
-      state.psbLevel = psbLevelKeys()[0];
-      saveState();
-      renderWordlistSection();
-      showImportFeedback(`✓ Loaded ${count} words across ${psbLevelKeys().length} levels. Tap a level to start.`);
-    } catch (err) {
+    try { applyImportedList(parseWordlistText(reader.result)); }
+    catch (err) {
       console.error('[spelling-bee] import failed', err);
       showImportFeedback('Could not read that file: ' + err.message, true);
     }
   };
   reader.readAsText(file);
-  e.target.value = '';   // allow re-importing the same filename later
+  e.target.value = '';
+});
+
+// Paste import — no file picker, works on any device.
+document.getElementById('paste-list-btn').addEventListener('click', () => {
+  const box = document.getElementById('paste-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  if (box.style.display === 'block') document.getElementById('paste-area').focus();
+});
+document.getElementById('cancel-paste-btn').addEventListener('click', () => {
+  document.getElementById('paste-box').style.display = 'none';
+  document.getElementById('paste-area').value = '';
+});
+document.getElementById('load-paste-btn').addEventListener('click', () => {
+  try {
+    applyImportedList(parseWordlistText(document.getElementById('paste-area').value));
+    document.getElementById('paste-box').style.display = 'none';
+    document.getElementById('paste-area').value = '';
+  } catch (err) {
+    console.error('[spelling-bee] paste import failed', err);
+    showImportFeedback('Could not read that: ' + err.message, true);
+  }
 });
 
 document.getElementById('use-standard-btn').addEventListener('click', () => {
