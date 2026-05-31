@@ -82,7 +82,21 @@ function addTask(text, label) {
   seen.add(h);
   tasks.push({ hash: h, text, label });
 }
-for (const w of allWords) addTask(`${w}.`, w);
+// Sentences for the "In a sentence" feature live in sentences.txt as
+// "word|sentence". Generate the judge-format clip only for words that have one.
+const sentences = {};
+try {
+  for (const line of readFileSync('sentences.txt', 'utf-8').split('\n')) {
+    const l = line.trim();
+    if (!l || l.startsWith('#')) continue;
+    const i = l.indexOf('|');
+    if (i > 0) sentences[l.slice(0, i).trim()] = l.slice(i + 1).trim();
+  }
+} catch (e) { /* no sentences.txt yet */ }
+
+for (const w of allWords) addTask(`${w}.`, w);                      // every "Say the word" clip first
+for (const w of allWords)                                           // then the "In a sentence" clips
+  if (sentences[w]) addTask(`${w}. ${sentences[w]}. ${w}.`, `${w} (sentence)`);
 addTask("G'day! I'll say words for you to spell.", 'welcome phrase');
 
 await mkdir(OUT_DIR, { recursive: true });
