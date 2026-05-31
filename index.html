@@ -2760,7 +2760,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.4.1';   // + cleaner header: centered title, evenly-spaced nav row
+const APP_VERSION = '2.4.2';   // + leaderboard reset (cumulative + two-strikes scoring)
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -2847,7 +2847,7 @@ if (state.aiVoiceId && !VOICE_OPTIONS.find(v => v.id === state.aiVoiceId)) {
 // One-shot migrations keyed by migrationVersion. Each block applies once per
 // user; after it runs, state.migrationVersion is bumped so the block never
 // triggers again — the user's subsequent choices stick.
-const CURRENT_MIGRATION_VERSION = 3;
+const CURRENT_MIGRATION_VERSION = 4;
 if ((state.migrationVersion || 0) < 2) {
   // v1.3.5: force useAI=false once for everyone to manage Gemini rate-limit usage.
   console.info('[spelling-bee] One-shot v2 migration: forcing useAI=false');
@@ -2862,6 +2862,15 @@ if ((state.migrationVersion || 0) < 3) {
   console.info('[spelling-bee] One-shot v3 migration: forcing useAI=true');
   state.useAI = true;
   state.migrationVersion = 3;
+  saveState();
+}
+if ((state.migrationVersion || 0) < 4) {
+  // v2.4.2: leaderboard reset for the new cumulative + two-strikes scoring.
+  // The shared board was wiped server-side; clear the local cache too so old
+  // (age-based) entries don't merge back in. New games repopulate it fresh.
+  console.info('[spelling-bee] One-shot v4 migration: clearing local leaderboard cache');
+  state.leaderboard = [];
+  state.migrationVersion = 4;
   saveState();
 }
 
