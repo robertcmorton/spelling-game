@@ -955,3 +955,113 @@ wholegrain|We eat wholegrain bread for breakfast.
 wrestling|The two friends had a friendly wrestling match.
 yacht|The white yacht sailed across the bay.
 Yosemite|Yosemite has giant cliffs and waterfalls.
+
+# ===== JUNIOR — Level 5 =====
+abseiling|We went abseiling down the cliff with ropes.
+acronym|"NASA" is an acronym for a much longer name.
+aikido|He learns aikido at the dojo.
+algebra|We solved an algebra problem at school.
+alkali|An alkali is the opposite of an acid.
+allegretto|The piece was played at a lively allegretto.
+alphanumeric|My password is alphanumeric, with letters and numbers.
+ampere|An ampere measures electric current.
+amphibious|A frog is an amphibious animal.
+analgesic|The doctor gave her an analgesic for the pain.
+anecdotal|His proof was only anecdotal, not real evidence.
+anecdote|Grandpa told a funny anecdote about his dog.
+antecedent|A noun is the antecedent of a pronoun.
+arancini|We ate crispy arancini balls for lunch.
+archetype|The wise old wizard is a classic archetype.
+aspersion|Do not cast an aspersion on her honesty.
+autonomous|An autonomous car can drive itself.
+bankruptcy|The shop closed because of bankruptcy.
+barrister|The barrister spoke in the courtroom.
+boisterous|The boisterous puppies played loudly.
+cachet|Winning the prize gave her real cachet.
+camembert|We spread soft camembert on a cracker.
+capricious|The weather here is very capricious.
+carbohydrate|Bread is full of carbohydrate for energy.
+Caribbean|We sailed across the warm Caribbean Sea.
+catapult|We built a small catapult to launch a ball.
+catastrophe|The flood was a terrible catastrophe.
+celestial|The stars are celestial objects.
+cerebral|The brain controls all cerebral activity.
+chromosome|A chromosome carries your genes.
+cinematography|The film's cinematography was stunning.
+commentator|The commentator described the whole match.
+commissioner|The police commissioner gave a speech.
+confectionery|The shop sold sweet confectionery.
+conservatorium|She studies music at the conservatorium.
+conurbation|Many towns joined into one large conurbation.
+crevasse|The climber leapt over the icy crevasse.
+curriculum|Maths is part of the school curriculum.
+cyclamen|A pink cyclamen flowered on the windowsill.
+cynicism|His cynicism made him doubt everyone.
+delicatessen|We bought ham at the delicatessen.
+ebullient|She was ebullient after winning the race.
+egotistical|The egotistical boy bragged all day.
+equilateral|An equilateral triangle has three equal sides.
+euphemism|"Passed away" is a gentle euphemism.
+fictitious|The story is set in a fictitious town.
+focaccia|We dipped focaccia bread in olive oil.
+foible|Forgetting names is his little foible.
+fortuitous|It was fortuitous that we met by chance.
+Galileo|Galileo studied the moons of Jupiter.
+gargoyle|A stone gargoyle perched on the old church.
+geriatric|The geriatric ward cares for older patients.
+gesticulate|He began to gesticulate wildly with his arms.
+gnocchi|We ate soft potato gnocchi for dinner.
+gratuitous|The film had gratuitous loud noises.
+haiku|We wrote a short haiku about autumn.
+inauguration|We watched the leader's inauguration.
+Indonesia|Indonesia is made up of many islands.
+innocuous|The spider looked scary but was innocuous.
+interrogation|The detective began his interrogation.
+irreversible|Cutting the cake is an irreversible step.
+laboratory|The scientist worked in the laboratory.
+linoleum|The kitchen has a shiny linoleum floor.
+liquidambar|The liquidambar tree turns red in autumn.
+manuscript|The author mailed her manuscript to the publisher.
+mathematician|The mathematician solved the tricky problem.
+melodramatic|He gave a melodramatic groan over the spilt milk.
+meringue|We topped the pie with fluffy meringue.
+millimetre|A grain of sand is about a millimetre wide.
+monastery|The monks lived in a quiet monastery.
+mortadella|We had mortadella in our sandwich.
+naturopathy|She studies natural health and naturopathy.
+necessity|Clean water is a necessity for everyone.
+nemesis|The hero finally faced his nemesis.
+Nullarbor|The Nullarbor is a vast, treeless plain.
+orchestra|The orchestra tuned their instruments.
+oxymoron|"Jumbo shrimp" is a funny oxymoron.
+pandemonium|There was pandemonium when the bell rang.
+peripheral|A mouse is a computer peripheral.
+perpendicular|The two walls meet at a perpendicular angle.
+physiotherapy|He had physiotherapy for his sore knee.
+pistachio|I love a scoop of pistachio ice cream.
+portraiture|The artist is famous for her portraiture.
+precipitation|Rain and snow are types of precipitation.
+precocious|The precocious child read at age three.
+preferential|VIP guests got preferential treatment.
+prejudice|We must stand up against prejudice.
+privilege|It is a privilege to meet you.
+prodigious|The young pianist had a prodigious talent.
+psychology|She is interested in the psychology of dreams.
+quadriceps|Cycling builds strong quadriceps muscles.
+seismology|Seismology is the study of earthquakes.
+sirocco|A hot sirocco wind blew in from the desert.
+solitaire|I played a game of solitaire with my cards.
+stalactite|A pointy stalactite hung from the cave roof.
+strenuous|Climbing the steep hill was strenuous work.
+superannuation|Adults save superannuation for when they retire.
+superstitious|My superstitious uncle avoids black cats.
+synonym|"Happy" is a synonym for "glad."
+temperature|The temperature dropped below freezing.
+tortilla|We wrapped the beans in a warm tortilla.
+Vanuatu|Vanuatu is a sunny island nation.
+vaudeville|The old theatre once hosted vaudeville shows.
+warranty|The new phone came with a two-year warranty.
+wildebeest|A herd of wildebeest crossed the plain.
+wrasse|A colourful wrasse swam past the reef.
+Zimbabwe|Zimbabwe is a country in southern Africa.
+zoological|We visited the zoological gardens.
