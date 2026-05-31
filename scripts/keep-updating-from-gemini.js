@@ -41,9 +41,9 @@ if (!GEMINI_KEY) {
 
 // ---------- Config (MUST match the frontend + /api/tts) ----------
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-tts';   // swap back to 3.1 when it's GA
-const VOICE_NAME   = 'Achernar';
+const VOICE_NAME   = 'Leda';
 const LANG_CODE    = 'en-AU';
-const VOICE_ID     = 'gemini_achernar';
+const VOICE_ID     = 'gemini_leda';
 const OUT_DIR      = path.join('public', 'audio');
 
 const PACE_MS              = parseInt(process.env.PACE_MS || '7000', 10);     // ≈8.5 RPM, under 10 RPM

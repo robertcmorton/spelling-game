@@ -17,7 +17,7 @@
 // On 429: backs off 60s and retries the same item.
 //
 // Output:
-//   public/audio/<sha1("gemini_achernar::word.")>.wav   — one per unique word
+//   public/audio/<sha1("gemini_leda::word.")>.wav   — one per unique word
 //   public/audio/index.json                              — hashes that exist on
 //                                                           disk (frontend uses
 //                                                           it to skip 404s)
@@ -48,9 +48,9 @@ if (!GEMINI_KEY) {
 
 // Config — MUST match the frontend (hashTextKey + wordTextFor) and /api/tts.
 const GEMINI_MODEL = 'gemini-2.5-flash-preview-tts';   // swap back to 3.1 when it's GA
-const VOICE_NAME   = 'Achernar';         // Gemini voice
+const VOICE_NAME   = 'Leda';         // Gemini voice
 const LANG_CODE    = 'en-AU';
-const VOICE_ID     = 'gemini_achernar';  // matches state.aiVoiceId in the frontend
+const VOICE_ID     = 'gemini_leda';  // matches state.aiVoiceId in the frontend
 const OUT_DIR      = path.join('public', 'audio');
 
 // Gemini 3.1 Flash TTS Preview limits: 10 RPM, 100 RPD. Pace ~7s (≈8.5 RPM) and

@@ -1,4 +1,4 @@
-// Gemini TTS proxy — speaks a word (or sentence) in Achernar (en-AU, female).
+// Gemini TTS proxy — speaks a word (or sentence) in Leda (en-AU, female).
 //
 // Setup (one-time):
 //   1. Get a free Gemini API key at https://aistudio.google.com (use Chrome
@@ -22,7 +22,7 @@ const RATE_KEY_PREFIX = 'spelling-bee:tts-rate:';
 const RATE_LIMIT      = 60;
 const MAX_TEXT_LEN    = 500;
 const GEMINI_MODEL    = 'gemini-2.5-flash-preview-tts';   // swap back to 3.1 when it's GA
-const DEFAULT_VOICE   = 'Achernar';   // soft, paired with en-AU prompt
+const DEFAULT_VOICE   = 'Leda';   // soft, paired with en-AU prompt
 const DEFAULT_LANG    = 'en-AU';
 
 function getRedis() {

@@ -26,7 +26,7 @@ Enter your name, pick **🐝 Junior** or **🎓 Senior**, and spell.
 
 ## Voice
 
-- **Achernar AI voice (Australian female)** — Google Gemini Flash TTS, fetched
+- **Leda AI voice (Australian female)** — Google Gemini Flash TTS, fetched
   per word and cached in IndexedDB so repeats are free. Audio for the whole
   word list is pre-generated and served as static files (see below), so the
   deployed game costs **$0 ongoing** in Gemini fees.
@@ -52,12 +52,12 @@ by audio only. To change the words, edit the `.txt` files **and** the
 Single-page vanilla-JS game (`index.html`, no build step) plus two Vercel
 serverless functions:
 
-- `api/tts.js` — proxies Gemini Flash TTS (Achernar, en-AU). Used only as a
+- `api/tts.js` — proxies Gemini Flash TTS (Leda, en-AU). Used only as a
   fallback for any word not in the pre-generated static set.
 - `api/leaderboard.js` — shared leaderboard backed by Vercel KV / Upstash
   Redis, keyed by mode (`junior` / `senior`).
 
-Static audio for every word lives at `public/audio/<sha1("gemini_achernar::word.")>.wav`.
+Static audio for every word lives at `public/audio/<sha1("gemini_leda::word.")>.wav`.
 The frontend tries the static file first and only calls `/api/tts` for misses.
 
 ## Deploying

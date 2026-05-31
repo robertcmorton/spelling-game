@@ -598,7 +598,7 @@ select {
     <button class="btn btn-primary" id="test-voice" style="width:100%; margin-top:10px;">🔊 Test voice</button>
     <p class="setting-help" id="ai-feedback" style="margin-top:8px; min-height:1em;"></p>
     <p class="setting-help" style="opacity:0.75; margin-top:4px;">
-      AI voice uses <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini Achernar</a>
+      AI voice uses <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini Leda</a>
       (Australian female). On any AI error the app falls back to your device voice so you always hear a voice.
     </p>
   </section>
@@ -2767,7 +2767,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.1.0';   // + two-strikes game-over (2 wrong in a level ends the game)
+const APP_VERSION = '2.2.0';   // + Leda voice (Gemini en-AU)
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -2779,7 +2779,7 @@ const defaultState = {
   rate: 1.0,
   voiceName: null,
   useAI: true,
-  aiVoiceId: 'gemini_achernar',
+  aiVoiceId: 'gemini_leda',
   migrationVersion: 0,    // bumped by one-shot migrations below
   words: {},
   recentWords: [],       // last N words shown across rounds — used to avoid repeats
@@ -2792,8 +2792,8 @@ const RECENT_WORDS_LIMIT = 30;
 // voices are still used as a fallback if /api/tts returns 503 (no key
 // set up) but they're not user-selectable from the dropdown.
 const VOICE_OPTIONS = [
-  { id: 'gemini_achernar',
-    label: '🇦🇺 Achernar — Australian female (Gemini AI)',
+  { id: 'gemini_leda',
+    label: '🇦🇺 Leda — Australian female (Gemini AI)',
     type: 'gemini' }
 ];
 
@@ -2836,7 +2836,7 @@ function effectiveAIVoice() {
   if (!opt) return null;
   if (opt.type === 'gemini') return opt.id;
   if (opt.type === 'browser') {
-    return findNativeVoice(opt.match) ? null : (opt.fallback || 'gemini_achernar');
+    return findNativeVoice(opt.match) ? null : (opt.fallback || 'gemini_leda');
   }
   return null;
 }
@@ -3258,7 +3258,7 @@ async function speak(text, opts = {}) {
           return;
         }
         // Not installed on this device — fall through to Gemini fallback
-        const note = `No native ${opt.match.nameHints[0]}-style voice on this device — using Gemini Achernar as fallback.`;
+        const note = `No native ${opt.match.nameHints[0]}-style voice on this device — using Gemini Leda as fallback.`;
         const fbEl = document.getElementById('ai-feedback');
         if (fbEl && !fbEl.dataset.warned) {
           showAIFeedback(note, true);
@@ -3969,7 +3969,7 @@ function refreshAIStatus() {
     aiStatusEl.textContent = v ? `On (${v.name})` : 'On (no native AU — using Gemini)';
     aiStatusEl.style.color = '#065f46';
   } else if (opt?.type === 'gemini') {
-    aiStatusEl.textContent = lastTTSError ? 'On (server error)' : 'On (Gemini Achernar)';
+    aiStatusEl.textContent = lastTTSError ? 'On (server error)' : 'On (Gemini Leda)';
     aiStatusEl.style.color = lastTTSError ? '#991b1b' : '#065f46';
   } else {
     aiStatusEl.textContent = 'On';
@@ -4020,7 +4020,7 @@ voiceIdEl.addEventListener('change', async () => {
       ensurePrefetch();
       return;
     }
-    showAIFeedback(`No native "${opt.match.nameHints[0]}" — will use Gemini Achernar instead.`);
+    showAIFeedback(`No native "${opt.match.nameHints[0]}" — will use Gemini Leda instead.`);
   }
 
   // Gemini voice — pre-fetch the test phrase so the next Test voice click
@@ -4045,7 +4045,7 @@ voiceIdEl.addEventListener('change', async () => {
 // Test Voice — dual-mode.
 //   "Use AI voice" OFF → tests the browser voice from the regular "Voice"
 //                        dropdown (state.voiceName), via speechSynthesis.
-//   "Use AI voice" ON  → tests Achernar via Gemini. First click fetches +
+//   "Use AI voice" ON  → tests Leda via Gemini. First click fetches +
 //                        caches; second click plays (fresh user gesture).
 //
 // Importantly, Test no longer auto-toggles useAI on. The button reflects
@@ -4079,7 +4079,7 @@ document.getElementById('test-voice').addEventListener('click', async () => {
     return;
   }
 
-  // --- AI mode (Gemini Achernar) ---
+  // --- AI mode (Gemini Leda) ---
   const opt = findVoiceOption(state.aiVoiceId);
   console.info('[spelling-bee] Test (AI):', state.aiVoiceId, opt);
 
@@ -4112,7 +4112,7 @@ document.getElementById('test-voice').addEventListener('click', async () => {
     audio.addEventListener('loadedmetadata', () => console.info('[spelling-bee] Audio metadata. duration =', audio.duration, 's'));
     audio.addEventListener('ended', () => console.info('[spelling-bee] Audio ended'));
     await audio.play();
-    showAIFeedback(`🔊 Achernar (Gemini AI).`);
+    showAIFeedback(`🔊 Leda (Gemini AI).`);
   } catch (e) {
     console.error('[spelling-bee] Cached play failed:', e);
     if (e.name === 'NotAllowedError') {
