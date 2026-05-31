@@ -709,3 +709,249 @@ vitamin|An orange is full of vitamin C.
 Vivaldi|Vivaldi composed The Four Seasons.
 volcano|The volcano sent ash high into the sky.
 watermelon|We ate juicy watermelon at the picnic.
+
+# ===== JUNIOR — Level 4 =====
+adventurous|My adventurous friend loves to climb tall trees.
+agility|The cat showed great agility as it leapt.
+alteration|The tailor made an alteration to my coat.
+amateur|He is an amateur photographer, not a professional.
+ambulance|The ambulance raced to help the injured man.
+anchovy|A salty anchovy sat on top of the pizza.
+annotate|We annotate the book with helpful notes.
+anticipate|We anticipate a fun day at the fair.
+antonym|The antonym of hot is cold.
+application|She filled in the application to join the club.
+apprehend|The police will apprehend the thief.
+architect|The architect drew plans for the new house.
+arguable|It is arguable whether dogs are smarter than cats.
+artery|An artery carries blood from the heart.
+arthritis|Grandma's arthritis makes her hands sore.
+ascent|The slow ascent up the mountain tired us out.
+askew|The picture on the wall hung askew.
+assertion|She made the bold assertion that she would win.
+associate|I associate the beach with summer holidays.
+attraction|The roller coaster is the main attraction.
+audible|Her whisper was barely audible.
+authentic|This is an authentic old treasure map.
+automobile|The shiny red automobile sped past.
+aviator|The brave aviator flew across the ocean.
+bacteria|Tiny bacteria can make you sick.
+barometer|The barometer shows that rain is coming.
+barrage|The team faced a barrage of questions.
+Belgium|Belgium is famous for its chocolate.
+beneficial|Eating fruit is beneficial for your health.
+besiege|The knights began to besiege the castle.
+biased|The unfair referee seemed biased.
+bilateral|We made a bilateral deal to swap cards.
+bilious|The rocking boat left him feeling bilious.
+billiards|They played a game of billiards.
+biodiverse|A rainforest is a biodiverse place.
+biscotti|We dipped biscotti into our hot chocolate.
+bisector|A bisector cuts the angle in half.
+blackcurrant|I love blackcurrant jam on toast.
+bocce|We rolled the balls in a game of bocce.
+botanical|We strolled through the botanical gardens.
+boysenberry|She picked a sweet boysenberry from the bush.
+breaststroke|He swam the breaststroke across the pool.
+brioche|We had soft brioche for breakfast.
+cafeteria|We ate lunch in the school cafeteria.
+caldera|A lake formed inside the volcano's caldera.
+camellia|A pink camellia bloomed in the garden.
+cartography|Cartography is the art of making maps.
+cartridge|The printer needs a new ink cartridge.
+catalogue|We picked our toys from the catalogue.
+cathedral|The grand cathedral had tall stone towers.
+celery|I crunched a fresh stick of celery.
+Celsius|Water freezes at zero degrees Celsius.
+census|The census counts everyone in the country.
+centaur|A centaur is half human and half horse.
+centenary|The town held a centenary to mark a hundred years.
+ceremony|We watched the medal ceremony.
+challenger|The challenger fought hard for the title.
+character|My favourite book character is funny and brave.
+circumference|We measured the circumference of the circle.
+circumvent|They found a path to circumvent the flood.
+combustion|An engine works by the combustion of fuel.
+compassion|She showed great compassion for the lost dog.
+competent|He is a competent and careful driver.
+conclusion|We finally reached the conclusion of the story.
+congregation|The whole congregation sang together.
+consecutive|We won three consecutive games.
+constrictor|A boa constrictor squeezes its prey.
+continuous|There was a continuous hum from the fan.
+contraption|He built a strange contraption from junk.
+controversy|The new rule caused a lot of controversy.
+convulsive|The cold gave her a convulsive shiver.
+corporation|Dad works for a large corporation.
+corral|The horses were kept in the corral.
+courteous|She gave a courteous nod and smiled.
+critique|The teacher wrote a kind critique of my essay.
+cubicle|He sat at his small office cubicle.
+cuisine|We love spicy Thai cuisine.
+cumbersome|The heavy box was cumbersome to carry.
+curiosity|Her curiosity led her to open the box.
+dandelion|I blew the seeds off a dandelion.
+deceptive|The calm sea was deceptive and dangerous.
+decibel|The siren was loud, at a high decibel.
+decorative|We hung decorative lights on the tree.
+decrepit|Nobody lived in the old, decrepit house.
+delectable|We ate a delectable chocolate cake.
+demonstration|The teacher gave a science demonstration.
+deodorant|He put on deodorant after sport.
+deplorable|The litter on the beach was deplorable.
+dermatology|A dermatology doctor looks after your skin.
+deteriorate|The weather began to deteriorate.
+dexterity|Juggling takes a lot of dexterity.
+dialogue|The two friends had a funny dialogue.
+diameter|We measured the diameter of the wheel.
+digestion|Chewing well helps your digestion.
+diplomacy|She solved the argument with gentle diplomacy.
+discussion|We had a lively discussion in class.
+documentary|We watched a documentary about whales.
+dressage|The horse performed a graceful dressage routine.
+dystopia|The story was set in a gloomy dystopia.
+ecstasy|She jumped with ecstasy when she won.
+edifice|The town hall is a grand old edifice.
+electricity|Lightning is a burst of electricity.
+elegy|The poet wrote a sad elegy.
+embarrass|Tripping over did not embarrass me at all.
+entertainment|The clown was wonderful entertainment.
+evaporate|Puddles evaporate in the hot sun.
+eventual|All our practice led to eventual success.
+exhaustion|After the race she felt total exhaustion.
+experience|Camping was a brand-new experience for me.
+experiment|We did a fun science experiment.
+exposition|The museum had a dinosaur exposition.
+falsetto|The singer hit a high falsetto note.
+fastidious|He is fastidious about keeping his desk tidy.
+ferocity|The storm hit with great ferocity.
+finicky|The finicky cat refused its dinner.
+fissure|A deep fissure opened in the rock.
+flagrant|Pushing into line is a flagrant act of rudeness.
+frequency|We visit Grandma with great frequency.
+frittata|We made a tasty egg frittata.
+generation|My grandparents are from an older generation.
+glossary|Look up the word in the glossary.
+graffiti|Someone sprayed graffiti on the wall.
+guava|I drank sweet guava juice.
+guttural|The dog gave a low, guttural growl.
+heavyweight|The heavyweight boxer was very strong.
+helium|We filled the balloons with helium.
+heroine|The brave heroine saved the whole town.
+hilarious|The clown's joke was absolutely hilarious.
+Hillary|Edmund Hillary was the first to climb Everest.
+Himalayas|The Himalayas are the tallest mountains on Earth.
+horizontal|Draw a horizontal line across the page.
+hurricane|The hurricane brought fierce winds.
+illustration|The book had a colourful illustration.
+immediate|We need an immediate answer.
+imperial|The imperial palace was huge and grand.
+impromptu|We had an impromptu picnic in the park.
+incision|The surgeon made a tiny, careful incision.
+infirmary|The sick student rested in the infirmary.
+innuendo|His joke had a cheeky innuendo.
+instalment|We read the next instalment of the story.
+intermittent|There was intermittent rain all day.
+inundate|Letters began to inundate the post office.
+involuntary|A sneeze is an involuntary action.
+Jamaica|Jamaica is a warm island in the Caribbean.
+jamboree|The scouts gathered for a big jamboree.
+knuckle|He scraped a knuckle on the wall.
+luncheon|We were invited to a fancy luncheon.
+luxuriant|The garden had luxuriant green leaves.
+mackerel|We caught a shiny mackerel from the pier.
+malady|A cold is a common winter malady.
+Malaysia|We ate delicious food in Malaysia.
+malicious|The bully made a malicious comment.
+medication|The doctor gave him some medication.
+memoir|She wrote a memoir about her childhood.
+mercurial|His mood was mercurial and kept changing.
+meteorite|A meteorite crashed into the desert.
+miniature|She has a miniature model of a train.
+monarch|The monarch wore a golden crown.
+monochrome|The old photo was in monochrome.
+monolith|A huge stone monolith stood in the field.
+multicultural|Our school is happy and multicultural.
+musician|The musician played the violin beautifully.
+mythical|A unicorn is a mythical creature.
+niche|The cat found a cosy niche to sleep in.
+nougat|The chewy nougat stuck to my teeth.
+oasis|The travellers found water at the oasis.
+observation|She made a clever observation.
+officious|The officious guard checked every ticket twice.
+ominous|Dark, ominous clouds filled the sky.
+optician|The optician tested my eyes.
+orator|The orator gave a powerful speech.
+oxygen|We need oxygen to breathe.
+Paraguay|Paraguay is a country in South America.
+parallel|The train tracks run parallel to each other.
+perceptible|There was a perceptible chill in the air.
+philosophy|My grandpa loves to talk about philosophy.
+piteous|The lost kitten gave a piteous cry.
+plateau|We hiked across the flat, high plateau.
+playwright|The playwright wrote a funny new play.
+pleasurable|A warm bath is very pleasurable.
+plethora|There was a plethora of cakes at the fair.
+porcupine|A porcupine has sharp, spiky quills.
+precipice|We stood well back from the precipice.
+programming|She is learning computer programming.
+promulgate|The king will promulgate a new law.
+quandary|I was in a quandary about which one to choose.
+quiche|We had a slice of cheese quiche.
+quokka|A friendly quokka hopped along the path.
+recipe|Follow the recipe to bake the bread.
+regimen|He follows a daily exercise regimen.
+rehabilitate|The vet will rehabilitate the injured bird.
+reimburse|The shop will reimburse the cost.
+rejuvenate|A good sleep will rejuvenate you.
+resilient|She is resilient and never gives up.
+retrospective|The gallery held a retrospective of her art.
+rhythm|We clapped along to the rhythm of the drum.
+righteous|He felt righteous anger at the unfairness.
+salamander|A spotted salamander hid under the log.
+sanitary|We keep the kitchen clean and sanitary.
+scaffolding|Workers climbed the scaffolding on the building.
+scenario|We imagined a funny scenario.
+scoundrel|The story's scoundrel stole the gold.
+semibreve|A semibreve is a note worth four beats.
+semifinalist|She was a semifinalist in the spelling bee.
+simile|"As brave as a lion" is a simile.
+souvenir|I bought a small souvenir on holiday.
+Spielberg|Steven Spielberg directs famous films.
+squall|A sudden squall rocked the little boat.
+stegosaurus|The stegosaurus had bony plates along its back.
+stethoscope|The doctor listened with a stethoscope.
+stoppage|There was a short stoppage in the game.
+strategic|We made a strategic plan to win.
+sucrose|Sugar is also called sucrose.
+supervisor|The supervisor checked our work.
+surmount|We will surmount every obstacle.
+sustenance|The hikers carried sustenance for the trip.
+Switzerland|Switzerland has snowy mountains and clear lakes.
+symphony|The orchestra played a grand symphony.
+symptom|A runny nose is a symptom of a cold.
+synthetic|The jacket is made of synthetic fibres.
+tenacious|The tenacious puppy would not let go of the rope.
+territorial|A guard dog can be very territorial.
+tertiary|University is a place for tertiary study.
+theatre|We watched a play at the theatre.
+theorem|We learned a maths theorem today.
+tomfoolery|The teacher put a stop to the classroom tomfoolery.
+tournament|Our team won the chess tournament.
+treasurer|The treasurer looks after the club's money.
+trepidation|She opened the spooky door with trepidation.
+triangulate|Rescuers triangulate the lost hiker's position.
+triceratops|The triceratops had three sharp horns.
+tricycle|The toddler rode a little red tricycle.
+unanimous|The vote to have a party was unanimous.
+unique|Every single snowflake is unique.
+unruffled|The calm captain stayed unruffled in the storm.
+upheaval|Moving house caused a big upheaval.
+vegetarian|My vegetarian friend does not eat meat.
+vegetation|Thick vegetation covered the jungle floor.
+visibility|Thick fog made visibility very poor.
+waratah|The red waratah is a beautiful native flower.
+wholegrain|We eat wholegrain bread for breakfast.
+wrestling|The two friends had a friendly wrestling match.
+yacht|The white yacht sailed across the bay.
+Yosemite|Yosemite has giant cliffs and waterfalls.
