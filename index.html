@@ -3896,6 +3896,11 @@ document.getElementById('back-from-leaderboard').addEventListener('click', () =>
 
 document.getElementById('switch-player-btn').addEventListener('click', () => {
   if (!confirm("Switch player? Scores stay saved in the leaderboard.")) return;
+  // Clear the active player and persist it, so a browser refresh stays on the
+  // welcome screen instead of reloading the previous player's game.
+  state.name = null;
+  state.mode = null;
+  saveState();
   showScreen('welcome');
   document.getElementById('name-input').value = '';
   document.getElementById('name-input').style.borderColor = '';
