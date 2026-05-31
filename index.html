@@ -79,22 +79,15 @@ h1 {
   font-size: 0.95em;
 }
 
-.header-top {
+.app-title { text-align: center; margin: 0 0 12px; }
+.nav-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 14px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-.header-top h1 { margin: 0; }
-.nav-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.nav-btns .btn { padding: 8px 16px; font-size: 0.95em; white-space: nowrap; }
-.tag-row {
-  display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
+.nav-row .btn { padding: 8px 16px; font-size: 0.95em; white-space: nowrap; }
 
 button {
   font-family: inherit;
@@ -472,14 +465,10 @@ select {
 <div id="app">
 
   <header class="card">
-    <div class="header-top">
-      <h1><span class="bee">🐝</span> Spelling Bee</h1>
-      <div class="nav-btns" id="nav-btns">
-        <button class="btn" id="new-game-top-btn">🔄 New Game</button>
-        <button class="btn btn-ghost" id="menu-btn">☰ Menu</button>
-      </div>
-    </div>
-    <div class="tag-row">
+    <h1 class="app-title"><span class="bee">🐝</span> Spelling Bee</h1>
+    <div class="nav-row" id="nav-row">
+      <button class="btn" id="new-game-top-btn">🔄 New Game</button>
+      <button class="btn btn-ghost" id="menu-btn">☰ Menu</button>
       <span class="tag" id="level-tag">Level 1</span>
     </div>
   </header>
@@ -2771,7 +2760,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.4.0';   // + top-bar redesign, Leaderboard back in the menu
+const APP_VERSION = '2.4.1';   // + cleaner header: centered title, evenly-spaced nav row
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -3585,8 +3574,7 @@ function showScreen(name) {
   // No level tag / Menu button on the welcome screen — the Menu must not be a
   // way to skip the welcome gate (which would start an unnamed player in Junior).
   const onWelcome = (name === 'welcome');
-  document.querySelector('.tag-row').style.display = onWelcome ? 'none' : '';
-  document.getElementById('nav-btns').style.display = onWelcome ? 'none' : 'flex';
+  document.getElementById('nav-row').style.display = onWelcome ? 'none' : 'flex';
   const playerPrefix = state.name ? `${state.name} · ` : '';
   document.getElementById('level-tag').textContent =
     `${playerPrefix}${modeLabel()} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
