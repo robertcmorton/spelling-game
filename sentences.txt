@@ -1455,3 +1455,324 @@ wreath|We hung a wreath on the front door.
 yesteryear|Grandma told tales of yesteryear.
 zodiac|There are twelve signs in the zodiac.
 zoology|She studies animals in zoology.
+
+# ===== SENIOR — Level 3 =====
+adversary|The chess master faced a worthy adversary.
+aerobics|We did aerobics to upbeat music.
+aerosol|She sprayed the paint from an aerosol can.
+aisle|We walked down the supermarket aisle.
+allegory|The story is an allegory about kindness.
+allergy|He has an allergy to peanuts.
+allotment|They grow vegetables on their allotment.
+allusion|The poem made an allusion to the sea.
+alternative|We took an alternative route home.
+ambiguous|The blurry sign gave an ambiguous message.
+amputate|The vet had to amputate the dog's hurt leg.
+amulet|She wore a lucky amulet on a chain.
+analysis|The scientist did an analysis of the water.
+Antarctica|Penguins live in icy Antarctica.
+anteroom|We waited in the small anteroom.
+anticipation|We waited with great anticipation.
+apologetic|He gave an apologetic smile.
+apparatus|The lab had all the right apparatus.
+apparel|The shop sells sports apparel.
+apparition|A ghostly apparition glided down the hall.
+applicable|Only one rule is applicable here.
+approximate|Give me an approximate number of guests.
+aquarium|We watched the sharks at the aquarium.
+argumentative|He was in an argumentative mood today.
+armament|The old fortress had heavy armament.
+arthritic|Her arthritic knees ached in the cold.
+artillery|The army fired its artillery.
+ascertain|We tried to ascertain the truth.
+askance|She looked askance at the strange gift.
+assessor|The assessor checked the damaged car.
+association|We joined the local sports association.
+assumption|Do not make an assumption without proof.
+attorney|The attorney spoke in the courtroom.
+attractive|The garden was bright and attractive.
+atypical|Snow in summer is atypical here.
+audacity|He had the audacity to push into line.
+austere|The monk lived an austere life.
+authenticate|Experts will authenticate the old coin.
+avalanche|An avalanche thundered down the mountain.
+aviation|He dreams of a career in aviation.
+ballast|The ship carried ballast to stay steady.
+barbarian|The fierce barbarian charged into battle.
+barnacle|A barnacle clung to the ship's hull.
+barramundi|We grilled a fresh barramundi for dinner.
+beguiling|She gave a beguiling smile.
+benefactor|A kind benefactor paid for the new library.
+bewilderment|He stared in total bewilderment.
+bicentenary|The town held a bicentenary for its 200th year.
+billionaire|The billionaire owned three islands.
+biodegradable|We use biodegradable bags that break down.
+biodiversity|The reef has amazing biodiversity.
+boardercross|She raced in the boardercross event.
+bounteous|The harvest was bounteous this year.
+brasserie|We had lunch at a French brasserie.
+buccaneer|The buccaneer searched for buried treasure.
+burglary|The police investigated the burglary.
+calculus|My older sister studies calculus.
+capability|The new robot has amazing capability.
+cassette|Grandpa still plays his old cassette tapes.
+casualty|There was thankfully only one minor casualty.
+catamaran|We sailed across the bay on a catamaran.
+categorical|She gave a categorical "no".
+caterpillar|A green caterpillar munched the leaf.
+cathartic|A good cry can be cathartic.
+celebration|We held a big birthday celebration.
+ceremonial|The guards wore ceremonial uniforms.
+chemistry|We mixed safe chemicals in chemistry class.
+cinnamon|She sprinkled cinnamon on the toast.
+circumspect|He was circumspect and chose his words carefully.
+classification|The library uses a classification system.
+clemency|The judge showed clemency to the young man.
+cloche|She covered the seedlings with a glass cloche.
+cognition|Puzzles help sharpen your cognition.
+combustible|Keep combustible materials away from fire.
+commentary|We listened to the match commentary.
+commodious|The new house was bright and commodious.
+competence|She showed great competence at the task.
+conceited|The conceited boy bragged about his marks.
+concentric|We drew three concentric circles.
+conclusive|The test gave a conclusive result.
+concurrent|The two events were concurrent.
+concussion|He got a concussion from the fall.
+congenial|We spent a congenial evening with friends.
+consequence|Every action has a consequence.
+consonant|The letter "b" is a consonant.
+conspiracy|The detectives uncovered a secret conspiracy.
+constructive|The teacher gave constructive advice.
+controversial|The new rule was very controversial.
+convulsion|The icy water gave him a convulsion of shivers.
+coronation|The crowd cheered at the king's coronation.
+counterfeit|The shop spotted the counterfeit note.
+couscous|We served the stew over fluffy couscous.
+cranium|The helmet protects your cranium.
+credential|She showed her credential at the door.
+credulous|The credulous boy believed the silly tale.
+croissant|I had a buttery croissant for breakfast.
+croquet|We played croquet on the lawn.
+crotchety|The crotchety old man grumbled all day.
+cumulative|Your cumulative score adds up each round.
+decongestant|The decongestant cleared his blocked nose.
+deference|She spoke with deference to the elders.
+deliberately|He deliberately chose the smaller piece.
+delinquent|The delinquent teen skipped school.
+dermatitis|The harsh soap gave her dermatitis.
+detriment|Too much screen time is a detriment to sleep.
+detritus|The flood left detritus all over the road.
+diffusion|Perfume spreads by diffusion through the air.
+disembodied|A disembodied voice echoed in the cave.
+disposition|She has a cheerful disposition.
+dissipation|The fog slowly faded into dissipation.
+distraught|The lost child looked distraught.
+dolmades|We ate dolmades wrapped in vine leaves.
+effigy|The crowd burned an effigy of the villain.
+electrician|The electrician fixed the broken light.
+elementary|That is an elementary maths problem.
+elliptical|The planet's orbit is elliptical.
+eloquent|She gave an eloquent speech.
+eminence|The scientist rose to great eminence.
+emulsion|Salad dressing is an emulsion of oil and vinegar.
+enigmatic|The wizard gave an enigmatic smile.
+enlightenment|The lesson brought a moment of enlightenment.
+ensemble|The musical ensemble played together.
+entanglement|The kite got into an entanglement of string.
+epicure|The epicure savoured every bite.
+epidermis|The epidermis is the outer layer of skin.
+epilogue|The book ends with a short epilogue.
+equestrian|She is a skilled equestrian rider.
+escalator|We rode the escalator to the top floor.
+esoteric|The book covered esoteric, unusual topics.
+evocative|The old song was wonderfully evocative.
+evolution|We studied the evolution of birds.
+excavation|The excavation uncovered dinosaur bones.
+exemplify|Her kindness exemplifies true friendship.
+expatriate|The expatriate missed her home country.
+expostulate|He began to expostulate about the unfair call.
+extravaganza|The show was a dazzling extravaganza.
+fajita|We wrapped the chicken in a warm fajita.
+fibrous|Celery is a fibrous vegetable.
+forbearance|She showed great forbearance with the noisy class.
+formidable|The champion was a formidable opponent.
+fracas|A small fracas broke out over the ball.
+freighter|A huge freighter carried the cargo.
+frieze|A carved frieze ran along the temple wall.
+frivolity|The party was full of fun and frivolity.
+gateau|We shared a rich chocolate gateau.
+generator|The generator powered the lights in the blackout.
+geyser|A geyser of hot water shot into the air.
+ghoulish|We told ghoulish tales at the campout.
+gladiator|The gladiator fought bravely in the arena.
+gluttonous|The gluttonous goblin ate the whole pie.
+gregarious|She is gregarious and loves a crowd.
+grievance|He aired his grievance to the coach.
+gymnastics|She does cartwheels in gymnastics.
+gyoza|We dipped the gyoza in soy sauce.
+Helsinki|Helsinki is the capital of Finland.
+hepatitis|A vaccine protects against hepatitis.
+herbaceous|The garden had a herbaceous border of plants.
+herbivorous|A cow is a herbivorous animal.
+hessian|We carried the spuds in a hessian sack.
+hilarity|The clown caused great hilarity.
+Honduras|Honduras is a country in Central America.
+hydrogen|Hydrogen is the lightest gas.
+hygienic|We keep the kitchen clean and hygienic.
+hypothesis|The scientist tested her hypothesis.
+idyllic|We had an idyllic day at the lake.
+igneous|Granite is an igneous rock.
+illicit|Smuggling is an illicit activity.
+illustrator|The illustrator drew the book's pictures.
+immeasurable|Her kindness was of immeasurable value.
+immunology|Immunology is the study of the body's defences.
+imperious|The queen gave an imperious wave.
+impertinence|His cheeky impertinence annoyed the teacher.
+incessant|The incessant rain lasted all week.
+incoherent|He was so sleepy his words were incoherent.
+incumbent|The incumbent mayor won again.
+independence|The country celebrated its independence.
+indescribable|The view was an indescribable wonder.
+indigestion|Eating too fast gave me indigestion.
+indolent|The indolent cat slept all afternoon.
+inflammation|The bee sting caused inflammation.
+infrastructure|Roads and bridges are vital infrastructure.
+inhospitable|The icy desert was inhospitable.
+insatiable|He has an insatiable appetite for books.
+instability|The wobbly ladder showed signs of instability.
+instigator|She was the instigator of the surprise party.
+instrumentalist|Each instrumentalist tuned their instrument.
+insurgent|The insurgent forces were turned back.
+intermezzo|The orchestra played a gentle intermezzo.
+intermission|We bought snacks during the intermission.
+intolerable|The heat in the tent was intolerable.
+intravenous|The nurse set up an intravenous drip.
+intuition|Her intuition told her to wait.
+isometrics|He does isometrics to build strength.
+jeopardy|The fumble put the game in jeopardy.
+jettison|The crew had to jettison the heavy cargo.
+journalism|She studies journalism at university.
+Kalahari|Meerkats live in the Kalahari Desert.
+Keneally|Thomas Keneally is a famous author.
+laborious|Digging the trench was laborious work.
+larrikin|The cheeky larrikin loved a good prank.
+literacy|Reading helps build literacy.
+literature|We study classic literature in English.
+lithe|The lithe dancer moved with grace.
+longitude|Lines of longitude run north to south.
+lucrative|Her little business turned out to be lucrative.
+luxuriate|She loves to luxuriate in a warm bath.
+macaw|A bright blue macaw squawked loudly.
+Madagascar|Lemurs live only in Madagascar.
+magician|The magician pulled a rabbit from his hat.
+magnesium|Magnesium burns with a bright white light.
+malaise|A general malaise spread through the tired team.
+malamute|The malamute is a strong sled dog.
+manicure|She treated herself to a manicure.
+maraca|He shook the maraca to the beat.
+marvellous|We had a marvellous time at the fair.
+massif|The climbers explored the mountain massif.
+mechanism|The clock's mechanism ticked steadily.
+meditation|Daily meditation helps her relax.
+memorandum|The boss sent a short memorandum.
+meridian|The sun crosses the meridian at noon.
+metadata|A photo's metadata records when it was taken.
+meteoric|Her rise to fame was meteoric.
+methodology|The study used a careful methodology.
+milliner|The milliner made a fine new hat.
+modicum|He showed not a modicum of patience.
+motif|A floral motif decorated the curtains.
+mountaineering|Mountaineering takes skill and courage.
+moustache|Grandpa twirled his grey moustache.
+multivitamin|She takes a multivitamin each morning.
+Myanmar|Myanmar is a country in Southeast Asia.
+mysterious|A mysterious figure waited in the shadows.
+nefarious|The villain hatched a nefarious plot.
+Netherlands|The Netherlands is famous for its windmills.
+newsagency|We bought a magazine at the newsagency.
+obstetrics|Obstetrics is the care of mothers and babies.
+ocelot|An ocelot is a small, spotted wild cat.
+octogenarian|The lively octogenarian still goes dancing.
+omnivorous|A bear is an omnivorous animal.
+pantomime|We laughed at the funny pantomime.
+parasailing|We went parasailing high above the beach.
+parenthesis|Put the extra note inside a parenthesis.
+petulant|The petulant child stamped his feet.
+photography|She has a real talent for photography.
+phylum|Insects belong to the arthropod phylum.
+pilates|She does pilates to strengthen her core.
+plaintiff|The plaintiff explained her case to the judge.
+porpoise|A porpoise leapt beside the boat.
+precipitous|We climbed the precipitous, steep cliff.
+premiere|We attended the film's premiere.
+procure|They managed to procure fresh supplies.
+prohibitive|The price was prohibitive, so we left it.
+projectile|The catapult launched the projectile.
+promontory|The lighthouse stood on a rocky promontory.
+protagonist|The protagonist is the hero of the story.
+psalm|The choir sang a gentle psalm.
+pulmonary|The lungs do important pulmonary work.
+quarterfinal|Our team reached the quarterfinal.
+quinoa|We had a healthy quinoa salad.
+rationale|She explained the rationale for the plan.
+recital|She played a lovely piano recital.
+recreation|Swimming is my favourite recreation.
+redolent|The kitchen was redolent of fresh bread.
+refurbish|They will refurbish the old playground.
+reiki|She practises gentle reiki healing.
+Rembrandt|Rembrandt painted many famous portraits.
+restoration|The old castle is under restoration.
+revelry|The festival was full of music and revelry.
+samurai|The brave samurai carried two swords.
+sasquatch|Some say a sasquatch roams the forest.
+sassafras|We brewed tea from sassafras bark.
+scapula|The scapula is your shoulder blade.
+scholastic|She won a scholastic award for her essay.
+sedimentary|Sandstone is a sedimentary rock.
+serenity|The quiet lake brought a sense of serenity.
+Shackleton|Shackleton explored the icy Antarctic.
+sierra|The trail wound through the rugged sierra.
+smorgasbord|The party had a smorgasbord of food.
+sociable|My puppy is friendly and sociable.
+sociology|She studies people and sociology.
+soiree|We were invited to an evening soiree.
+spacious|The new classroom is bright and spacious.
+steppe|Wild horses roam the grassy steppe.
+stowaway|A sneaky stowaway hid on the ship.
+strategy|We planned a clever strategy to win.
+stringent|The pool has stringent safety rules.
+stroganoff|We had beef stroganoff for dinner.
+stubborn|The stubborn mule refused to move.
+stupendous|The fireworks were stupendous.
+sturgeon|A sturgeon is a very large fish.
+subterfuge|The spy used clever subterfuge.
+suburbia|They live on a quiet street in suburbia.
+succulent|The peach was sweet and succulent.
+supplement|She takes a vitamin supplement.
+suspicious|The cat gave the new toy a suspicious look.
+sympathetic|She gave a sympathetic nod.
+syndrome|The doctor explained the rare syndrome.
+tantamount|Silence was tantamount to agreement.
+Tanzania|Lions roam the plains of Tanzania.
+taxonomy|Scientists use taxonomy to name living things.
+technique|She practised her swimming technique.
+tetanus|A rusty nail can cause tetanus.
+thermometer|The thermometer showed a high fever.
+tiramisu|We shared a creamy tiramisu.
+toboggan|We zoomed down the snow on a toboggan.
+tranquillity|The garden was a place of tranquillity.
+ultraviolet|Sunscreen blocks harmful ultraviolet rays.
+umami|Mushrooms add a savoury umami flavour.
+unaccountable|For some unaccountable reason, the lights went out.
+unassuming|The hero was quiet and unassuming.
+Uruguay|Uruguay is a small country in South America.
+utterance|Her first utterance was a tiny squeak.
+vacuum|Use the vacuum to clean the rug.
+vagary|We could not predict the weather's vagary.
+vanquish|The knight set out to vanquish the dragon.
+vehicle|A red vehicle pulled into the driveway.
+velodrome|The cyclists raced around the velodrome.
+vengeance|The hero sought no vengeance, only peace.
+vulnerable|The baby bird was small and vulnerable.
+xylophone|She tapped out a tune on the xylophone.
