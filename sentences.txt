@@ -1065,3 +1065,133 @@ wildebeest|A herd of wildebeest crossed the plain.
 wrasse|A colourful wrasse swam past the reef.
 Zimbabwe|Zimbabwe is a country in southern Africa.
 zoological|We visited the zoological gardens.
+
+# ===== SENIOR — Level 1 =====
+abide|I cannot abide rudeness at the dinner table.
+accord|The two leaders signed a peace accord.
+acute|She felt an acute pain in her side.
+alcove|A cosy reading nook was tucked into the alcove.
+alight|The passengers will alight at the next station.
+alpine|Wildflowers carpeted the alpine meadow.
+ambush|The soldiers planned a surprise ambush.
+Andes|The Andes stretch down the west of South America.
+anthem|We stood as the national anthem played.
+Armstrong|Neil Armstrong was the first person on the Moon.
+attack|The knights launched an attack at dawn.
+baboon|The baboon bared its teeth and screeched.
+bisect|A diameter will bisect the circle.
+bleach|Dad used bleach to whiten the old shirt.
+Bradman|Don Bradman was a legendary cricketer.
+breadth|We measured the breadth of the river.
+breakfast|I had cereal and toast for breakfast.
+breath|Take a deep breath before you dive.
+brie|We spread soft brie on a cracker.
+Britain|Big Ben is a famous landmark in Britain.
+bushwalking|We went bushwalking through the national park.
+capsize|A big wave nearly made the canoe capsize.
+captain|The captain steered the ship through the storm.
+cello|She played a low, rich note on the cello.
+chafe|The stiff new boots began to chafe my heels.
+champion|She is the reigning chess champion.
+climate|The desert has a hot, dry climate.
+convict|The jury voted to convict the criminal.
+culture|We learned about the rich culture of Japan.
+cyclone|The cyclone tore the roof off the shed.
+dazzle|The bright stage lights began to dazzle the crowd.
+deafen|The roar of the jet almost deafened us.
+dollop|She added a dollop of cream to the pie.
+earnest|He made an earnest promise to help.
+electron|An electron carries a negative charge.
+energy|A good breakfast gives me lots of energy.
+engine|The mechanic fixed the car's engine.
+engross|A really good book can completely engross me.
+entail|Owning a pet will entail a lot of care.
+exile|The defeated king was sent into exile.
+fanfare|A trumpet fanfare announced the queen.
+farce|The mix-up turned the play into a farce.
+fashion|She has a great sense of fashion.
+femur|The femur is the long bone in your thigh.
+fencing|He won a medal in fencing with his sword.
+finite|We have only a finite amount of time.
+forehand|She hit a powerful forehand across the net.
+forty|There are forty students in the hall.
+fraction|One half is a simple fraction.
+fraud|The fake painting turned out to be a fraud.
+fresco|The artist painted a fresco on the wall.
+frisbee|We tossed the frisbee around the park.
+further|The shop is further down the road.
+futon|Our guest slept on the futon.
+gallop|The horse broke into a fast gallop.
+giant|In the tale, a friendly giant lived on the hill.
+goggles|I wear goggles to keep water out of my eyes.
+grammar|We learned about grammar in English class.
+grandstand|The fans cheered from the packed grandstand.
+grotto|We explored a hidden seaside grotto.
+guess|Can you guess what is in the box?
+guru|People travelled far to learn from the guru.
+handful|She grabbed a handful of grapes.
+haul|It was a heavy haul up the steep hill.
+Hawking|Stephen Hawking studied black holes.
+health|Eating well is good for your health.
+holiday|We are going to the beach for the holiday.
+iceberg|The ship steered around the huge iceberg.
+idol|The young singer is my idol.
+impede|Fallen branches impede the forest path.
+indignant|She was indignant about the unfair rule.
+industry|The car industry employs many workers.
+innings|The batter scored a century in one innings.
+instead|Let's walk instead of driving.
+interval|We had ice cream during the interval.
+issue|We discussed the issue in class.
+jaunty|He wore his hat at a jaunty angle.
+jockey|The jockey rode the horse to victory.
+joist|The builder nailed the floorboards to the joist.
+journey|The long journey took us two days.
+judo|She earned her black belt in judo.
+kennel|The dog slept in its wooden kennel.
+kernel|A single kernel of corn popped in the pan.
+Lebanon|Lebanon is a country on the Mediterranean Sea.
+livestock|The farmer feeds his livestock at dawn.
+lounge|We relaxed on the comfy lounge.
+lumbar|He hurt the lumbar region of his lower back.
+mangrove|Crabs scuttled among the mangrove roots.
+mantra|"Stay calm" is her daily mantra.
+marron|We caught a marron in the freshwater creek.
+methane|Cows produce a gas called methane.
+mirror|She checked her hair in the mirror.
+mushroom|We found a wild mushroom in the forest.
+neither|Neither of the twins likes broccoli.
+notion|He had a clever notion for the project.
+orchard|We picked apples in the orchard.
+ordeal|The long wait at the airport was an ordeal.
+paddock|The horses grazed in the green paddock.
+patrol|The guards patrol the gate at night.
+piece|I ate the very last piece of cake.
+poetry|She wrote a book of beautiful poetry.
+rodeo|Cowboys rode wild horses at the rodeo.
+sailboard|He balanced on the sailboard in the wind.
+salami|We had salami in our sandwiches.
+script|The actors learned their lines from the script.
+simmer|Let the soup simmer gently for an hour.
+stencil|She used a stencil to paint the letters.
+suffix|The suffix "-ful" means "full of".
+swallow|It is hard to swallow a big pill.
+swimsuit|I packed my swimsuit for the pool.
+tempest|The little ship was tossed about in the tempest.
+theme|The party had a pirate theme.
+theory|She has a theory about the missing socks.
+thermos|The hot soup stayed warm in the thermos.
+thief|The thief slipped away into the dark.
+thimble|She wore a thimble to protect her finger.
+tofu|We fried some tofu for dinner.
+tome|The old dictionary is a heavy tome.
+tonic|The cool drink was a real tonic on a hot day.
+unity|The team played with great unity.
+upkeep|The old house needs a lot of upkeep.
+veal|The recipe calls for tender veal.
+velvet|Her dress was made of soft red velvet.
+vibrate|My phone began to vibrate in my pocket.
+video|We watched a funny video about cats.
+virus|A virus can make your computer run slowly.
+voucher|We won a voucher for a free meal.
+Winton|Winton is a small town in outback Queensland.
