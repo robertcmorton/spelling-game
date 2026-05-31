@@ -516,6 +516,7 @@ select {
     <div class="score-big" id="end-score">8 / 10</div>
     <p id="end-message" style="text-align:center; margin-bottom:14px;"></p>
     <button class="btn btn-primary btn-big" id="next-round-btn" style="width:100%;">Play again ▶</button>
+    <button class="btn btn-primary btn-big" id="new-game-btn" style="width:100%; display:none;">🔄 Start a new game</button>
     <button class="btn btn-ghost" id="level-up-btn" style="width:100%; margin-top:8px; display:none;">⬆ Move up to next level</button>
     <button class="btn btn-ghost" id="see-leaderboard-btn" style="width:100%; margin-top:8px;">🏆 Leaderboard</button>
     <button class="btn btn-ghost" id="see-stats-btn" style="width:100%; margin-top:8px;">📊 See my stats</button>
@@ -2766,7 +2767,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.0.0';   // Junior/Senior rebuild
+const APP_VERSION = '2.1.0';   // + two-strikes game-over (2 wrong in a level ends the game)
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -3476,7 +3477,13 @@ function checkAnswer(e) {
 
   renderProgress();
 
+  // Two wrong answers in a single level ends the whole game (no grinding).
+  const wrongSoFar = round.results.filter(r => r === false).length;
   setTimeout(() => {
+    if (!isRight && wrongSoFar >= 2) {
+      gameOver();
+      return;
+    }
     round.index++;
     if (round.index >= round.words.length) {
       finishRound();
@@ -3489,6 +3496,9 @@ function checkAnswer(e) {
 function finishRound() {
   roundActive = false;
   showScreen('end');
+  // Normal end-of-round: offer "Play again", hide the game-over "new game" button.
+  document.getElementById('next-round-btn').style.display = '';
+  document.getElementById('new-game-btn').style.display = 'none';
   const score = round.correct;
   const total = round.words.length;
   document.getElementById('end-score').textContent = `${score} / ${total}`;
@@ -3530,6 +3540,34 @@ function finishRound() {
       saveState();
     }
   }
+}
+
+// Two wrong answers in a single level ends the game — the child must start over.
+function gameOver() {
+  roundActive = false;
+  showScreen('end');
+  const answered = round.index + 1;          // words seen before the 2nd miss
+  const score = round.correct;
+  document.getElementById('end-score').textContent = `${score} / ${answered}`;
+
+  // Log the partial round so the cumulative leaderboard stays honest.
+  if (state.name && state.mode) {
+    submitScore({
+      name: state.name, mode: state.mode,
+      score, total: answered, level: state.level,
+      date: new Date().toISOString()
+    });
+  }
+
+  document.getElementById('celebrate-emoji').textContent = '🐝';
+  document.getElementById('end-title').textContent = 'Game Over';
+  document.getElementById('end-message').textContent =
+    'Two misses in one level ends the game. Start a new game to try again!';
+
+  // A game-over means a brand-new game — no replay, no level-up.
+  document.getElementById('next-round-btn').style.display = 'none';
+  document.getElementById('level-up-btn').style.display = 'none';
+  document.getElementById('new-game-btn').style.display = 'block';
 }
 
 // ============================================================
@@ -3807,6 +3845,10 @@ document.getElementById('level-up-btn').addEventListener('click', () => {
   bumpHighest(state.level);
   saveState();
   startRound();
+});
+document.getElementById('new-game-btn').addEventListener('click', () => {
+  // Game over → start a brand-new game from the welcome gate (name + mode).
+  showScreen('welcome');
 });
 document.getElementById('see-stats-btn').addEventListener('click', () => {
   renderStats();
