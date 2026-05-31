@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #
 # Download the Spelling Bee audio from Google Gemini (Achernar voice, en-AU).
-# Run it and leave it. Gemini 2.5 Flash TTS has no daily cap, so it does the whole
-# set in one sitting — but the preview model is rate-limited to ~10 requests/min,
-# so ~4,200 clips takes several hours. Best run overnight. It commits + pushes each
-# batch as it goes and resumes where it left off if interrupted (Ctrl-C safe).
+# Run it and leave it. Uses Gemini 3.1 Flash TTS (Leda). The preview model is
+# capped at ~10 requests/min AND ~100 requests/day, so it does a daily batch
+# (~95 clips), then sleeps until the quota resets (~next midnight Pacific) and
+# continues. All ~4,200 clips take a few weeks of these daily batches. It commits +
+# pushes each batch and resumes where it left off if interrupted (Ctrl-C safe).
 #
 # It downloads every "Say the word" clip first, then the "In a sentence" clips
 # for words that have a sentence (see sentences.txt).
@@ -27,9 +28,9 @@ fi
 export AUTO_GIT=true
 [ "$1" = "--local" ] && export AUTO_GIT=false
 
-# No daily cap, but ~10 RPM on the preview model — pace at 7s to avoid empty
-# responses / 429s. Big cycles are fine (no per-day limit); each cycle is pushed.
-export MAX_PER_CYCLE=300
+# 3.1 Flash TTS: ~10 RPM and ~100/day. Pace 7s (under 10/min); when the daily cap
+# is hit the daemon sleeps until reset and resumes. MAX_PER_CYCLE chunks commits.
+export MAX_PER_CYCLE=95
 export PACE_MS=7000
 
 echo "Downloading Spelling Bee audio (push each batch: $AUTO_GIT)."

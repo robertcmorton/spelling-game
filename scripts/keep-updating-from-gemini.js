@@ -40,7 +40,7 @@ if (!GEMINI_KEY) {
 }
 
 // ---------- Config (MUST match the frontend + /api/tts) ----------
-const GEMINI_MODEL = 'gemini-2.5-flash-preview-tts';   // swap back to 3.1 when it's GA
+const GEMINI_MODEL = 'gemini-3.1-flash-tts-preview';   // 3.1 preview: best audio quality
 const VOICE_NAME   = 'Leda';
 const LANG_CODE    = 'en-AU';
 const VOICE_ID     = 'gemini_leda';
@@ -249,7 +249,7 @@ while (true) {
   if (todoTasks().length === 0) { console.log('🎉 All audio generated.'); break; }
 
   // Only wait for the daily quota reset if we actually hit a daily cap (429).
-  // Models without a daily cap (e.g. gemini-2.5-flash-preview-tts) keep going.
+  // Models without a daily cap (e.g. gemini-3.1-flash-tts-preview) keep going.
   if (!hitCap) { console.log('Continuing to the next batch…'); continue; }
   const sleepMs = msUntilNextPacificMidnight();
   console.log(`Daily cap reached. Sleeping ${fmtDuration(sleepMs)} until ${new Date(Date.now() + sleepMs).toLocaleString()} (next Pacific midnight + ${PACIFIC_BUFFER_MIN}min).`);
