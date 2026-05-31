@@ -548,6 +548,7 @@ select {
 
   <!-- LEVEL PICKER -->
   <section class="card" id="level-screen">
+    <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-bottom:16px;">⬅ Back to game</button>
     <div class="parent-section" style="margin-top:0; background:#d1fae5; border-color:#065f46;">
       <h2 style="margin-top:0;">👤 Player</h2>
       <div class="stat-row" style="border:none; padding:6px 0;">
@@ -597,8 +598,6 @@ select {
       AI voice uses <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini Achernar</a>
       (Australian female). On any AI error the app falls back to your device voice so the kid never gets silence.
     </p>
-
-    <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-top:16px;">Back to game</button>
   </section>
 
   <footer>Made for Leo 🐝 · <span id="version-stamp"></span></footer>
@@ -1646,6 +1645,9 @@ function showScreen(name) {
     const el = document.getElementById(s + '-screen');
     el.classList.toggle('screen-active', s === name);
   });
+  // No level tag / Menu button on the welcome screen — the Menu must not be a
+  // way to skip the welcome gate (which would start an unnamed player in Junior).
+  document.querySelector('.tag-row').style.display = (name === 'welcome') ? 'none' : '';
   const playerPrefix = state.name ? `${state.name} · ` : '';
   document.getElementById('level-tag').textContent =
     `${playerPrefix}${modeLabel()} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
@@ -1903,6 +1905,7 @@ document.getElementById('play-btn').addEventListener('click', () => {
 document.getElementById('answer-form').addEventListener('submit', checkAnswer);
 
 document.getElementById('menu-btn').addEventListener('click', () => {
+  if (!state.name || !state.mode) return;   // can't open the menu before a player + mode is chosen
   renderLevels();
   document.getElementById('current-player').textContent =
     state.name ? `${state.name} (${modeLabel()})` : modeLabel();
