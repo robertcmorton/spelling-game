@@ -3351,6 +3351,7 @@ const ROUND_LENGTH = 10;
 const LEVEL_UP_THRESHOLD = 9;   // 9/10 = 90% to unlock the next level
 
 let round = { words: [], index: 0, correct: 0, results: [] };
+let roundActive = false;   // true while a round is being played (not yet finished)
 
 function pickRoundWords() {
   let pool = poolForCurrent();
@@ -3390,6 +3391,7 @@ function pickRoundWords() {
 
 function startRound() {
   round = { words: pickRoundWords(), index: 0, correct: 0, results: [] };
+  roundActive = true;
   showScreen('game');
   renderProgress();
   presentWord();
@@ -3484,6 +3486,7 @@ function checkAnswer(e) {
 }
 
 function finishRound() {
+  roundActive = false;
   showScreen('end');
   const score = round.correct;
   const total = round.words.length;
@@ -3768,6 +3771,8 @@ function renderLevels() {
     `;
     btn.onclick = () => {
       if (i > highest) return;
+      // Don't let a round in progress be silently abandoned to dodge a low score.
+      if (roundActive && !confirm("Leave your current round? It won't be added to your score.")) return;
       state.level = i;
       saveState();
       startRound();
