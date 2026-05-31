@@ -381,3 +381,331 @@ wonderful|We had a wonderful day at the beach.
 woodwind|The flute is a woodwind instrument.
 wrist|I wear my watch on my wrist.
 yeast|Bread needs yeast to help it rise.
+
+# ===== JUNIOR — Level 3 =====
+abacus|She counted the beads on the abacus.
+ability|He has the ability to run very fast.
+abolish|The school will abolish the old rule.
+absolute|I have absolute trust in my best friend.
+absolve|The judge will absolve the innocent man.
+abyss|The divers stared into the dark abyss.
+accept|Please accept this gift from me.
+access|We have access to the library after school.
+accomplish|You can accomplish a lot with practice.
+ache|My legs ache after the long walk.
+acre|The farm covers one large acre of land.
+acrobat|The acrobat flipped high in the air.
+activity|My favourite activity is painting.
+address|Write your address on the envelope.
+adept|She is adept at solving puzzles.
+adverse|The hikers faced adverse weather.
+agitated|The lost dog seemed agitated and scared.
+ailment|A cold is a common ailment in winter.
+alibi|He had a good alibi for that night.
+alley|The cat slipped down the narrow alley.
+alphabet|We sang the alphabet song in class.
+altitude|The plane flew at a high altitude.
+ambition|Her ambition is to become a vet.
+animated|The children were animated and excited.
+announce|The teacher will announce the winner.
+antelope|The antelope leapt across the plain.
+antihero|The story's antihero was grumpy but kind.
+antivirus|Dad installed antivirus on the computer.
+apology|She wrote a kind apology note.
+appetite|All that running gave me a big appetite.
+appoint|The team will appoint a new captain.
+arduous|The climb up the hill was arduous.
+arena|The crowd cheered inside the huge arena.
+argument|They had a short argument over the game.
+arrange|Let's arrange the books on the shelf.
+artichoke|We cooked an artichoke for dinner.
+ashen|His face turned ashen with fright.
+assign|The teacher will assign our groups.
+astonish|The clever trick will astonish you.
+astronaut|The astronaut floated in space.
+astute|She made an astute guess.
+atmosphere|The party had a happy atmosphere.
+attempt|This is my first attempt at the puzzle.
+attire|We wore fancy attire to the wedding.
+auburn|She has long auburn hair.
+auditor|The auditor checked all the numbers.
+Austria|We saw snowy mountains in Austria.
+aversion|He has an aversion to spiders.
+axle|The wheel spins around the axle.
+badger|A badger dug a hole near the path.
+ballad|The singer sang a slow ballad.
+ballet|She takes ballet lessons after school.
+bandicoot|A bandicoot snuffled through the garden.
+baton|The runner passed the baton to her teammate.
+beacon|The lighthouse beacon shone across the sea.
+beautiful|The sunset was truly beautiful.
+befuddle|The tricky riddle will befuddle you.
+belated|He sent a belated birthday card.
+benign|The doctor said the lump was benign.
+billabong|Ducks swam in the quiet billabong.
+blustery|It was a cold and blustery day.
+bothersome|The buzzing fly was very bothersome.
+bounty|The farmers shared a bounty of fruit.
+Brahms|Brahms wrote beautiful music.
+breathe|Take a moment to breathe slowly.
+buffalo|A herd of buffalo crossed the river.
+buoy|A red buoy bobbed on the waves.
+cabana|We changed into our swimmers in the cabana.
+Cairo|Cairo is the capital city of Egypt.
+callus|A hard callus formed on his hand.
+cameo|The actor made a quick cameo in the film.
+canopy|Monkeys swung through the forest canopy.
+carriage|The horse pulled the old carriage.
+casserole|Mum made a warm chicken casserole.
+casual|We wore casual clothes to the picnic.
+caution|Cross the road with great caution.
+ceiling|We painted the ceiling white.
+celebrate|We celebrate my birthday in June.
+cereal|I eat cereal for breakfast.
+certainty|I know the answer with certainty.
+certificate|She won a certificate for reading.
+chaos|The classroom was in chaos before lunch.
+charades|We played charades at the party.
+chariot|The Roman chariot raced around the track.
+chlorine|The pool smelled of chlorine.
+chocolate|He shared his chocolate with a friend.
+chopsticks|I ate the noodles with chopsticks.
+chortle|The funny joke made her chortle.
+cockatoo|A white cockatoo screeched in the tree.
+cocoon|The caterpillar spun a silky cocoon.
+coincide|The party will coincide with the holiday.
+colleague|Dad met a colleague for lunch.
+comparable|The two bikes are comparable in price.
+compelling|The book told a compelling story.
+competitor|She is a strong competitor in the race.
+complaint|He made a complaint about the cold soup.
+composure|She kept her composure during the test.
+compulsive|He is a compulsive list-maker.
+concept|The teacher explained the concept clearly.
+condemn|We all condemn cheating.
+congeal|The gravy began to congeal as it cooled.
+continent|Africa is a very large continent.
+coriander|Mum sprinkled coriander on the curry.
+crockery|We washed the crockery after dinner.
+Curie|Marie Curie was a famous scientist.
+current|The river's current was very strong.
+curtail|We had to curtail our trip due to rain.
+cycling|We go cycling along the river path.
+Daintree|The Daintree is an ancient rainforest.
+decimal|A decimal point goes between the numbers.
+decipher|Can you decipher this secret code?
+delicious|The cake was absolutely delicious.
+deluge|A sudden deluge soaked the whole town.
+destitute|The charity helps destitute families.
+dilemma|She faced a tricky dilemma.
+diligent|He is a diligent and careful worker.
+divisible|Ten is divisible by two.
+docile|The old pony is gentle and docile.
+drought|The long drought dried up the dam.
+economical|A small car is more economical.
+Einstein|Einstein was a brilliant scientist.
+emporium|The toy emporium had everything.
+Europe|We visited three countries in Europe.
+exercise|Daily exercise keeps you healthy.
+faculty|The whole faculty met in the staffroom.
+festival|We danced at the music festival.
+feud|The two families ended their long feud.
+floe|A seal rested on the ice floe.
+forfeit|If you cheat, you forfeit the game.
+forgery|The painting turned out to be a forgery.
+formula|The scientist mixed a secret formula.
+fortify|They will fortify the sandcastle walls.
+frolic|The lambs frolic in the green field.
+gaiety|The party was full of music and gaiety.
+galaxy|Our galaxy has billions of stars.
+gaudy|The clown wore a gaudy, bright costume.
+genial|Our neighbour is a genial old man.
+genre|My favourite book genre is adventure.
+geology|We study rocks in geology class.
+glacier|The huge glacier moved very slowly.
+gourmet|The chef cooked a gourmet meal.
+hammock|I swung gently in the hammock.
+handicraft|She sold her handicraft at the market.
+harmonica|He played a tune on his harmonica.
+hertz|Sound is measured in hertz.
+hopscotch|We drew a hopscotch grid with chalk.
+horizon|The sun dipped below the horizon.
+ignorant|It is rude to be ignorant of others.
+impediment|The fallen tree was an impediment on the path.
+incongruous|A snowman looked incongruous on the beach.
+infectious|Her laugh is wonderfully infectious.
+infinite|The night sky seemed infinite.
+influenza|He stayed home with influenza.
+ingredient|Sugar is the main ingredient in the cake.
+innocent|The puppy gave an innocent look.
+insincere|His apology sounded insincere.
+insipid|The soup was watery and insipid.
+integrity|She is a person of great integrity.
+intercept|The player ran to intercept the ball.
+intrigue|The mystery was full of intrigue.
+isle|We sailed to a tiny isle.
+italics|The important word is written in italics.
+jaguar|A jaguar prowled through the jungle.
+jasmine|The jasmine flowers smelled sweet.
+jocular|Grandpa is always in a jocular mood.
+journal|I write in my journal every night.
+Kakadu|We saw crocodiles in Kakadu.
+karate|She earned a yellow belt in karate.
+kitchen|We baked cookies in the kitchen.
+knight|The brave knight rode his horse.
+knoll|We had our picnic on a grassy knoll.
+lamington|We ate a chocolate lamington for dessert.
+language|French is a beautiful language.
+languish|The plant began to languish without water.
+lattice|Roses climbed up the wooden lattice.
+lectern|The speaker stood at the lectern.
+legume|A pea is a kind of legume.
+levitate|The magician seemed to levitate the ball.
+liberal|She gave a liberal helping of ice cream.
+lightning|Lightning flashed across the sky.
+loathsome|The slimy swamp had a loathsome smell.
+loch|A monster is said to live in the loch.
+logical|That is a very logical answer.
+lorikeet|A rainbow lorikeet sipped the nectar.
+luggage|We packed our luggage for the trip.
+lycra|The dancers wore stretchy lycra suits.
+lyrics|I know all the lyrics to that song.
+magazine|I read a comic magazine on the bus.
+magistrate|The magistrate listened to the case.
+mannerism|Tapping his foot is a funny mannerism.
+margarine|She spread margarine on the toast.
+maritime|The maritime museum had old ships.
+maximum|The maximum speed here is slow.
+meagre|The bird had only a meagre meal.
+meditate|We meditate quietly for five minutes.
+medley|The choir sang a medley of songs.
+melody|The flute played a sweet melody.
+merciless|The hot sun was merciless.
+merriment|The party was full of merriment.
+Mexico|We ate tacos in Mexico.
+microscope|We looked at the bug under a microscope.
+minim|A minim is a note worth two beats.
+mischief|The kitten was up to mischief.
+mobility|A wheelchair gives him more mobility.
+monsoon|The monsoon brought heavy rain.
+mosquito|A mosquito bit my arm.
+museum|We saw dinosaur bones at the museum.
+naughty|The naughty puppy chewed my shoe.
+negligent|It was negligent to leave the gate open.
+negotiate|We tried to negotiate a fair swap.
+Nepal|Mount Everest is in Nepal.
+nocturnal|Owls are nocturnal birds.
+noticeable|There was a noticeable hole in his sock.
+notional|We made a notional plan for the trip.
+nucleus|The nucleus is the centre of a cell.
+oblivion|The old song faded into oblivion.
+obsolete|The old phone is now obsolete.
+occupant|The only occupant of the room was a cat.
+octave|She sang the notes an octave higher.
+ogre|The friendly ogre lived in the swamp.
+operator|The crane operator was very careful.
+ordinary|It was just an ordinary Tuesday.
+ostrich|An ostrich cannot fly, but it runs fast.
+ozone|The ozone layer protects us from the sun.
+pagoda|We visited a tall, ancient pagoda.
+pancreas|The pancreas helps you digest food.
+pandemic|People stayed home during the pandemic.
+paradise|The sunny beach was like paradise.
+parasite|A tick is a tiny parasite.
+pathetic|The wet kitten gave a pathetic meow.
+patience|It takes patience to learn the guitar.
+penguin|A penguin waddled across the ice.
+persuade|I tried to persuade Dad to buy ice cream.
+pertinent|She asked a pertinent question.
+perturbed|He looked perturbed by the strange noise.
+petition|We signed a petition to save the park.
+photograph|I took a photograph of the rainbow.
+pianist|The pianist played a lovely tune.
+pilgrim|The pilgrim walked many miles.
+platoon|A platoon of soldiers marched past.
+plausible|That sounds like a plausible excuse.
+podiatry|A podiatry clinic looks after feet.
+poison|Some berries can be poison.
+political|The leaders gave political speeches.
+pollinate|Bees pollinate the flowers.
+polyester|The jacket is made of polyester.
+polygon|A triangle is a simple polygon.
+pompous|The pompous man bragged all night.
+porridge|I had warm porridge for breakfast.
+precede|A flash of lightning will precede the thunder.
+premature|It is premature to celebrate just yet.
+premier|We met the premier of our state.
+presume|I presume you have done your homework.
+probable|Rain is probable this afternoon.
+problematic|A flat tyre is problematic on a trip.
+promotion|Dad got a promotion at work.
+propagate|We will propagate the plant from a cutting.
+proportion|Mix the paint in the right proportion.
+protocol|We followed the safety protocol.
+prototype|The inventor built a prototype robot.
+provision|We packed a provision of snacks.
+proximity|The shop's proximity to home is handy.
+pungent|The cheese had a pungent smell.
+punnet|We picked a punnet of strawberries.
+pursuit|The dog ran in pursuit of the ball.
+quadrant|We studied one quadrant of the map.
+quadruple|The recipe will quadruple the dough.
+quaff|The thirsty knight began to quaff his drink.
+qualified|She is a qualified swimming teacher.
+quell|The teacher tried to quell the noise.
+quibble|Let's not quibble over small things.
+quill|The writer dipped the quill in ink.
+rainforest|Frogs croaked in the rainforest.
+rampant|Weeds grew rampant in the garden.
+ramshackle|They fixed up the ramshackle old shed.
+ratio|Mix the juice in a ratio of one to three.
+receive|I hope to receive a letter soon.
+reconcile|The friends were happy to reconcile.
+recuperate|He needs to recuperate after the flu.
+reference|She used a book as a reference.
+regatta|We watched the boats at the regatta.
+rehearse|We rehearse the play every week.
+reindeer|A reindeer pulled the sleigh.
+replica|He built a replica of the old ship.
+research|We did research for our project.
+resonate|The bell's sound began to resonate.
+responsible|She is responsible for feeding the fish.
+reunion|We had a big family reunion.
+rhombus|A rhombus has four equal sides.
+rummage|I had to rummage through the box.
+salmon|We had grilled salmon for dinner.
+satire|The cartoon was a clever satire.
+scorpion|A scorpion hid under the rock.
+semester|We start a new semester next week.
+serenade|He sang a serenade beneath her window.
+serial|We watched the next episode of the serial.
+shroud|A shroud of fog covered the hills.
+signature|Please add your signature here.
+simulcast|The game was a simulcast on TV and radio.
+skateboard|He rode his skateboard to the park.
+skeleton|We saw a dinosaur skeleton at the museum.
+sluggish|I feel sluggish on a hot day.
+snorkel|We used a snorkel to watch the fish.
+soccer|We play soccer on Saturdays.
+specimen|The scientist studied a leaf specimen.
+squawk|The parrot let out a loud squawk.
+squelch|My boots squelch in the mud.
+squirrel|A squirrel buried a nut.
+sumptuous|We ate a sumptuous feast.
+sympathy|She felt sympathy for the lost dog.
+tangent|The line touches the circle at a tangent.
+tangible|A coin is a tangible object.
+tedious|The long wait was very tedious.
+texture|The rock had a rough texture.
+tragedy|The play ended in a sad tragedy.
+tranquil|The lake was calm and tranquil.
+trilogy|I read all three books in the trilogy.
+tuition|She gives piano tuition after school.
+uninspired|His drawing looked dull and uninspired.
+universe|The universe is full of galaxies.
+vanilla|I love a scoop of vanilla ice cream.
+vegetable|A carrot is my favourite vegetable.
+vitamin|An orange is full of vitamin C.
+Vivaldi|Vivaldi composed The Four Seasons.
+volcano|The volcano sent ash high into the sky.
+watermelon|We ate juicy watermelon at the picnic.
