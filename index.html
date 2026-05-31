@@ -264,22 +264,6 @@ button {
 #game-screen, #end-screen, #stats-screen, #level-screen, #welcome-screen, #leaderboard-screen { display: none; }
 .screen-active { display: block !important; }
 
-.welcome-age-input {
-  font-size: 3em;
-  padding: 12px;
-  text-align: center;
-  width: 140px;
-  display: block;
-  margin: 0 auto 20px;
-  border: 4px solid #78350f;
-  border-radius: 18px;
-  background: #fffbeb;
-  color: #78350f;
-  font-family: inherit;
-  font-weight: bold;
-  outline: none;
-  -moz-appearance: textfield;
-}
 .welcome-name-input {
   font-size: 1.6em;
   padding: 10px 14px;
@@ -296,9 +280,6 @@ button {
   font-weight: bold;
   outline: none;
 }
-.welcome-age-input::-webkit-outer-spin-button,
-.welcome-age-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-
 .setting-input {
   font-family: inherit;
   font-size: 0.95em;
@@ -499,14 +480,9 @@ select {
            maxlength="20"
            autocomplete="off"
            autocapitalize="words">
-    <p style="text-align:center; margin-bottom:8px;">How old are you?</p>
-    <input id="age-input"
-           class="welcome-age-input"
-           type="number"
-           min="7" max="16"
-           value="7"
-           inputmode="numeric">
-    <button class="btn btn-primary btn-big" id="start-from-welcome" style="width:100%;">Let's go! 🐝</button>
+    <p style="text-align:center; margin:14px 0 10px;">Pick your spelling bee:</p>
+    <button class="btn btn-primary btn-big" id="start-junior" style="width:100%; margin-bottom:10px;">🐝 Junior Spelling Bee</button>
+    <button class="btn btn-big" id="start-senior" style="width:100%; background:#f59e0b; color:white; border-color:#92400e; box-shadow:0 4px 0 #92400e;">🎓 Senior Spelling Bee</button>
   </section>
 
   <!-- GAME SCREEN -->
@@ -515,11 +491,6 @@ select {
     <div class="progress" id="progress"></div>
 
     <button class="btn-huge" id="play-btn">🔊 Say the word</button>
-
-    <div class="btn-row">
-      <button class="btn btn-ghost" id="slower-btn">🐢 Slower</button>
-      <button class="btn btn-ghost" id="sentence-btn">💬 In a sentence</button>
-    </div>
 
     <form id="answer-form" autocomplete="off">
       <input id="answer"
@@ -570,13 +541,14 @@ select {
   <!-- LEADERBOARD SCREEN -->
   <section class="card" id="leaderboard-screen">
     <h2>🏆 Leaderboard</h2>
-    <p class="setting-help" style="margin-bottom:10px;">Best scores per age group on this device.</p>
+    <p class="setting-help" style="margin-bottom:10px;">Best scores per bee — Junior and Senior.</p>
     <div id="leaderboard-content"></div>
     <button class="btn btn-primary" id="back-from-leaderboard" style="width:100%; margin-top:16px;">Back to game</button>
   </section>
 
   <!-- LEVEL PICKER -->
   <section class="card" id="level-screen">
+    <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-bottom:16px;">⬅ Back to game</button>
     <div class="parent-section" style="margin-top:0; background:#d1fae5; border-color:#065f46;">
       <h2 style="margin-top:0;">👤 Player</h2>
       <div class="stat-row" style="border:none; padding:6px 0;">
@@ -586,47 +558,11 @@ select {
       <button class="btn btn-primary" id="open-leaderboard-btn" style="width:100%; margin-top:8px;">🏆 Leaderboard</button>
     </div>
 
-    <!-- Competition word list (e.g. NSW Spelling Bee) — appears when imported -->
-    <div class="parent-section" id="wordlist-section" style="margin-top:0; background:#fde68a; border-color:#78350f;">
-      <h2 style="margin-top:0;">📋 Word list</h2>
-      <div class="stat-row" style="border:none; padding:6px 0;">
-        <span id="active-list-label"><strong>Standard</strong> (by age)</span>
-        <span style="display:flex; gap:6px;">
-          <button class="btn btn-ghost" id="paste-list-btn" style="padding:6px 12px; font-size:0.85em;">Paste list</button>
-          <button class="btn btn-ghost" id="import-list-btn" style="padding:6px 12px; font-size:0.85em;">Import file</button>
-        </span>
-      </div>
-      <input type="file" id="import-file" accept="application/json,.json,text/plain" style="display:none;">
-
-      <!-- Paste-to-load: no file picker needed, works on any device -->
-      <div id="paste-box" style="display:none; margin:6px 0;">
-        <p class="setting-help" style="margin:4px 0;">Paste the word list below. Accepts the JSON file's contents, OR plain text with <code>Level 2</code> / <code>Level 3</code> … headings and words separated by spaces, commas or new lines.</p>
-        <textarea id="paste-area" rows="6" style="width:100%; font-family:inherit; font-size:0.9em; padding:8px; border:3px solid #78350f; border-radius:10px; background:#fffbeb; color:#78350f; resize:vertical;" placeholder="Paste here…"></textarea>
-        <div style="display:flex; gap:6px; margin-top:6px;">
-          <button class="btn btn-primary" id="load-paste-btn" style="flex:1; font-size:0.9em;">Load words</button>
-          <button class="btn btn-ghost" id="cancel-paste-btn" style="font-size:0.9em;">Cancel</button>
-        </div>
-      </div>
-
-      <div id="psb-levels" style="display:none;">
-        <p class="setting-help" style="margin:6px 0;">🐝 Tap a competition level:</p>
-        <div class="level-grid" id="psb-level-grid"></div>
-        <button class="btn btn-ghost" id="use-standard-btn" style="width:100%; margin-top:8px; font-size:0.85em;">↩ Switch back to standard (by age)</button>
-        <button class="btn btn-ghost" id="remove-list-btn" style="width:100%; margin-top:6px; font-size:0.8em; background:#fee2e2;">🗑 Remove imported list</button>
-      </div>
-      <p class="setting-help" id="import-feedback" style="margin-top:6px; min-height:1em;"></p>
-    </div>
-
     <h2>🎚 Choose a level</h2>
-    <p style="margin-bottom:8px;">Levels unlock as you get 8 out of 10 right.</p>
+    <p style="margin-bottom:8px;">Levels unlock as you get 9 out of 10 right.</p>
     <div class="level-grid" id="level-grid"></div>
 
     <h2 style="margin-top:14px;">⚙ Settings</h2>
-    <div class="stat-row">
-      <span>Age</span>
-      <input id="age-setting" type="number" min="7" max="16"
-             style="width:80px; font-family:inherit; font-size:1em; padding:6px 10px; border:3px solid #78350f; border-radius:12px; background:white; color:#78350f; font-weight:bold; text-align:center;">
-    </div>
     <div class="stat-row">
       <span>Speed</span>
       <select id="rate-select">
@@ -662,8 +598,6 @@ select {
       AI voice uses <a href="https://aistudio.google.com" target="_blank" rel="noopener">Gemini Achernar</a>
       (Australian female). On any AI error the app falls back to your device voice so the kid never gets silence.
     </p>
-
-    <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-top:16px;">Back to game</button>
   </section>
 
   <footer>Made for Leo 🐝 · <span id="version-stamp"></span></footer>
@@ -673,859 +607,276 @@ select {
 // ============================================================
 // WORD LISTS — by level
 // ============================================================
-// Generic difficulty labels — every age now plays all 10 levels.
-// Level 1 = easiest words for that age, Level 10 = stretch words.
-const LEVEL_NAMES = [
-  "Warm up", "Easy", "Comfortable", "Steady", "Standard",
-  "Tricky", "Challenging", "Hard", "Expert", "Master"
-];
+// Five difficulty levels, shared by both modes.
+const LEVEL_NAMES = ["Warm-up", "Easy", "Steady", "Tricky", "Champion"];
 
-// Master word pool, keyed by absolute spelling age (5-17).
-// Sources: Schonell graded word spelling test, Australian curriculum word lists
-// (Years 2–11), Dolch sight words, Scripps spelling bee material.
-//
-// The pool for a given (playerAge, level) is computed by taking words whose
-// spelling age sits in a band around (playerAge - 2 + level * 6/9). This means
-// the same word naturally appears as a "hard" word for a younger player and an
-// "easy" word for an older one — exactly the overlap requested.
-const MASTER_WORDS = {
-  5: [
-    { word: "cat",  sentence: "The cat sat on the mat." },
-    { word: "hat",  sentence: "I wear a hat to school." },
-    { word: "mat",  sentence: "Wipe your feet on the mat." },
-    { word: "bat",  sentence: "The bat flew at night." },
-    { word: "sat",  sentence: "We sat together at lunch." },
-    { word: "mad",  sentence: "Don't get mad at me." },
-    { word: "sad",  sentence: "She looked a little sad." },
-    { word: "dad",  sentence: "My dad makes great pancakes." },
-    { word: "bed",  sentence: "Time to go to bed." },
-    { word: "red",  sentence: "Apples can be red." },
-    { word: "fed",  sentence: "I fed the dog." },
-    { word: "leg",  sentence: "I hurt my leg." },
-    { word: "big",  sentence: "It is a very big tree." },
-    { word: "dig",  sentence: "Dig a deep hole." },
-    { word: "pig",  sentence: "The pig went oink." },
-    { word: "dog",  sentence: "My dog is friendly." },
-    { word: "log",  sentence: "Sit on the log." },
-    { word: "hop",  sentence: "Frogs hop high." },
-    { word: "top",  sentence: "Spin the top fast." },
-    { word: "mop",  sentence: "Mop the kitchen floor." },
-    { word: "cup",  sentence: "Drink from your cup." },
-    { word: "sun",  sentence: "The sun is shining." },
-    { word: "fun",  sentence: "We had so much fun." },
-    { word: "run",  sentence: "I can run very fast." },
-    { word: "nut",  sentence: "Crack open the nut." },
-    { word: "ten",  sentence: "I can count to ten." },
-    { word: "pen",  sentence: "Write with a blue pen." }
+// Two fixed modes, five levels each. Word-only lists (no example sentences),
+// from the NSW Premier Spelling Bee.
+//   Junior = junior list levels 1-5.
+//   Senior = senior list levels 2-6, renumbered to 1-5 so both modes show Level 1-5.
+const WORD_LISTS = {
+  junior: [
+    [   // Level 1 (122 words)
+      "antler", "bang", "barn", "basket", "black", "broad", "cabin", "chess", "chin", "creek",
+      "damper", "dance", "data", "dawn", "dine", "fair", "fate", "fleet", "fork", "France",
+      "front", "goat", "golf", "holy", "inlet", "jelly", "left", "lemon", "letter", "lime",
+      "mail", "marble", "match", "meat", "mince", "mint", "monster", "mood", "netball", "Norway",
+      "orbit", "pain", "paint", "part", "party", "path", "Peru", "plate", "plot", "point",
+      "power", "prove", "puck", "race", "rare", "rash", "real", "reap", "record", "royal",
+      "ruler", "salad", "sale", "scale", "scar", "setting", "shake", "sharp", "sheep", "shine",
+      "shoe", "since", "skill", "skim", "sky", "smile", "snore", "snow", "soil", "solo",
+      "song", "space", "spider", "spine", "spoon", "stage", "stamp", "start", "steel", "storm",
+      "story", "strum", "sumo", "swag", "tact", "tail", "talent", "team", "throw", "thunder",
+      "tide", "title", "tone", "total", "tower", "track", "trust", "unit", "vase", "vine",
+      "volt", "wait", "wash", "weak", "wild", "wire", "wok", "worm", "yelp", "yoga",
+      "young", "zest"
+    ],
+    [   // Level 2 (253 words)
+      "absent", "afford", "afraid", "ahead", "aide", "aircraft", "Aldrin", "alien", "allow", "already",
+      "amaze", "another", "appeal", "approval", "apricot", "argue", "arrow", "Asia", "astound", "astray",
+      "atoll", "author", "awful", "backstroke", "balance", "bamboo", "barren", "baseball", "bashful", "beneath",
+      "bilby", "billycart", "bombard", "Brazil", "brolga", "burrow", "bushfire", "cadet", "canal", "canoe",
+      "canyon", "cardboard", "casting", "cavern", "cherry", "clef", "coda", "compass", "concave", "cosmos",
+      "cosplay", "cotton", "coupon", "creative", "curfew", "custom", "database", "deduce", "delta", "depth",
+      "describe", "desert", "downscale", "dual", "duchess", "elude", "emerald", "engulf", "enjoy", "famine",
+      "ferret", "firebreak", "fireworks", "flour", "fluent", "fourteen", "frantic", "fruit", "funnel", "furtive",
+      "galley", "garbage", "garment", "gradient", "Greece", "growth", "harness", "heyday", "highlight", "history",
+      "hobby", "human", "India", "inferno", "intersect", "island", "janitor", "kettle", "kiln", "kneel",
+      "landfill", "landscape", "landslide", "Lawson", "leech", "leeway", "lethal", "limestone", "litre", "loyal",
+      "magma", "mammal", "mania", "marine", "massive", "measure", "miso", "missile", "moat", "motion",
+      "movement", "mulga", "myth", "nature", "navigate", "Newton", "nickname", "nostril", "nuzzle", "oblong",
+      "onion", "opera", "password", "peevish", "pepper", "pickle", "picnic", "picture", "pillow", "planet",
+      "pontoon", "practical", "promise", "prompt", "propel", "puppet", "quickly", "quirk", "quiver", "raincoat",
+      "ramen", "refresh", "relief", "require", "rissole", "ritual", "rudder", "rugby", "saga", "sailor",
+      "Samoa", "Saturn", "scandal", "scarlet", "scene", "semitone", "sermon", "serum", "service", "skiff",
+      "slather", "sleet", "sneeze", "sonar", "source", "sprint", "squirt", "stadium", "stanza", "statue",
+      "stifling", "stork", "strange", "style", "sublime", "sugar", "suggest", "sullen", "survey", "suture",
+      "Sweden", "swimming", "tadpole", "talon", "tangle", "tango", "tangy", "tantrum", "tardy", "tempo",
+      "tendon", "tennis", "tepid", "terminal", "thicket", "thirsty", "thought", "thousand", "tiara", "Tonga",
+      "topic", "torment", "translate", "trapdoor", "travel", "trek", "trinket", "trite", "tundra", "underdog",
+      "unite", "unseemly", "untidy", "upset", "useless", "vacate", "vampire", "Venus", "vessel", "victor",
+      "villa", "viola", "virtue", "vital", "voice", "volume", "wardrobe", "weapon", "wetsuit", "whale",
+      "wheel", "whine", "width", "wily", "windmill", "windpipe", "windsurf", "wingspan", "wishful", "wonderful",
+      "woodwind", "wrist", "yeast"
+    ],
+    [   // Level 3 (326 words)
+      "abacus", "ability", "abolish", "absolute", "absolve", "abyss", "accept", "access", "accomplish", "ache",
+      "acre", "acrobat", "activity", "address", "adept", "adverse", "agitated", "ailment", "alibi", "alley",
+      "alphabet", "altitude", "ambition", "animated", "announce", "antelope", "antihero", "antivirus", "apology", "appetite",
+      "appoint", "arduous", "arena", "argument", "arrange", "artichoke", "ashen", "assign", "astonish", "astronaut",
+      "astute", "atmosphere", "attempt", "attire", "auburn", "auditor", "Austria", "aversion", "axle", "badger",
+      "ballad", "ballet", "bandicoot", "baton", "beacon", "beautiful", "befuddle", "belated", "benign", "billabong",
+      "blustery", "bothersome", "bounty", "Brahms", "breathe", "buffalo", "buoy", "cabana", "Cairo", "callus",
+      "cameo", "canopy", "carriage", "casserole", "casual", "caution", "ceiling", "celebrate", "cereal", "certainty",
+      "certificate", "chaos", "charades", "chariot", "chlorine", "chocolate", "chopsticks", "chortle", "cockatoo", "cocoon",
+      "coincide", "colleague", "comparable", "compelling", "competitor", "complaint", "composure", "compulsive", "concept", "condemn",
+      "congeal", "continent", "coriander", "crockery", "Curie", "current", "curtail", "cycling", "Daintree", "decimal",
+      "decipher", "delicious", "deluge", "destitute", "dilemma", "diligent", "divisible", "docile", "drought", "economical",
+      "Einstein", "emporium", "Europe", "exercise", "faculty", "festival", "feud", "floe", "forfeit", "forgery",
+      "formula", "fortify", "frolic", "gaiety", "galaxy", "gaudy", "genial", "genre", "geology", "glacier",
+      "gourmet", "hammock", "handicraft", "harmonica", "hertz", "hopscotch", "horizon", "ignorant", "impediment", "incongruous",
+      "infectious", "infinite", "influenza", "ingredient", "innocent", "insincere", "insipid", "integrity", "intercept", "intrigue",
+      "isle", "italics", "jaguar", "jasmine", "jocular", "journal", "Kakadu", "karate", "kitchen", "knight",
+      "knoll", "lamington", "language", "languish", "lattice", "lectern", "legume", "levitate", "liberal", "lightning",
+      "loathsome", "loch", "logical", "lorikeet", "luggage", "lycra", "lyrics", "magazine", "magistrate", "mannerism",
+      "margarine", "maritime", "maximum", "meagre", "meditate", "medley", "melody", "merciless", "merriment", "Mexico",
+      "microscope", "minim", "mischief", "mobility", "monsoon", "mosquito", "museum", "naughty", "negligent", "negotiate",
+      "Nepal", "nocturnal", "noticeable", "notional", "nucleus", "oblivion", "obsolete", "occupant", "octave", "ogre",
+      "operator", "ordinary", "ostrich", "ozone", "pagoda", "pancreas", "pandemic", "paradise", "parasite", "pathetic",
+      "patience", "penguin", "persuade", "pertinent", "perturbed", "petition", "photograph", "pianist", "pilgrim", "platoon",
+      "plausible", "podiatry", "poison", "political", "pollinate", "polyester", "polygon", "pompous", "porridge", "precede",
+      "premature", "premier", "presume", "probable", "problematic", "promotion", "propagate", "proportion", "protocol", "prototype",
+      "provision", "proximity", "pungent", "punnet", "pursuit", "quadrant", "quadruple", "quaff", "qualified", "quell",
+      "quibble", "quill", "rainforest", "rampant", "ramshackle", "ratio", "receive", "reconcile", "recuperate", "reference",
+      "regatta", "rehearse", "reindeer", "replica", "research", "resonate", "responsible", "reunion", "rhombus", "rummage",
+      "salmon", "satire", "scorpion", "semester", "serenade", "serial", "shroud", "signature", "simulcast", "skateboard",
+      "skeleton", "sluggish", "snorkel", "soccer", "specimen", "squawk", "squelch", "squirrel", "sumptuous", "sympathy",
+      "tangent", "tangible", "tedious", "texture", "tragedy", "tranquil", "trilogy", "tuition", "uninspired", "universe",
+      "vanilla", "vegetable", "vitamin", "Vivaldi", "volcano", "watermelon"
+    ],
+    [   // Level 4 (244 words)
+      "adventurous", "agility", "alteration", "amateur", "ambulance", "anchovy", "annotate", "anticipate", "antonym", "application",
+      "apprehend", "architect", "arguable", "artery", "arthritis", "ascent", "askew", "assertion", "associate", "attraction",
+      "audible", "authentic", "automobile", "aviator", "bacteria", "barometer", "barrage", "Belgium", "beneficial", "besiege",
+      "biased", "bilateral", "bilious", "billiards", "biodiverse", "biscotti", "bisector", "blackcurrant", "bocce", "botanical",
+      "boysenberry", "breaststroke", "brioche", "cafeteria", "caldera", "camellia", "cartography", "cartridge", "catalogue", "cathedral",
+      "celery", "Celsius", "census", "centaur", "centenary", "ceremony", "challenger", "character", "circumference", "circumvent",
+      "combustion", "compassion", "competent", "conclusion", "congregation", "consecutive", "constrictor", "continuous", "contraption", "controversy",
+      "convulsive", "corporation", "corral", "courteous", "critique", "cubicle", "cuisine", "cumbersome", "curiosity", "dandelion",
+      "deceptive", "decibel", "decorative", "decrepit", "delectable", "demonstration", "deodorant", "deplorable", "dermatology", "deteriorate",
+      "dexterity", "dialogue", "diameter", "digestion", "diplomacy", "discussion", "documentary", "dressage", "dystopia", "ecstasy",
+      "edifice", "electricity", "elegy", "embarrass", "entertainment", "evaporate", "eventual", "exhaustion", "experience", "experiment",
+      "exposition", "falsetto", "fastidious", "ferocity", "finicky", "fissure", "flagrant", "frequency", "frittata", "generation",
+      "glossary", "graffiti", "guava", "guttural", "heavyweight", "helium", "heroine", "hilarious", "Hillary", "Himalayas",
+      "horizontal", "hurricane", "illustration", "immediate", "imperial", "impromptu", "incision", "infirmary", "innuendo", "instalment",
+      "intermittent", "inundate", "involuntary", "Jamaica", "jamboree", "knuckle", "luncheon", "luxuriant", "mackerel", "malady",
+      "Malaysia", "malicious", "medication", "memoir", "mercurial", "meteorite", "miniature", "monarch", "monochrome", "monolith",
+      "multicultural", "musician", "mythical", "niche", "nougat", "oasis", "observation", "officious", "ominous", "optician",
+      "orator", "oxygen", "Paraguay", "parallel", "perceptible", "philosophy", "piteous", "plateau", "playwright", "pleasurable",
+      "plethora", "porcupine", "precipice", "programming", "promulgate", "quandary", "quiche", "quokka", "recipe", "regimen",
+      "rehabilitate", "reimburse", "rejuvenate", "resilient", "retrospective", "rhythm", "righteous", "salamander", "sanitary", "scaffolding",
+      "scenario", "scoundrel", "semibreve", "semifinalist", "simile", "souvenir", "Spielberg", "squall", "stegosaurus", "stethoscope",
+      "stoppage", "strategic", "sucrose", "supervisor", "surmount", "sustenance", "Switzerland", "symphony", "symptom", "synthetic",
+      "tenacious", "territorial", "tertiary", "theatre", "theorem", "tomfoolery", "tournament", "treasurer", "trepidation", "triangulate",
+      "triceratops", "tricycle", "unanimous", "unique", "unruffled", "upheaval", "vegetarian", "vegetation", "visibility", "waratah",
+      "wholegrain", "wrestling", "yacht", "Yosemite"
+    ],
+    [   // Level 5 (108 words)
+      "abseiling", "acronym", "aikido", "algebra", "alkali", "allegretto", "alphanumeric", "ampere", "amphibious", "analgesic",
+      "anecdotal", "anecdote", "antecedent", "arancini", "archetype", "aspersion", "autonomous", "bankruptcy", "barrister", "boisterous",
+      "cachet", "camembert", "capricious", "carbohydrate", "Caribbean", "catapult", "catastrophe", "celestial", "cerebral", "chromosome",
+      "cinematography", "commentator", "commissioner", "confectionery", "conservatorium", "conurbation", "crevasse", "curriculum", "cyclamen", "cynicism",
+      "delicatessen", "ebullient", "egotistical", "equilateral", "euphemism", "fictitious", "focaccia", "foible", "fortuitous", "Galileo",
+      "gargoyle", "geriatric", "gesticulate", "gnocchi", "gratuitous", "haiku", "inauguration", "Indonesia", "innocuous", "interrogation",
+      "irreversible", "laboratory", "linoleum", "liquidambar", "manuscript", "mathematician", "melodramatic", "meringue", "millimetre", "monastery",
+      "mortadella", "naturopathy", "necessity", "nemesis", "Nullarbor", "orchestra", "oxymoron", "pandemonium", "peripheral", "perpendicular",
+      "physiotherapy", "pistachio", "portraiture", "precipitation", "precocious", "preferential", "prejudice", "privilege", "prodigious", "psychology",
+      "quadriceps", "seismology", "sirocco", "solitaire", "stalactite", "strenuous", "superannuation", "superstitious", "synonym", "temperature",
+      "tortilla", "Vanuatu", "vaudeville", "warranty", "wildebeest", "wrasse", "Zimbabwe", "zoological"
+    ]
   ],
-  6: [
-    { word: "jump",  sentence: "Frogs jump high in the pond." },
-    { word: "ship",  sentence: "The ship sails on the sea." },
-    { word: "fish",  sentence: "The fish swims fast." },
-    { word: "plant", sentence: "Water the plant every day." },
-    { word: "swim",  sentence: "I can swim well." },
-    { word: "milk",  sentence: "Pour the milk in my cup." },
-    { word: "sand",  sentence: "I build castles in the sand." },
-    { word: "park",  sentence: "We play at the park." },
-    { word: "that",  sentence: "That is my book." },
-    { word: "with",  sentence: "Come with me." },
-    { word: "when",  sentence: "When is dinner?" },
-    { word: "what",  sentence: "What is your name?" },
-    { word: "said",  sentence: "She said hello to me." },
-    { word: "were",  sentence: "We were happy." },
-    { word: "they",  sentence: "They are my friends." },
-    { word: "look",  sentence: "Look at the rainbow." },
-    { word: "make",  sentence: "Let's make a cake." },
-    { word: "came",  sentence: "Mum came home early." },
-    { word: "like",  sentence: "I like ice cream." },
-    { word: "time",  sentence: "What time is it?" },
-    { word: "home",  sentence: "I am going home now." },
-    { word: "play",  sentence: "Let's play in the park." },
-    { word: "read",  sentence: "I can read a book." },
-    { word: "tree",  sentence: "Climb the tall tree." },
-    { word: "blue",  sentence: "The sky is blue today." },
-    { word: "cake",  sentence: "It is my birthday cake." },
-    { word: "fast",  sentence: "He can run very fast." },
-    { word: "cold",  sentence: "Ice is very cold." },
-    { word: "find",  sentence: "Find the hidden toy." },
-    { word: "good",  sentence: "Have a good day." },
-    { word: "then",  sentence: "First we eat, then we play." },
-    { word: "this",  sentence: "This is my pencil." },
-    { word: "chip",  sentence: "Pass me one chip." },
-    { word: "shop",  sentence: "We went to the shop." },
-    { word: "hand",  sentence: "Wash your hand first." }
-  ],
-  7: [
-    { word: "smile",   sentence: "She has a big smile." },
-    { word: "paint",   sentence: "I paint a picture." },
-    { word: "sleep",   sentence: "It is time to sleep." },
-    { word: "dream",   sentence: "I had a happy dream." },
-    { word: "happy",   sentence: "I feel very happy." },
-    { word: "rabbit",  sentence: "The rabbit hopped away." },
-    { word: "garden",  sentence: "Flowers grow in the garden." },
-    { word: "pretty",  sentence: "What a pretty flower." },
-    { word: "hello",   sentence: "Say hello to your friend." },
-    { word: "lemon",   sentence: "A lemon tastes sour." },
-    { word: "light",   sentence: "Turn on the light." },
-    { word: "night",   sentence: "Stars shine at night." },
-    { word: "right",   sentence: "You are right about it." },
-    { word: "found",   sentence: "I found my missing book." },
-    { word: "sound",   sentence: "What is that sound?" },
-    { word: "around",  sentence: "Look around the room." },
-    { word: "brown",   sentence: "The bear has brown fur." },
-    { word: "sister",  sentence: "My sister is kind." },
-    { word: "water",   sentence: "Please pour the water." },
-    { word: "after",   sentence: "After dinner we play." },
-    { word: "before",  sentence: "Brush your teeth before bed." },
-    { word: "again",   sentence: "Please try again." },
-    { word: "every",   sentence: "I read every day." },
-    { word: "white",   sentence: "Snow is white." },
-    { word: "about",   sentence: "Tell me about your day." },
-    { word: "kitten",  sentence: "The kitten chased the yarn." },
-    { word: "monkey",  sentence: "The monkey climbed the tree." },
-    { word: "dragon",  sentence: "The dragon breathes fire." },
-    { word: "summer",  sentence: "We swim in summer." },
-    { word: "winter",  sentence: "It snows in winter." },
-    { word: "story",   sentence: "Read me a story." },
-    { word: "queen",   sentence: "The queen wore a crown." },
-    { word: "party",   sentence: "We had a birthday party." },
-    { word: "answer",  sentence: "Give me your answer." },
-    { word: "quickly", sentence: "Run quickly to the door." }
-  ],
-  8: [
-    { word: "friend",    sentence: "My best friend is funny." },
-    { word: "school",    sentence: "I walk to school." },
-    { word: "because",   sentence: "I am tired because I ran far." },
-    { word: "family",    sentence: "I love my family." },
-    { word: "people",    sentence: "Many people came to the show." },
-    { word: "would",     sentence: "I would like a snack." },
-    { word: "could",     sentence: "Could you help me?" },
-    { word: "should",    sentence: "We should be kind." },
-    { word: "where",     sentence: "Where is my bag?" },
-    { word: "there",     sentence: "Put it over there." },
-    { word: "their",     sentence: "That is their house." },
-    { word: "between",   sentence: "Sit between us." },
-    { word: "morning",   sentence: "Good morning, sunshine." },
-    { word: "thought",   sentence: "I thought about it carefully." },
-    { word: "through",   sentence: "Walk through the door." },
-    { word: "enough",    sentence: "I have had enough." },
-    { word: "myself",    sentence: "I did it all by myself." },
-    { word: "surprise",  sentence: "What a lovely surprise." },
-    { word: "beautiful", sentence: "What a beautiful day." },
-    { word: "favourite", sentence: "Blue is my favourite colour." },
-    { word: "jumping",   sentence: "The dog kept jumping up." },
-    { word: "walked",    sentence: "We walked home together." },
-    { word: "climbed",   sentence: "She climbed the steep hill." },
-    { word: "careful",   sentence: "Be careful with the glass." },
-    { word: "kindness",  sentence: "Show kindness to everyone." },
-    { word: "sleeping",  sentence: "The baby is sleeping." },
-    { word: "exciting",  sentence: "What an exciting day!" },
-    { word: "painted",   sentence: "She painted the wall blue." },
-    { word: "listened",  sentence: "I listened carefully." },
-    { word: "another",   sentence: "Can I have another one?" },
-    { word: "wonderful", sentence: "A wonderful surprise." },
-    { word: "learning",  sentence: "She is learning to swim." },
-    { word: "honest",    sentence: "Be honest with me." },
-    { word: "island",    sentence: "We visited a tropical island." },
-    { word: "famous",    sentence: "He is a famous singer." }
-  ],
-  9: [
-    { word: "knife",       sentence: "Cut the bread with a knife." },
-    { word: "knight",      sentence: "A brave knight rode the horse." },
-    { word: "knock",       sentence: "Knock on the door first." },
-    { word: "lamb",        sentence: "A baby sheep is called a lamb." },
-    { word: "climb",       sentence: "I love to climb trees." },
-    { word: "ghost",       sentence: "The ghost story scared me." },
-    { word: "weight",      sentence: "Check the weight of the bag." },
-    { word: "eight",       sentence: "I am eight years old." },
-    { word: "height",      sentence: "Measure my height please." },
-    { word: "neighbour",   sentence: "Our neighbour is friendly." },
-    { word: "write",       sentence: "Write your name on the page." },
-    { word: "wrong",       sentence: "That answer is wrong." },
-    { word: "listen",      sentence: "Please listen carefully." },
-    { word: "often",       sentence: "I often visit my grandma." },
-    { word: "autumn",      sentence: "Leaves fall in autumn." },
-    { word: "ancient",     sentence: "An ancient castle stood there." },
-    { word: "science",     sentence: "Science is my favourite subject." },
-    { word: "naturally",   sentence: "Hair grows naturally." },
-    { word: "especially",  sentence: "I love fruit, especially mangoes." },
-    { word: "separate",    sentence: "Separate the colours please." },
-    { word: "calendar",    sentence: "Check the calendar for the date." },
-    { word: "library",     sentence: "Borrow books from the library." },
-    { word: "ordinary",    sentence: "It was an ordinary day." },
-    { word: "particular",  sentence: "I like this particular one." },
-    { word: "popular",     sentence: "That song is popular." },
-    { word: "regular",     sentence: "We meet on a regular basis." },
-    { word: "similar",     sentence: "These shapes are similar." },
-    { word: "several",     sentence: "Several friends came over." },
-    { word: "suddenly",    sentence: "It started to rain suddenly." },
-    { word: "definitely",  sentence: "I will definitely come." },
-    { word: "muscle",      sentence: "Flex your strong muscle." },
-    { word: "honest",      sentence: "Be honest about it." },
-    { word: "doubt",       sentence: "I have no doubt." },
-    { word: "rough",       sentence: "The road was rough." },
-    { word: "cough",       sentence: "He had a bad cough." }
-  ],
-  10: [
-    { word: "necessary",   sentence: "It is necessary to study." },
-    { word: "opposite",    sentence: "North is the opposite of south." },
-    { word: "occasion",    sentence: "A very special occasion." },
-    { word: "embarrass",   sentence: "Please don't embarrass me." },
-    { word: "address",     sentence: "Write your address here." },
-    { word: "balance",     sentence: "Keep your balance on the beam." },
-    { word: "recipe",      sentence: "Follow the recipe step by step." },
-    { word: "generous",    sentence: "She is a generous person." },
-    { word: "accident",    sentence: "It was just an accident." },
-    { word: "character",   sentence: "He has a kind character." },
-    { word: "recommend",   sentence: "I recommend this book." },
-    { word: "important",   sentence: "An important meeting today." },
-    { word: "government",  sentence: "The government made a new rule." },
-    { word: "environment", sentence: "We must protect the environment." },
-    { word: "equipment",   sentence: "Take all the sports equipment." },
-    { word: "opinion",     sentence: "Everyone has an opinion." },
-    { word: "sentence",    sentence: "Write a complete sentence." },
-    { word: "computer",    sentence: "Use the computer to type." },
-    { word: "document",    sentence: "Sign the document please." },
-    { word: "language",    sentence: "She speaks three languages." },
-    { word: "knowledge",   sentence: "Share your knowledge with others." },
-    { word: "courage",     sentence: "She showed great courage." },
-    { word: "century",     sentence: "We live in the 21st century." },
-    { word: "dictionary",  sentence: "Look it up in the dictionary." },
-    { word: "mystery",     sentence: "Solve the mystery together." },
-    { word: "treasure",    sentence: "Pirates buried treasure here." },
-    { word: "available",   sentence: "Tickets are still available." },
-    { word: "business",    sentence: "She runs her own business." },
-    { word: "decision",    sentence: "Make a wise decision." },
-    { word: "exercise",    sentence: "Daily exercise is healthy." },
-    { word: "medicine",    sentence: "Take your medicine." },
-    { word: "signature",   sentence: "Add your signature." },
-    { word: "challenge",   sentence: "Accept the challenge." },
-    { word: "promise",     sentence: "I promise to help." },
-    { word: "attention",   sentence: "Pay close attention." }
-  ],
-  11: [
-    { word: "parliament",   sentence: "Parliament passed the new law." },
-    { word: "vegetable",    sentence: "Eat your vegetables." },
-    { word: "conscience",   sentence: "Listen to your conscience." },
-    { word: "sincerely",    sentence: "I sincerely apologise." },
-    { word: "foreign",      sentence: "She visits a foreign country." },
-    { word: "restaurant",   sentence: "We ate at a new restaurant." },
-    { word: "ambulance",    sentence: "The ambulance arrived quickly." },
-    { word: "audience",     sentence: "The audience clapped loudly." },
-    { word: "schedule",     sentence: "Check the schedule today." },
-    { word: "scissors",     sentence: "Use the scissors carefully." },
-    { word: "vehicle",      sentence: "A red vehicle drove past." },
-    { word: "ceremony",     sentence: "The opening ceremony was grand." },
-    { word: "certificate",  sentence: "She received a certificate." },
-    { word: "conference",   sentence: "The conference starts at nine." },
-    { word: "continue",     sentence: "Please continue reading." },
-    { word: "criticise",    sentence: "Don't criticise unfairly." },
-    { word: "curiosity",    sentence: "Her curiosity led her on." },
-    { word: "descend",      sentence: "Descend the stairs slowly." },
-    { word: "develop",      sentence: "Develop your skills." },
-    { word: "disappear",    sentence: "The clouds will disappear." },
-    { word: "disappoint",   sentence: "I won't disappoint you." },
-    { word: "discipline",   sentence: "Self discipline matters." },
-    { word: "drought",      sentence: "A long drought hit the farm." },
-    { word: "enthusiastic", sentence: "She is enthusiastic about art." },
-    { word: "equipped",     sentence: "We are well equipped." },
-    { word: "exhibit",      sentence: "A new exhibit opens today." },
-    { word: "existence",    sentence: "Question its existence." },
-    { word: "familiar",     sentence: "A familiar face appeared." },
-    { word: "guarantee",    sentence: "I guarantee it will work." },
-    { word: "immediately",  sentence: "Come here immediately." },
-    { word: "obvious",      sentence: "It was obvious." },
-    { word: "genuine",      sentence: "A genuine smile." },
-    { word: "cousin",       sentence: "My older cousin visits." },
-    { word: "piece",        sentence: "A piece of cake." },
-    { word: "fierce",       sentence: "A fierce dragon roared." }
-  ],
-  12: [
-    { word: "rhythm",        sentence: "Feel the rhythm of the music." },
-    { word: "weird",         sentence: "What a weird coincidence." },
-    { word: "mischievous",   sentence: "A mischievous grin spread." },
-    { word: "embarrassed",   sentence: "She felt embarrassed." },
-    { word: "exaggerate",    sentence: "Don't exaggerate the story." },
-    { word: "accommodate",   sentence: "We can accommodate you." },
-    { word: "accomplish",    sentence: "Accomplish your goals." },
-    { word: "achievement",   sentence: "What a great achievement." },
-    { word: "acquaintance",  sentence: "He is an old acquaintance." },
-    { word: "advantage",     sentence: "Take the advantage." },
-    { word: "allegiance",    sentence: "Pledge your allegiance." },
-    { word: "amateur",       sentence: "She is an amateur photographer." },
-    { word: "analyse",       sentence: "Analyse the results carefully." },
-    { word: "apparent",      sentence: "The answer was apparent." },
-    { word: "appearance",    sentence: "He made a brief appearance." },
-    { word: "appreciate",    sentence: "I appreciate your help." },
-    { word: "argument",      sentence: "Avoid a pointless argument." },
-    { word: "assistance",    sentence: "Do you need assistance?" },
-    { word: "atmosphere",    sentence: "A friendly atmosphere filled the room." },
-    { word: "attendance",    sentence: "Daily attendance is required." },
-    { word: "autobiography", sentence: "Read her autobiography." },
-    { word: "behaviour",     sentence: "Excellent behaviour today." },
-    { word: "beneath",       sentence: "It was hidden beneath the rug." },
-    { word: "bicycle",       sentence: "I ride my bicycle to school." },
-    { word: "bouquet",       sentence: "He gave her a bouquet." },
-    { word: "brilliant",     sentence: "What a brilliant idea." },
-    { word: "broccoli",      sentence: "I love steamed broccoli." },
-    { word: "cathedral",     sentence: "The cathedral is ancient." },
-    { word: "cemetery",      sentence: "We visited the cemetery." },
-    { word: "believe",       sentence: "I believe in you." },
-    { word: "receive",       sentence: "She will receive the gift." },
-    { word: "seize",         sentence: "Seize the day." },
-    { word: "ceiling",       sentence: "Paint the ceiling white." },
-    { word: "shield",        sentence: "Hold up your shield." }
-  ],
-  13: [
-    { word: "hierarchy",      sentence: "A strict hierarchy ruled the army." },
-    { word: "miscellaneous",  sentence: "A box of miscellaneous items." },
-    { word: "conscientious",  sentence: "She is a conscientious worker." },
-    { word: "perseverance",   sentence: "Perseverance leads to success." },
-    { word: "prejudice",      sentence: "We must reject prejudice." },
-    { word: "simultaneously", sentence: "It all happened simultaneously." },
-    { word: "supersede",      sentence: "New rules supersede the old." },
-    { word: "liaison",        sentence: "He acts as a liaison." },
-    { word: "leisure",        sentence: "Enjoy your leisure time." },
-    { word: "mortgage",       sentence: "They paid off the mortgage." },
-    { word: "mysterious",     sentence: "A mysterious figure waited." },
-    { word: "niece",          sentence: "My niece is turning seven." },
-    { word: "occurred",       sentence: "What occurred yesterday?" },
-    { word: "occurrence",     sentence: "It is a rare occurrence." },
-    { word: "omitted",        sentence: "He omitted one detail." },
-    { word: "opportunity",    sentence: "A golden opportunity arose." },
-    { word: "parallel",       sentence: "Draw two parallel lines." },
-    { word: "paralyse",       sentence: "Fear can paralyse a person." },
-    { word: "pastime",        sentence: "Reading is my favourite pastime." },
-    { word: "perceive",       sentence: "How do you perceive this?" },
-    { word: "persistent",     sentence: "The persistent rain continued." },
-    { word: "persuade",       sentence: "I tried to persuade him." },
-    { word: "phenomenon",     sentence: "It is a natural phenomenon." },
-    { word: "philosophy",     sentence: "She studies philosophy." },
-    { word: "physician",      sentence: "Ask your physician." },
-    { word: "picturesque",    sentence: "A picturesque village." },
-    { word: "possession",     sentence: "A prized possession." },
-    { word: "privilege",      sentence: "It is a great privilege." },
-    { word: "pronunciation",  sentence: "Practice your pronunciation." },
-    { word: "questionnaire",  sentence: "Fill out the questionnaire." },
-    { word: "millionaire",    sentence: "He became a millionaire." },
-    { word: "fluorescent",    sentence: "Fluorescent lights buzzed." },
-    { word: "forfeit",        sentence: "They had to forfeit the match." },
-    { word: "exhilarating",   sentence: "An exhilarating ride." }
-  ],
-  14: [
-    { word: "bureaucracy",   sentence: "Government bureaucracy is slow." },
-    { word: "entrepreneur",  sentence: "She is a young entrepreneur." },
-    { word: "surveillance",  sentence: "Under constant surveillance." },
-    { word: "paraphernalia", sentence: "He brought all his paraphernalia." },
-    { word: "idiosyncrasy",  sentence: "An interesting idiosyncrasy." },
-    { word: "onomatopoeia",  sentence: "Buzz is an example of onomatopoeia." },
-    { word: "magnanimous",   sentence: "A magnanimous gesture." },
-    { word: "ostentatious",  sentence: "An ostentatious display of wealth." },
-    { word: "ubiquitous",    sentence: "Phones are now ubiquitous." },
-    { word: "perspicacious", sentence: "A perspicacious observation." },
-    { word: "gregarious",    sentence: "He is naturally gregarious." },
-    { word: "surreptitious", sentence: "A surreptitious glance." },
-    { word: "paraphrase",    sentence: "Paraphrase the long sentence." },
-    { word: "perpendicular", sentence: "Two perpendicular lines meet." },
-    { word: "pharmaceutical",sentence: "Pharmaceutical research is costly." },
-    { word: "presumptuous",  sentence: "It seems presumptuous to ask." },
-    { word: "pseudonym",     sentence: "She writes under a pseudonym." },
-    { word: "psychiatrist",  sentence: "He visits a psychiatrist." },
-    { word: "psychology",    sentence: "She studies psychology." },
-    { word: "reconnaissance",sentence: "A reconnaissance mission was planned." },
-    { word: "reminiscence",  sentence: "Fond reminiscences of childhood." },
-    { word: "rendezvous",    sentence: "Meet at the agreed rendezvous." },
-    { word: "reservoir",     sentence: "The reservoir is nearly full." },
-    { word: "restaurateur",  sentence: "A celebrated restaurateur." },
-    { word: "rhetorical",    sentence: "It was a rhetorical question." },
-    { word: "silhouette",    sentence: "Her silhouette appeared in the doorway." },
-    { word: "sophisticated", sentence: "A sophisticated solution." },
-    { word: "synonymous",    sentence: "Their names are synonymous with talent." },
-    { word: "tournament",    sentence: "She won the tournament." },
-    { word: "vacuum",        sentence: "Use the vacuum to clean the rug." },
-    { word: "paradigm",      sentence: "A new paradigm in science." },
-    { word: "nausea",        sentence: "A wave of nausea hit her." },
-    { word: "pneumatic",     sentence: "A pneumatic drill is loud." },
-    { word: "xylophone",     sentence: "Play the xylophone gently." }
-  ],
-  15: [
-    { word: "acquiesce",      sentence: "I acquiesce to your demand." },
-    { word: "anachronism",    sentence: "A horse in the city is an anachronism." },
-    { word: "antediluvian",   sentence: "Antediluvian customs persisted." },
-    { word: "bourgeois",      sentence: "Bourgeois values shaped the era." },
-    { word: "chiaroscuro",    sentence: "The painting uses bold chiaroscuro." },
-    { word: "connoisseur",    sentence: "She is a wine connoisseur." },
-    { word: "consensus",      sentence: "The team reached a consensus." },
-    { word: "defenestration", sentence: "Defenestration means throwing something out a window." },
-    { word: "ennui",          sentence: "Long summers can bring on ennui." },
-    { word: "ethereal",       sentence: "Her voice had an ethereal quality." },
-    { word: "inchoate",       sentence: "An inchoate plan took shape." },
-    { word: "juxtaposition",  sentence: "A striking juxtaposition of styles." },
-    { word: "kaleidoscope",   sentence: "Look through the kaleidoscope." },
-    { word: "lackadaisical",  sentence: "A lackadaisical attitude annoyed the coach." },
-    { word: "malfeasance",    sentence: "He was charged with malfeasance." },
-    { word: "mellifluous",    sentence: "Her mellifluous voice soothed everyone." },
-    { word: "nonchalant",     sentence: "He gave a nonchalant shrug." },
-    { word: "obfuscate",      sentence: "Don't obfuscate the issue." },
-    { word: "omniscient",     sentence: "The novel uses an omniscient narrator." },
-    { word: "peripatetic",    sentence: "She lived a peripatetic life." },
-    { word: "quintessential", sentence: "The quintessential summer day." },
-    { word: "soliloquy",      sentence: "Hamlet's famous soliloquy." },
-    { word: "supercilious",   sentence: "A supercilious smirk crossed his face." },
-    { word: "vicissitude",    sentence: "The vicissitudes of life." },
-    { word: "magnanimity",    sentence: "She showed great magnanimity." },
-    { word: "perspicacity",   sentence: "His perspicacity solved the case." },
-    { word: "recalcitrant",   sentence: "A recalcitrant student tested patience." },
-    { word: "sycophant",      sentence: "The king was surrounded by sycophants." },
-    { word: "archaeology",    sentence: "She studies archaeology." },
-    { word: "intricate",      sentence: "An intricate pattern." }
-  ],
-  16: [
-    { word: "sesquipedalian", sentence: "His sesquipedalian style impressed no one." },
-    { word: "somnambulist",   sentence: "The somnambulist walked through the hall." },
-    { word: "lugubrious",     sentence: "A lugubrious tone filled the room." },
-    { word: "obsequious",     sentence: "An obsequious greeting irritated him." },
-    { word: "propinquity",    sentence: "Their propinquity made them close." },
-    { word: "pertinacious",   sentence: "Pertinacious effort wins the day." },
-    { word: "equanimity",     sentence: "She faced the news with equanimity." },
-    { word: "salubrious",     sentence: "A salubrious mountain climate." },
-    { word: "vituperative",   sentence: "His vituperative remarks shocked all." },
-    { word: "anthropomorphic",sentence: "Anthropomorphic animals fill the book." },
-    { word: "ostracise",      sentence: "Don't ostracise the new student." },
-    { word: "pernicious",     sentence: "A pernicious rumour spread." },
-    { word: "tintinnabulation", sentence: "The tintinnabulation of distant bells." },
-    { word: "ephemeral",      sentence: "An ephemeral moment of joy." },
-    { word: "juxtapose",      sentence: "Juxtapose the two photographs." },
-    { word: "obstreperous",   sentence: "An obstreperous crowd gathered." },
-    { word: "melancholy",     sentence: "A melancholy mood lingered." },
-    { word: "clandestine",    sentence: "A clandestine meeting at dawn." },
-    { word: "inconceivable",  sentence: "An inconceivable idea." },
-    { word: "unprecedented",  sentence: "Unprecedented growth this year." },
-    { word: "catastrophic",   sentence: "Catastrophic flooding hit the town." },
-    { word: "proselytize",    sentence: "They proselytize new ideas." },
-    { word: "acquiescence",   sentence: "Her acquiescence was reluctant." },
-    { word: "magnificent",    sentence: "A magnificent palace." },
-    { word: "surreptitiously",sentence: "She entered surreptitiously." }
-  ],
-  17: [
-    { word: "circumlocution",     sentence: "Avoid circumlocution in your essay." },
-    { word: "quintessence",       sentence: "The quintessence of elegance." },
-    { word: "perspicuity",        sentence: "Speak with perspicuity." },
-    { word: "ineluctable",        sentence: "An ineluctable conclusion." },
-    { word: "perfidious",         sentence: "A perfidious double-agent." },
-    { word: "unctuous",           sentence: "His unctuous smile fooled no one." },
-    { word: "acquiescent",        sentence: "An acquiescent nod sealed it." },
-    { word: "presciently",        sentence: "She predicted this presciently." },
-    { word: "extemporaneously",   sentence: "Speak extemporaneously, not from notes." },
-    { word: "preponderance",      sentence: "A preponderance of evidence." },
-    { word: "heterogeneous",      sentence: "A heterogeneous mixture of cultures." },
-    { word: "machination",        sentence: "Political machinations everywhere." },
-    { word: "cognizant",          sentence: "Be cognizant of the rules." },
-    { word: "proselytization",    sentence: "Aggressive proselytization is unwelcome." },
-    { word: "circumnavigation",   sentence: "Their circumnavigation took a year." },
-    { word: "precocious",         sentence: "A precocious child reader." },
-    { word: "ostentation",        sentence: "Wealth without ostentation." },
-    { word: "magnanimously",      sentence: "She acted magnanimously." },
-    { word: "pulchritudinous",    sentence: "A pulchritudinous garden in spring." },
-    { word: "antidisestablishmentarianism", sentence: "Antidisestablishmentarianism is a famously long word." }
+  senior: [
+    [   // Level 1 (128 words)
+      "abide", "accord", "acute", "alcove", "alight", "alpine", "ambush", "Andes", "anthem", "Armstrong",
+      "attack", "baboon", "bisect", "bleach", "Bradman", "breadth", "breakfast", "breath", "brie", "Britain",
+      "bushwalking", "capsize", "captain", "cello", "chafe", "champion", "climate", "convict", "culture", "cyclone",
+      "dazzle", "deafen", "dollop", "earnest", "electron", "energy", "engine", "engross", "entail", "exile",
+      "fanfare", "farce", "fashion", "femur", "fencing", "finite", "forehand", "forty", "fraction", "fraud",
+      "fresco", "frisbee", "further", "futon", "gallop", "giant", "goggles", "grammar", "grandstand", "grotto",
+      "guess", "guru", "handful", "haul", "Hawking", "health", "holiday", "iceberg", "idol", "impede",
+      "indignant", "industry", "innings", "instead", "interval", "issue", "jaunty", "jockey", "joist", "journey",
+      "judo", "kennel", "kernel", "Lebanon", "livestock", "lounge", "lumbar", "mangrove", "mantra", "marron",
+      "methane", "mirror", "mushroom", "neither", "notion", "orchard", "ordeal", "paddock", "patrol", "piece",
+      "poetry", "rodeo", "sailboard", "salami", "script", "simmer", "stencil", "suffix", "swallow", "swimsuit",
+      "tempest", "theme", "theory", "thermos", "thief", "thimble", "tofu", "tome", "tonic", "unity",
+      "upkeep", "veal", "velvet", "vibrate", "video", "virus", "voucher", "Winton"
+    ],
+    [   // Level 2 (258 words)
+      "abdomen", "accomplished", "accost", "acoustics", "affluent", "agile", "Amazon", "Amsterdam", "amusement", "animation",
+      "arboreal", "archery", "aromatic", "athletics", "Auckland", "backgammon", "balcony", "betrayal", "bettong", "biome",
+      "bionics", "blithely", "bobsleigh", "bonsai", "brackish", "bravado", "brusque", "bushel", "butte", "calculator",
+      "calorie", "canyoning", "carnivore", "cautious", "cavernous", "celebrant", "centimetre", "ceramics", "clearance", "cleaver",
+      "clerk", "clique", "compere", "competition", "component", "concerted", "concourse", "condiment", "conservation", "contestant",
+      "correlate", "culinary", "Cyprus", "deuce", "diagonal", "dialect", "dictionary", "dimensions", "enjoyment", "environment",
+      "epidemic", "epoch", "equipment", "Everest", "festivity", "forthright", "genetics", "geometry", "glucose", "goalkeeper",
+      "habitat", "hinterland", "hoary", "imagery", "integer", "irony", "Istanbul", "juncture", "khaki", "kilojoule",
+      "Kimberley", "kimono", "leotard", "lifeguard", "lullaby", "manifesto", "marsupial", "matcha", "medium", "metallic",
+      "microphone", "molecule", "momentum", "Mongolia", "monotony", "monotreme", "monstrosity", "Morocco", "nachos", "narrative",
+      "nautilus", "nicety", "nightingale", "nominee", "nourish", "novella", "obviously", "operative", "oregano", "organic",
+      "origami", "Pakistan", "palatable", "paradox", "paragraph", "paramedic", "parody", "patronage", "pedestal", "penance",
+      "pergola", "periodical", "perishable", "permanent", "personality", "perspiration", "perverse", "petunia", "phantom", "pide",
+      "pillage", "pittance", "plague", "plantation", "plasticine", "pleasantry", "pliable", "polarity", "possessive", "pragmatic",
+      "precaution", "premiership", "president", "prevalent", "principled", "procedure", "prolific", "prologue", "promoter", "prospector",
+      "protection", "protein", "punitive", "quadruped", "queasy", "recognition", "refreshment", "reluctant", "rendering", "renovate",
+      "reprimand", "republican", "residual", "respiration", "restaurant", "restraint", "reticent", "retrospect", "revulsion", "rhubarb",
+      "risotto", "royalty", "ruminate", "sachet", "sacrifice", "salivate", "sarcastic", "scalpel", "sedentary", "seminar",
+      "sensei", "sensitive", "sepia", "sequel", "serviette", "sheriff", "simplistic", "sincere", "situation", "skydiving",
+      "slalom", "solitude", "soloist", "sporadic", "squalor", "straight", "strait", "stupidity", "substantial", "substitute",
+      "superfluous", "supersonic", "tarmac", "tendency", "tentacle", "terrible", "terrify", "theology", "thespian", "thoughtful",
+      "threaten", "thyroid", "tradition", "trampoline", "transition", "treasury", "tremendous", "trident", "trivial", "troublesome",
+      "turmoil", "turnstile", "tutorial", "twilight", "typhoon", "ultimate", "Uluru", "umbrella", "underlying", "unicycle",
+      "unison", "universal", "unusual", "urgency", "utensil", "vacation", "variable", "vertigo", "vestige", "vibrato",
+      "vindicate", "vintage", "violence", "vitality", "voluntary", "voyage", "wallaroo", "wastage", "wavelength", "whetstone",
+      "wholesome", "widespread", "windcheater", "wondrous", "wreath", "yesteryear", "zodiac", "zoology"
+    ],
+    [   // Level 3 (319 words)
+      "adversary", "aerobics", "aerosol", "aisle", "allegory", "allergy", "allotment", "allusion", "alternative", "ambiguous",
+      "amputate", "amulet", "analysis", "Antarctica", "anteroom", "anticipation", "apologetic", "apparatus", "apparel", "apparition",
+      "applicable", "approximate", "aquarium", "argumentative", "armament", "arthritic", "artillery", "ascertain", "askance", "assessor",
+      "association", "assumption", "attorney", "attractive", "atypical", "audacity", "austere", "authenticate", "avalanche", "aviation",
+      "ballast", "barbarian", "barnacle", "barramundi", "beguiling", "benefactor", "bewilderment", "bicentenary", "billionaire", "biodegradable",
+      "biodiversity", "boardercross", "bounteous", "brasserie", "buccaneer", "burglary", "calculus", "capability", "cassette", "casualty",
+      "catamaran", "categorical", "caterpillar", "cathartic", "celebration", "ceremonial", "chemistry", "cinnamon", "circumspect", "classification",
+      "clemency", "cloche", "cognition", "combustible", "commentary", "commodious", "competence", "conceited", "concentric", "conclusive",
+      "concurrent", "concussion", "congenial", "consequence", "consonant", "conspiracy", "constructive", "controversial", "convulsion", "coronation",
+      "counterfeit", "couscous", "cranium", "credential", "credulous", "croissant", "croquet", "crotchety", "cumulative", "decongestant",
+      "deference", "deliberately", "delinquent", "dermatitis", "detriment", "detritus", "diffusion", "disembodied", "disposition", "dissipation",
+      "distraught", "dolmades", "effigy", "electrician", "elementary", "elliptical", "eloquent", "eminence", "emulsion", "enigmatic",
+      "enlightenment", "ensemble", "entanglement", "epicure", "epidermis", "epilogue", "equestrian", "escalator", "esoteric", "evocative",
+      "evolution", "excavation", "exemplify", "expatriate", "expostulate", "extravaganza", "fajita", "fibrous", "forbearance", "formidable",
+      "fracas", "freighter", "frieze", "frivolity", "gateau", "generator", "geyser", "ghoulish", "gladiator", "gluttonous",
+      "gregarious", "grievance", "gymnastics", "gyoza", "Helsinki", "hepatitis", "herbaceous", "herbivorous", "hessian", "hilarity",
+      "Honduras", "hydrogen", "hygienic", "hypothesis", "idyllic", "igneous", "illicit", "illustrator", "immeasurable", "immunology",
+      "imperious", "impertinence", "incessant", "incoherent", "incumbent", "independence", "indescribable", "indigestion", "indolent", "inflammation",
+      "infrastructure", "inhospitable", "insatiable", "instability", "instigator", "instrumentalist", "insurgent", "intermezzo", "intermission", "intolerable",
+      "intravenous", "intuition", "isometrics", "jeopardy", "jettison", "journalism", "Kalahari", "Keneally", "laborious", "larrikin",
+      "literacy", "literature", "lithe", "longitude", "lucrative", "luxuriate", "macaw", "Madagascar", "magician", "magnesium",
+      "malaise", "malamute", "manicure", "maraca", "marvellous", "massif", "mechanism", "meditation", "memorandum", "meridian",
+      "metadata", "meteoric", "methodology", "milliner", "modicum", "motif", "mountaineering", "moustache", "multivitamin", "Myanmar",
+      "mysterious", "nefarious", "Netherlands", "newsagency", "obstetrics", "ocelot", "octogenarian", "omnivorous", "pantomime", "parasailing",
+      "parenthesis", "petulant", "photography", "phylum", "pilates", "plaintiff", "porpoise", "precipitous", "premiere", "procure",
+      "prohibitive", "projectile", "promontory", "protagonist", "psalm", "pulmonary", "quarterfinal", "quinoa", "rationale", "recital",
+      "recreation", "redolent", "refurbish", "reiki", "Rembrandt", "restoration", "revelry", "samurai", "sasquatch", "sassafras",
+      "scapula", "scholastic", "sedimentary", "serenity", "Shackleton", "sierra", "smorgasbord", "sociable", "sociology", "soiree",
+      "spacious", "steppe", "stowaway", "strategy", "stringent", "stroganoff", "stubborn", "stupendous", "sturgeon", "subterfuge",
+      "suburbia", "succulent", "supplement", "suspicious", "sympathetic", "syndrome", "tantamount", "Tanzania", "taxonomy", "technique",
+      "tetanus", "thermometer", "tiramisu", "toboggan", "tranquillity", "ultraviolet", "umami", "unaccountable", "unassuming", "Uruguay",
+      "utterance", "vacuum", "vagary", "vanquish", "vehicle", "velodrome", "vengeance", "vulnerable", "xylophone"
+    ],
+    [   // Level 4 (237 words)
+      "abominable", "accolade", "acquaintance", "acquisition", "acrimony", "acrobatically", "adjacent", "adjourn", "advantageous", "aerodynamic",
+      "Afghanistan", "alchemist", "alkaline", "allargando", "alleviate", "alliteration", "amalgamate", "amateurish", "ambidextrous", "ambiguity",
+      "ambivalent", "ambrosia", "analogous", "ancillary", "Annapurna", "anomaly", "antiquated", "antiseptic", "apprehensive", "Arafura",
+      "arbitration", "architecture", "aristocracy", "asthma", "aubergine", "basilica", "behemoth", "benevolent", "bibliography", "blasphemy",
+      "bouzouki", "brigadier", "broccolini", "Bucharest", "budgerigar", "buoyant", "cabaret", "cadaverous", "cadenza", "calligraphy",
+      "candelabra", "cannula", "caribou", "cassowary", "catastrophic", "centrifugal", "cerise", "chancellor", "chateau", "chimerical",
+      "chiropractor", "cholera", "chorizo", "ciabatta", "circumnavigate", "citronella", "coalition", "collocation", "colloquialism", "cologne",
+      "commemorate", "commission", "conceptualise", "connotation", "consensus", "contemptuous", "continuum", "Copernicus", "coulomb", "counsellor",
+      "creche", "crustacean", "cybernetics", "Dardanelles", "decrescendo", "deforestation", "delirium", "delphinium", "diagnosis", "Diamantina",
+      "differential", "discourteous", "discrepancy", "duress", "Ecuador", "edamame", "elixir", "elocution", "embryo", "entourage",
+      "equilibrium", "equivocal", "espadrille", "eucalyptus", "excruciating", "exorbitant", "extortionate", "extraordinaire", "extrapolate", "Fahrenheit",
+      "felicitations", "glockenspiel", "Guatemala", "guernsey", "gymkhana", "hollandaise", "humerus", "hyperbola", "hypnotherapy", "impeccable",
+      "inappropriate", "inaugural", "inconceivable", "inconsiderate", "iridescent", "irreproachable", "irresistible", "juggernaut", "julienne", "jurisdiction",
+      "karaoke", "liaison", "ligature", "liniment", "madrigal", "maintenance", "malapropism", "malevolent", "marionette", "mascarpone",
+      "masquerade", "Mauritius", "mediocre", "meningitis", "metabolism", "mezzanine", "Michelangelo", "millennium", "minestrone", "moussaka",
+      "nanotechnology", "narcissus", "negotiation", "neuralgia", "palazzo", "paparazzi", "parabola", "parachute", "paradigm", "percentile",
+      "permissible", "personification", "pharmaceutical", "phoenix", "physicality", "picturesque", "pilgrimage", "planetarium", "polyunsaturated", "pomegranate",
+      "predecessor", "prejudicial", "preponderance", "primordial", "profiterole", "propitious", "prospectus", "pugilist", "purveyor", "putrefaction",
+      "Pyrenees", "quadrille", "quarantine", "quidditch", "raconteur", "rebellious", "recession", "refrigeration", "rejuvenation", "relegation",
+      "resuscitation", "revolution", "rhetorical", "rhomboid", "rogaining", "sabbatical", "salmonella", "scoliosis", "seismograph", "Seychelles",
+      "shipwright", "simultaneous", "sojourn", "solicitous", "souvlaki", "spelunker", "spherical", "spinnaker", "statistician", "stereophonic",
+      "straitlaced", "subcutaneous", "subliminal", "surfeit", "sycamore", "syllabus", "symposium", "symptomatic", "syncopation", "synopsis",
+      "teleprompter", "temperamental", "thermodynamics", "tinnitus", "topiary", "tortellini", "tourmaline", "trajectory", "trattoria", "troposphere",
+      "tumultuous", "uncommunicative", "unfathomable", "vandalism", "velocity", "Vesuvius", "vivacious"
+    ],
+    [   // Level 5 (106 words)
+      "abalone", "algebraic", "algorithm", "Appalachian", "arabesque", "archipelago", "balalaika", "cacophony", "cannellini", "cholesterol",
+      "coefficient", "connoisseur", "conquistador", "convalescence", "courgette", "cryptocurrency", "cumulonimbus", "cunjevoi", "decoupage", "defibrillator",
+      "degustation", "diagnostician", "ecclesiastical", "echelon", "ecotourism", "effervescent", "embouchure", "enchilada", "entrepreneur", "epidemiology",
+      "euphonium", "Euphrates", "fluoridation", "fossiliferous", "frontispiece", "fugue", "gastroenterologist", "gelateria", "guillotine", "hieroglyphics",
+      "hiragana", "hypochondriac", "hypotenuse", "hypothalamus", "ikebana", "infinitesimal", "jodhpurs", "Kilimanjaro", "lackadaisical", "lepidopterist",
+      "lithosphere", "loquacious", "lugubrious", "mademoiselle", "manoeuvre", "melaleuca", "metamorphosis", "mozzarella", "musculoskeletal", "Namatjira",
+      "Navratilova", "Nicaragua", "nomenclature", "omniscient", "opprobrium", "orienteering", "oscillation", "osteoporosis", "paracetamol", "paraphernalia",
+      "patisserie", "penicillin", "pertinacious", "petanque", "petroglyph", "phantasmagorical", "phosphorescent", "photosynthesis", "physique", "pirouette",
+      "potpourri", "pseudonym", "puerile", "Pythagoras", "quorum", "ratatouille", "reveille", "rheumatism", "saboteur", "sarcophagus",
+      "sauerkraut", "sclerophyll", "segue", "sequoia", "soliloquy", "subpoena", "subterranean", "thoroughbred", "thylacine", "tourniquet",
+      "Tszyu", "tuberculosis", "velociraptor", "vermilion", "viscera", "Yangtze"
+    ]
   ]
 };
 
-// Old LEVELS shape kept only so legacy code that referenced LEVELS.length
-// (e.g. level-up bounds) still works without changes.
-const LEVELS = LEVEL_NAMES.map((name, i) => ({
-  name,
-  description: `Level ${i + 1}`,
-  words: []   // dynamic — see pickRoundWords / poolForCurrent
-}));
-
-// Maps (playerAge, level 0-9) → spelling-age band.
-// Level 1 (idx 0) → ~playerAge - 2;  Level 10 (idx 9) → ~playerAge + 4.
-function poolForAgeAndLevel(playerAge, levelIdx) {
-  const target = (playerAge || 7) - 2 + levelIdx * (6 / 9);
-  const minAge = Math.max(5, Math.floor(target - 0.5));
-  const maxAge = Math.min(17, Math.ceil(target + 0.5));
-  let pool = [];
-  for (let a = minAge; a <= maxAge; a++) {
-    if (MASTER_WORDS[a]) pool = pool.concat(MASTER_WORDS[a]);
-  }
-  // De-dupe in case the same word slips into two ages
-  const seen = new Set();
-  return pool.filter(w => seen.has(w.word) ? false : (seen.add(w.word), true));
+// Words for (mode, level index 0-4) as {word, sentence} objects. sentence is
+// always '' because these lists carry no example sentences.
+function poolFor(mode, level) {
+  const levels = WORD_LISTS[mode] || WORD_LISTS.junior;
+  return (levels[level] || levels[0] || []).map(w => ({ word: w, sentence: '' }));
 }
-
 function poolForCurrent() {
-  return poolForAgeAndLevel(state.age || 7, state.level);
+  return poolFor(state.mode || 'junior', state.level || 0);
 }
 
-// Replaces the array-shaped LEVELS reference used below.
-const __DISCARDED_LEVELS_BELOW__ = [
-  {
-    name: "Age 7",
-    description: "Year 2 — phonics & sight words",
-    words: [
-      { word: "jump",   sentence: "Frogs jump high in the pond." },
-      { word: "ship",   sentence: "The ship sails on the sea." },
-      { word: "fish",   sentence: "The fish swims fast." },
-      { word: "plant",  sentence: "Water the plant every day." },
-      { word: "swim",   sentence: "I can swim well." },
-      { word: "milk",   sentence: "Pour the milk in my cup." },
-      { word: "sand",   sentence: "I build castles in the sand." },
-      { word: "park",   sentence: "We play at the park." },
-      { word: "that",   sentence: "That is my book." },
-      { word: "with",   sentence: "Come with me." },
-      { word: "when",   sentence: "When is dinner?" },
-      { word: "what",   sentence: "What is your name?" },
-      { word: "said",   sentence: "She said hello to me." },
-      { word: "were",   sentence: "We were happy." },
-      { word: "they",   sentence: "They are my friends." },
-      { word: "look",   sentence: "Look at the rainbow." },
-      { word: "make",   sentence: "Let's make a cake." },
-      { word: "came",   sentence: "Mum came home early." },
-      { word: "like",   sentence: "I like ice cream." },
-      { word: "time",   sentence: "What time is it?" },
-      { word: "home",   sentence: "I am going home now." },
-      { word: "play",   sentence: "We play in the park." },
-      { word: "read",   sentence: "I can read a book." },
-      { word: "tree",   sentence: "Climb the tall tree." },
-      { word: "blue",   sentence: "The sky is blue today." },
-      { word: "cake",   sentence: "It is my birthday cake." },
-      { word: "fast",   sentence: "He can run very fast." },
-      { word: "cold",   sentence: "Ice is very cold." },
-      { word: "find",   sentence: "Find the hidden toy." },
-      { word: "good",   sentence: "Have a good day." }
-    ]
-  },
-  {
-    name: "Age 8",
-    description: "Year 3 — magic E & vowel teams",
-    words: [
-      { word: "smile",   sentence: "She has a big smile." },
-      { word: "paint",   sentence: "I paint a picture." },
-      { word: "sleep",   sentence: "It is time to sleep." },
-      { word: "dream",   sentence: "I had a happy dream." },
-      { word: "happy",   sentence: "I feel very happy." },
-      { word: "rabbit",  sentence: "The rabbit hopped away." },
-      { word: "garden",  sentence: "Flowers grow in the garden." },
-      { word: "pretty",  sentence: "What a pretty flower." },
-      { word: "hello",   sentence: "Say hello to your friend." },
-      { word: "lemon",   sentence: "A lemon tastes sour." },
-      { word: "light",   sentence: "Turn on the light." },
-      { word: "night",   sentence: "Stars shine at night." },
-      { word: "right",   sentence: "You are right about it." },
-      { word: "found",   sentence: "I found my missing book." },
-      { word: "sound",   sentence: "What is that sound?" },
-      { word: "around",  sentence: "Look around the room." },
-      { word: "brown",   sentence: "The bear has brown fur." },
-      { word: "sister",  sentence: "My sister is kind." },
-      { word: "water",   sentence: "Please pour the water." },
-      { word: "after",   sentence: "After dinner we play." },
-      { word: "before",  sentence: "Brush before bed." },
-      { word: "again",   sentence: "Please try again." },
-      { word: "every",   sentence: "I read every day." },
-      { word: "white",   sentence: "Snow is white." },
-      { word: "about",   sentence: "Tell me about your day." },
-      { word: "kitten",  sentence: "The kitten chased the yarn." },
-      { word: "monkey",  sentence: "The monkey climbed the tree." },
-      { word: "dragon",  sentence: "The dragon breathes fire." },
-      { word: "summer",  sentence: "We swim in summer." },
-      { word: "winter",  sentence: "It snows in winter." }
-    ]
-  },
-  {
-    name: "Age 9",
-    description: "Year 4 — tricky sight words",
-    words: [
-      { word: "friend",    sentence: "My best friend is funny." },
-      { word: "school",    sentence: "I walk to school." },
-      { word: "because",   sentence: "I am tired because I ran far." },
-      { word: "family",    sentence: "I love my family." },
-      { word: "people",    sentence: "Many people came to the show." },
-      { word: "would",     sentence: "I would like a snack." },
-      { word: "could",     sentence: "Could you help me?" },
-      { word: "should",    sentence: "We should be kind." },
-      { word: "where",     sentence: "Where is my bag?" },
-      { word: "there",     sentence: "Put it over there." },
-      { word: "their",     sentence: "That is their house." },
-      { word: "between",   sentence: "Sit between us." },
-      { word: "morning",   sentence: "Good morning, sunshine." },
-      { word: "thought",   sentence: "I thought about it carefully." },
-      { word: "through",   sentence: "Walk through the door." },
-      { word: "enough",    sentence: "I have had enough." },
-      { word: "myself",    sentence: "I did it all by myself." },
-      { word: "surprise",  sentence: "What a lovely surprise." },
-      { word: "beautiful", sentence: "What a beautiful day." },
-      { word: "favourite", sentence: "Blue is my favourite colour." },
-      { word: "jumping",   sentence: "The dog kept jumping up." },
-      { word: "walked",    sentence: "We walked home together." },
-      { word: "climbed",   sentence: "She climbed the steep hill." },
-      { word: "careful",   sentence: "Be careful with the glass." },
-      { word: "kindness",  sentence: "Show kindness to everyone." },
-      { word: "sleeping",  sentence: "The baby is sleeping." },
-      { word: "exciting",  sentence: "What an exciting day!" },
-      { word: "painted",   sentence: "She painted the wall blue." },
-      { word: "listened",  sentence: "I listened carefully." },
-      { word: "another",   sentence: "Can I have another one?" }
-    ]
-  },
-  {
-    name: "Age 10",
-    description: "Year 5 — silent letters & tricky vowels",
-    words: [
-      { word: "knife",       sentence: "Cut the bread with a knife." },
-      { word: "knight",      sentence: "A brave knight rode the horse." },
-      { word: "knock",       sentence: "Knock on the door first." },
-      { word: "lamb",        sentence: "A baby sheep is called a lamb." },
-      { word: "climb",       sentence: "I love to climb trees." },
-      { word: "ghost",       sentence: "The ghost story scared me." },
-      { word: "weight",      sentence: "Check the weight of the bag." },
-      { word: "eight",       sentence: "I am eight years old." },
-      { word: "height",      sentence: "Measure my height please." },
-      { word: "neighbour",   sentence: "Our neighbour is friendly." },
-      { word: "write",       sentence: "Write your name on the page." },
-      { word: "wrong",       sentence: "That answer is wrong." },
-      { word: "listen",      sentence: "Please listen carefully." },
-      { word: "often",       sentence: "I often visit my grandma." },
-      { word: "autumn",      sentence: "Leaves fall in autumn." },
-      { word: "ancient",     sentence: "An ancient castle stood there." },
-      { word: "science",     sentence: "Science is my favourite subject." },
-      { word: "naturally",   sentence: "Hair grows naturally." },
-      { word: "especially",  sentence: "I love fruit, especially mangoes." },
-      { word: "separate",    sentence: "Separate the colours please." },
-      { word: "calendar",    sentence: "Check the calendar for the date." },
-      { word: "library",     sentence: "Borrow books from the library." },
-      { word: "ordinary",    sentence: "It was an ordinary day." },
-      { word: "particular",  sentence: "I like this particular one." },
-      { word: "popular",     sentence: "That song is popular." },
-      { word: "regular",     sentence: "We meet on a regular basis." },
-      { word: "similar",     sentence: "These shapes are similar." },
-      { word: "several",     sentence: "Several friends came over." },
-      { word: "suddenly",    sentence: "It started to rain suddenly." },
-      { word: "definitely",  sentence: "I will definitely come." }
-    ]
-  },
-  {
-    name: "Age 11",
-    description: "Year 6 — academic vocabulary",
-    words: [
-      { word: "necessary",   sentence: "It is necessary to study." },
-      { word: "opposite",    sentence: "North is the opposite of south." },
-      { word: "occasion",    sentence: "A very special occasion." },
-      { word: "embarrass",   sentence: "Please don't embarrass me." },
-      { word: "address",     sentence: "Write your address here." },
-      { word: "balance",     sentence: "Keep your balance on the beam." },
-      { word: "recipe",      sentence: "Follow the recipe step by step." },
-      { word: "generous",    sentence: "She is a generous person." },
-      { word: "accident",    sentence: "It was just an accident." },
-      { word: "character",   sentence: "He has a kind character." },
-      { word: "recommend",   sentence: "I recommend this book." },
-      { word: "important",   sentence: "An important meeting today." },
-      { word: "government",  sentence: "The government made a new rule." },
-      { word: "environment", sentence: "We must protect the environment." },
-      { word: "equipment",   sentence: "Take all the sports equipment." },
-      { word: "opinion",     sentence: "Everyone has an opinion." },
-      { word: "sentence",    sentence: "Write a complete sentence." },
-      { word: "computer",    sentence: "Use the computer to type." },
-      { word: "document",    sentence: "Sign the document please." },
-      { word: "language",    sentence: "She speaks three languages." },
-      { word: "knowledge",   sentence: "Share your knowledge with others." },
-      { word: "courage",     sentence: "She showed great courage." },
-      { word: "century",     sentence: "We live in the 21st century." },
-      { word: "dictionary",  sentence: "Look it up in the dictionary." },
-      { word: "mystery",     sentence: "Solve the mystery together." },
-      { word: "treasure",    sentence: "Pirates buried treasure here." },
-      { word: "available",   sentence: "Tickets are still available." },
-      { word: "business",    sentence: "She runs her own business." },
-      { word: "decision",    sentence: "Make a wise decision." },
-      { word: "exercise",    sentence: "Daily exercise is healthy." }
-    ]
-  },
-  {
-    name: "Age 12",
-    description: "Year 7 — commonly misspelled",
-    words: [
-      { word: "parliament",   sentence: "Parliament passed the new law." },
-      { word: "vegetable",    sentence: "Eat your vegetables." },
-      { word: "conscience",   sentence: "Listen to your conscience." },
-      { word: "sincerely",    sentence: "I sincerely apologise." },
-      { word: "foreign",      sentence: "She visits a foreign country." },
-      { word: "restaurant",   sentence: "We ate at a new restaurant." },
-      { word: "ambulance",    sentence: "The ambulance arrived quickly." },
-      { word: "audience",     sentence: "The audience clapped loudly." },
-      { word: "schedule",     sentence: "Check the schedule today." },
-      { word: "scissors",     sentence: "Use the scissors carefully." },
-      { word: "vehicle",      sentence: "A red vehicle drove past." },
-      { word: "ceremony",     sentence: "The opening ceremony was grand." },
-      { word: "certificate",  sentence: "She received a certificate." },
-      { word: "conference",   sentence: "The conference starts at nine." },
-      { word: "continue",     sentence: "Please continue reading." },
-      { word: "criticise",    sentence: "Don't criticise unfairly." },
-      { word: "curiosity",    sentence: "Her curiosity led her on." },
-      { word: "descend",      sentence: "Descend the stairs slowly." },
-      { word: "develop",      sentence: "Develop your skills." },
-      { word: "disappear",    sentence: "The clouds will disappear." },
-      { word: "disappoint",   sentence: "I won't disappoint you." },
-      { word: "discipline",   sentence: "Self discipline matters." },
-      { word: "drought",      sentence: "A long drought hit the farm." },
-      { word: "enthusiastic", sentence: "She is enthusiastic about art." },
-      { word: "equipped",     sentence: "We are well equipped." },
-      { word: "exhibit",      sentence: "A new exhibit opens today." },
-      { word: "existence",    sentence: "Question its existence." },
-      { word: "familiar",     sentence: "A familiar face appeared." },
-      { word: "guarantee",    sentence: "I guarantee it will work." },
-      { word: "immediately",  sentence: "Come here immediately." }
-    ]
-  },
-  {
-    name: "Age 13",
-    description: "Year 8 — spelling bee starter",
-    words: [
-      { word: "rhythm",        sentence: "Feel the rhythm of the music." },
-      { word: "weird",         sentence: "What a weird coincidence." },
-      { word: "mischievous",   sentence: "A mischievous grin spread." },
-      { word: "embarrassed",   sentence: "She felt embarrassed." },
-      { word: "exaggerate",    sentence: "Don't exaggerate the story." },
-      { word: "accommodate",   sentence: "We can accommodate you." },
-      { word: "accomplish",    sentence: "Accomplish your goals." },
-      { word: "achievement",   sentence: "What a great achievement." },
-      { word: "acquaintance",  sentence: "He is an old acquaintance." },
-      { word: "advantage",     sentence: "Take the advantage." },
-      { word: "allegiance",    sentence: "Pledge your allegiance." },
-      { word: "amateur",       sentence: "She is an amateur photographer." },
-      { word: "analyse",       sentence: "Analyse the results carefully." },
-      { word: "apparent",      sentence: "The answer was apparent." },
-      { word: "appearance",    sentence: "He made a brief appearance." },
-      { word: "appreciate",    sentence: "I appreciate your help." },
-      { word: "argument",      sentence: "Avoid a pointless argument." },
-      { word: "assistance",    sentence: "Do you need assistance?" },
-      { word: "atmosphere",    sentence: "A friendly atmosphere filled the room." },
-      { word: "attendance",    sentence: "Daily attendance is required." },
-      { word: "autobiography", sentence: "Read her autobiography." },
-      { word: "behaviour",     sentence: "Excellent behaviour today." },
-      { word: "beneath",       sentence: "It was hidden beneath the rug." },
-      { word: "bicycle",       sentence: "I ride my bicycle to school." },
-      { word: "bouquet",       sentence: "He gave her a bouquet." },
-      { word: "brilliant",     sentence: "What a brilliant idea." },
-      { word: "broccoli",      sentence: "I love steamed broccoli." },
-      { word: "cathedral",     sentence: "The cathedral is ancient." },
-      { word: "cemetery",      sentence: "We visited the cemetery." },
-      { word: "necessary",     sentence: "Bring only what is necessary." }
-    ]
-  },
-  {
-    name: "Age 14",
-    description: "Year 9 — advanced spelling",
-    words: [
-      { word: "hierarchy",      sentence: "A strict hierarchy ruled the army." },
-      { word: "miscellaneous",  sentence: "A box of miscellaneous items." },
-      { word: "conscientious",  sentence: "She is a conscientious worker." },
-      { word: "perseverance",   sentence: "Perseverance leads to success." },
-      { word: "prejudice",      sentence: "We must reject prejudice." },
-      { word: "simultaneously", sentence: "It all happened simultaneously." },
-      { word: "supersede",      sentence: "New rules supersede the old." },
-      { word: "liaison",        sentence: "He acts as a liaison." },
-      { word: "leisure",        sentence: "Enjoy your leisure time." },
-      { word: "mortgage",       sentence: "They paid off the mortgage." },
-      { word: "mysterious",     sentence: "A mysterious figure waited." },
-      { word: "niece",          sentence: "My niece is turning seven." },
-      { word: "occurred",       sentence: "What occurred yesterday?" },
-      { word: "occurrence",     sentence: "It is a rare occurrence." },
-      { word: "omitted",        sentence: "He omitted one detail." },
-      { word: "opportunity",    sentence: "A golden opportunity arose." },
-      { word: "parallel",       sentence: "Draw two parallel lines." },
-      { word: "paralyse",       sentence: "Fear can paralyse a person." },
-      { word: "pastime",        sentence: "Reading is my favourite pastime." },
-      { word: "perceive",       sentence: "How do you perceive this?" },
-      { word: "persistent",     sentence: "The persistent rain continued." },
-      { word: "persuade",       sentence: "I tried to persuade him." },
-      { word: "phenomenon",     sentence: "It is a natural phenomenon." },
-      { word: "philosophy",     sentence: "She studies philosophy." },
-      { word: "physician",      sentence: "Ask your physician." },
-      { word: "picturesque",    sentence: "A picturesque village." },
-      { word: "possession",     sentence: "A prized possession." },
-      { word: "privilege",      sentence: "It is a great privilege." },
-      { word: "pronunciation",  sentence: "Practice your pronunciation." },
-      { word: "questionnaire",  sentence: "Fill out the questionnaire." }
-    ]
-  },
-  {
-    name: "Age 15",
-    description: "Year 10 — Greek & Latin roots",
-    words: [
-      { word: "bureaucracy",   sentence: "Government bureaucracy is slow." },
-      { word: "entrepreneur",  sentence: "She is a young entrepreneur." },
-      { word: "surveillance",  sentence: "Under constant surveillance." },
-      { word: "paraphernalia", sentence: "He brought all his paraphernalia." },
-      { word: "idiosyncrasy",  sentence: "An interesting idiosyncrasy." },
-      { word: "onomatopoeia",  sentence: "Buzz is an example of onomatopoeia." },
-      { word: "magnanimous",   sentence: "A magnanimous gesture." },
-      { word: "ostentatious",  sentence: "An ostentatious display of wealth." },
-      { word: "ubiquitous",    sentence: "Phones are now ubiquitous." },
-      { word: "perspicacious", sentence: "A perspicacious observation." },
-      { word: "gregarious",    sentence: "He is naturally gregarious." },
-      { word: "surreptitious", sentence: "A surreptitious glance." },
-      { word: "paraphrase",    sentence: "Paraphrase the long sentence." },
-      { word: "perpendicular", sentence: "Two perpendicular lines meet." },
-      { word: "pharmaceutical",sentence: "Pharmaceutical research is costly." },
-      { word: "presumptuous",  sentence: "It seems presumptuous to ask." },
-      { word: "pseudonym",     sentence: "She writes under a pseudonym." },
-      { word: "psychiatrist",  sentence: "He visits a psychiatrist." },
-      { word: "psychology",    sentence: "She studies psychology." },
-      { word: "reconnaissance",sentence: "A reconnaissance mission was planned." },
-      { word: "reminiscence",  sentence: "Fond reminiscences of childhood." },
-      { word: "rendezvous",    sentence: "Meet at the agreed rendezvous." },
-      { word: "reservoir",     sentence: "The reservoir is nearly full." },
-      { word: "restaurateur",  sentence: "A celebrated restaurateur." },
-      { word: "rhetorical",    sentence: "It was a rhetorical question." },
-      { word: "silhouette",    sentence: "Her silhouette appeared in the doorway." },
-      { word: "sophisticated", sentence: "A sophisticated solution." },
-      { word: "synonymous",    sentence: "Their names are synonymous with talent." },
-      { word: "tournament",    sentence: "She won the tournament." },
-      { word: "vacuum",        sentence: "Use the vacuum to clean the rug." }
-    ]
-  },
-  {
-    name: "Age 16",
-    description: "Year 11 — championship words",
-    words: [
-      { word: "acquiesce",       sentence: "I acquiesce to your demand." },
-      { word: "anachronism",     sentence: "A horse in the city is an anachronism." },
-      { word: "antediluvian",    sentence: "Antediluvian customs persisted." },
-      { word: "bourgeois",       sentence: "Bourgeois values shaped the era." },
-      { word: "chiaroscuro",     sentence: "The painting uses bold chiaroscuro." },
-      { word: "connoisseur",     sentence: "She is a wine connoisseur." },
-      { word: "consensus",       sentence: "The team reached a consensus." },
-      { word: "defenestration",  sentence: "Defenestration is throwing someone out a window." },
-      { word: "ennui",           sentence: "Long summers can bring on ennui." },
-      { word: "ethereal",        sentence: "Her voice had an ethereal quality." },
-      { word: "inchoate",        sentence: "An inchoate plan took shape." },
-      { word: "juxtaposition",   sentence: "A striking juxtaposition of styles." },
-      { word: "kaleidoscope",    sentence: "Look through the kaleidoscope." },
-      { word: "lackadaisical",   sentence: "A lackadaisical attitude annoyed the coach." },
-      { word: "malfeasance",     sentence: "He was charged with malfeasance." },
-      { word: "mellifluous",     sentence: "Her mellifluous voice soothed everyone." },
-      { word: "nonchalant",      sentence: "He gave a nonchalant shrug." },
-      { word: "obfuscate",       sentence: "Don't obfuscate the issue." },
-      { word: "omniscient",      sentence: "The novel uses an omniscient narrator." },
-      { word: "paradigm",        sentence: "A new paradigm in science." },
-      { word: "peripatetic",     sentence: "She lived a peripatetic life." },
-      { word: "quintessential",  sentence: "The quintessential summer day." },
-      { word: "soliloquy",       sentence: "Hamlet's famous soliloquy." },
-      { word: "supercilious",    sentence: "A supercilious smirk crossed his face." },
-      { word: "ubiquitously",    sentence: "Coffee shops appear ubiquitously." },
-      { word: "vicissitude",     sentence: "The vicissitudes of life." },
-      { word: "magnanimity",     sentence: "She showed great magnanimity." },
-      { word: "perspicacity",    sentence: "His perspicacity solved the case." },
-      { word: "recalcitrant",    sentence: "A recalcitrant student tested patience." },
-      { word: "sycophant",       sentence: "The king was surrounded by sycophants." }
-    ]
-  }
-];
+const MODE_LABELS = { junior: 'Junior', senior: 'Senior' };
+function modeLabel() { return MODE_LABELS[state.mode] || 'Junior'; }
+function highestForMode() { return (state.highestLevel && state.highestLevel[state.mode]) || 0; }
+function bumpHighest(lvl) {
+  if (!state.highestLevel || typeof state.highestLevel !== 'object') state.highestLevel = { junior: 0, senior: 0 };
+  if (lvl > (state.highestLevel[state.mode] || 0)) state.highestLevel[state.mode] = lvl;
+}
 
 // ============================================================
 // STATE
 // ============================================================
-const STORAGE_KEY = 'spelling-bee-leo-v1';
+const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
 const APP_VERSION = '1.5.1';   // bumped each GitHub push
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
@@ -1533,9 +884,9 @@ document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
 const defaultState = {
   name: null,
-  age: null,
+  mode: null,            // 'junior' | 'senior'
   level: 0,
-  highestLevel: 0,
+  highestLevel: { junior: 0, senior: 0 },   // furthest unlocked level, per mode
   rate: 0.85,
   voiceName: null,
   useAI: true,
@@ -1543,34 +894,10 @@ const defaultState = {
   migrationVersion: 0,    // bumped by one-shot migrations below
   words: {},
   recentWords: [],       // last N words shown across rounds — used to avoid repeats
-  leaderboard: [],
-  wordSource: 'standard', // 'standard' (age-based) | 'psb' (imported competition list)
-  psbLevel: null          // selected competition level key (e.g. "2")
+  leaderboard: []
 };
 
 const RECENT_WORDS_LIMIT = 30;
-
-// ============================================================
-// IMPORTED COMPETITION WORD LIST (e.g. NSW Premier's Spelling Bee)
-// Stored ONLY in this browser's localStorage — never sent to the server
-// or committed to the repo, to respect the publisher's copyright terms.
-// ============================================================
-const PSB_KEY = 'spelling-bee-competition-list';
-function loadPSBList() {
-  try { const raw = localStorage.getItem(PSB_KEY); return raw ? JSON.parse(raw) : null; }
-  catch (e) { return null; }
-}
-function savePSBList(obj) {
-  try { localStorage.setItem(PSB_KEY, JSON.stringify(obj)); } catch (e) {}
-}
-function clearPSBList() {
-  try { localStorage.removeItem(PSB_KEY); } catch (e) {}
-}
-let psbList = loadPSBList();   // { name, levels: { "2": [...words], ... } }
-function psbLevelKeys() {
-  if (!psbList || !psbList.levels) return [];
-  return Object.keys(psbList.levels).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
-}
 
 // Voice options — currently a single Gemini AI voice. Native browser
 // voices are still used as a fallback if /api/tts returns 503 (no key
@@ -1625,12 +952,6 @@ function effectiveAIVoice() {
   return null;
 }
 
-// Age 7 → Level 1, Age 8 → Level 2, …, Age 16 → Level 10
-function levelForAge(age) {
-  const clamped = Math.max(7, Math.min(16, age || 7));
-  return clamped - 7;
-}
-
 let state = loadState();
 
 // Migration: v1.3.0 removed Kokoro voices. If the saved aiVoiceId is no
@@ -1663,13 +984,14 @@ if ((state.migrationVersion || 0) < 3) {
 }
 
 function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...defaultState };
-    return { ...defaultState, ...JSON.parse(raw) };
-  } catch (e) {
-    return { ...defaultState };
-  }
+  let saved = {};
+  try { const raw = localStorage.getItem(STORAGE_KEY); if (raw) saved = JSON.parse(raw) || {}; } catch (e) {}
+  const s = { ...defaultState, ...saved };
+  // highestLevel is a per-mode object — always rebuild a fresh copy so we
+  // never alias (and later mutate) defaultState's shared reference.
+  const hl = (saved.highestLevel && typeof saved.highestLevel === 'object') ? saved.highestLevel : {};
+  s.highestLevel = { junior: hl.junior || 0, senior: hl.senior || 0 };
+  return s;
 }
 
 function saveState() {
@@ -1974,7 +1296,8 @@ function wordTextFor(w) {
 
 // Returns the sentence form spoken by "In a sentence" — same shape as a
 // real spelling-bee judge: word, then sentence, then word again.
-// Competition words have no sentence; fall back to just saying the word.
+// Words with no example sentence (e.g. the imported senior/junior lists)
+// fall back to just saying the word twice.
 function sentenceFormFor(w) {
   if (!w.sentence) return `${w.word}. ${w.word}.`;
   return `${w.word}. ${w.sentence}. ${w.word}.`;
@@ -2000,7 +1323,7 @@ function buildPrefetchQueue() {
   if (round.words) round.words.forEach(add);          // priority 1: this round
   poolForCurrent().forEach(add);                       // priority 2: current level
   if (state.level < LEVEL_NAMES.length - 1) {          // priority 3: next level
-    poolForAgeAndLevel(state.age || 7, state.level + 1).forEach(add);
+    poolFor(state.mode, state.level + 1).forEach(add);
   }
   return queue;
 }
@@ -2137,18 +1460,12 @@ function showAIFeedback(msg, isError) {
 // GAME LOGIC
 // ============================================================
 const ROUND_LENGTH = 10;
-const LEVEL_UP_THRESHOLD = 8;
+const LEVEL_UP_THRESHOLD = 9;   // 9/10 = 90% to unlock the next level
 
 let round = { words: [], index: 0, correct: 0, results: [] };
 
 function pickRoundWords() {
-  let pool;
-  if (state.wordSource === 'psb' && psbList && psbList.levels[state.psbLevel]) {
-    // Competition words are plain strings with no example sentence.
-    pool = psbList.levels[state.psbLevel].map(w => ({ word: w, sentence: '' }));
-  } else {
-    pool = poolForCurrent();
-  }
+  let pool = poolForCurrent();
   pool = pool.slice();
   // Fisher-Yates shuffle
   for (let i = pool.length - 1; i > 0; i--) {
@@ -2201,14 +1518,9 @@ function presentWord() {
   input.focus();
   setFeedback('', '');
   renderProgress();
-  // Hide "In a sentence" for competition words (they have no example sentence).
   const curWord = round.words[round.index];
-  const sentBtn = document.getElementById('sentence-btn');
-  if (sentBtn) sentBtn.style.display = curWord.sentence ? '' : 'none';
   setTimeout(() => {
     speak(wordTextFor(curWord));   // say the word
-    // No sentence prefetch. "In a sentence" fetches lazily on click — if
-    // the kid never clicks it, we never burn API quota on sentences.
   }, 200);
 }
 
@@ -2287,13 +1599,10 @@ function finishRound() {
   document.getElementById('end-score').textContent = `${score} / ${total}`;
 
   // Save round to the shared leaderboard (with local fallback).
-  // Competition (PSB) practice rounds are NOT submitted — they'd mix
-  // competition levels into the age-based casual leaderboard. Per-word
-  // stats are still tracked (see checkAnswer) so progress is recorded.
-  if (state.name && state.age && state.wordSource !== 'psb') {
+  if (state.name && state.mode) {
     submitScore({
       name: state.name,
-      age: state.age,
+      mode: state.mode,
       score,
       total,
       level: state.level,
@@ -2317,22 +1626,13 @@ function finishRound() {
   document.getElementById('end-message').textContent = msg;
 
   const lvlBtn = document.getElementById('level-up-btn');
-  if (state.wordSource === 'psb') {
-    // Competition mode: level up = next PSB level (e.g. Level 2 → 3)
-    const keys = psbLevelKeys();
-    const idx = keys.indexOf(state.psbLevel);
-    const canUp = score >= LEVEL_UP_THRESHOLD && idx >= 0 && idx < keys.length - 1;
-    lvlBtn.style.display = canUp ? 'block' : 'none';
-    if (canUp) lvlBtn.textContent = `⬆ Move up to Level ${keys[idx + 1]}`;
-  } else {
-    const canLevelUp = score >= LEVEL_UP_THRESHOLD && state.level < LEVEL_NAMES.length - 1;
-    lvlBtn.style.display = canLevelUp ? 'block' : 'none';
-    if (canLevelUp) {
-      lvlBtn.textContent = `⬆ Move up to Level ${state.level + 2}: ${LEVEL_NAMES[state.level + 1]}`;
-      if (state.level + 1 > state.highestLevel) {
-        state.highestLevel = state.level + 1;
-        saveState();
-      }
+  const canLevelUp = score >= LEVEL_UP_THRESHOLD && state.level < LEVEL_NAMES.length - 1;
+  lvlBtn.style.display = canLevelUp ? 'block' : 'none';
+  if (canLevelUp) {
+    lvlBtn.textContent = `⬆ Move up to Level ${state.level + 2}: ${LEVEL_NAMES[state.level + 1]}`;
+    if (state.level + 1 > highestForMode()) {
+      bumpHighest(state.level + 1);
+      saveState();
     }
   }
 }
@@ -2345,14 +1645,12 @@ function showScreen(name) {
     const el = document.getElementById(s + '-screen');
     el.classList.toggle('screen-active', s === name);
   });
+  // No level tag / Menu button on the welcome screen — the Menu must not be a
+  // way to skip the welcome gate (which would start an unnamed player in Junior).
+  document.querySelector('.tag-row').style.display = (name === 'welcome') ? 'none' : '';
   const playerPrefix = state.name ? `${state.name} · ` : '';
-  if (state.wordSource === 'psb' && psbList) {
-    document.getElementById('level-tag').textContent =
-      `${playerPrefix}🐝 Bee · Level ${state.psbLevel}`;
-  } else {
-    document.getElementById('level-tag').textContent =
-      `${playerPrefix}Age ${state.age || 7} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
-  }
+  document.getElementById('level-tag').textContent =
+    `${playerPrefix}${modeLabel()} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
 }
 
 // ============================================================
@@ -2366,7 +1664,7 @@ function renderStats() {
   document.getElementById('stat-wrong').textContent = wrong;
   document.getElementById('stat-accuracy').textContent =
     total ? Math.round(right / total * 100) + '%' : '0%';
-  document.getElementById('stat-level').textContent = state.highestLevel + 1;
+  document.getElementById('stat-level').textContent = highestForMode() + 1;
 
   const entries = Object.entries(state.words);
 
@@ -2435,7 +1733,7 @@ async function loadLeaderboard() {
     return local;
   }
   // Merge: dedupe by (name|age|score|level|date)
-  const sig = e => `${e.name}|${e.age}|${e.score}|${e.level}|${e.date}`;
+  const sig = e => `${e.name}|${e.mode}|${e.score}|${e.level}|${e.date}`;
   const remoteSigs = new Set(remote.map(sig));
   const localOnly = local.filter(e => !remoteSigs.has(sig(e)));
   const merged = [...remote, ...localOnly];
@@ -2468,11 +1766,11 @@ async function submitScore(entry) {
   }
 }
 
-// Best entry per name within an age group, ranked by score then level then recency.
-function topForAge(age, limit = 10) {
-  const inAge = (state.leaderboard || []).filter(e => e.age === age);
+// Best entry per name within a mode, ranked by score then level then recency.
+function topForMode(mode, limit = 10) {
+  const inMode = (state.leaderboard || []).filter(e => e.mode === mode);
   const byName = new Map();
-  for (const e of inAge) {
+  for (const e of inMode) {
     const cur = byName.get(e.name);
     if (!cur ||
         e.score > cur.score ||
@@ -2489,7 +1787,7 @@ function topForAge(age, limit = 10) {
     .slice(0, limit);
 }
 
-let selectedLeaderboardAge = null;
+let selectedLeaderboardMode = null;
 
 async function renderLeaderboard() {
   const el = document.getElementById('leaderboard-content');
@@ -2513,51 +1811,35 @@ async function renderLeaderboard() {
   }
   el.appendChild(statusEl);
 
-  const board = state.leaderboard || [];
-
-  // Ages with at least one entry, plus the current player's age (so the
-  // current player sees their own tab even before they've played).
-  const ageSet = new Set(board.map(e => Number(e.age)).filter(a => Number.isFinite(a)));
-  if (state.age) ageSet.add(state.age);
-  const ages = [...ageSet].sort((a, b) => a - b);
-
-  if (ages.length === 0) {
-    const empty = document.createElement('p');
-    empty.style.textAlign = 'center';
-    empty.style.padding = '20px';
-    empty.innerHTML = '<em>No scores yet — finish a round!</em>';
-    el.appendChild(empty);
-    return;
-  }
-
-  // Default to current player's age. Sticky across re-renders for tab clicks.
-  if (selectedLeaderboardAge === null || !ages.includes(selectedLeaderboardAge)) {
-    selectedLeaderboardAge = ages.includes(state.age) ? state.age : ages[0];
+  // Fixed Junior / Senior tabs. Default to the current player's mode.
+  const MODES = ['junior', 'senior'];
+  if (selectedLeaderboardMode === null || !MODES.includes(selectedLeaderboardMode)) {
+    selectedLeaderboardMode = MODES.includes(state.mode) ? state.mode : 'junior';
   }
 
   // Tabs
   const tabsEl = document.createElement('div');
   tabsEl.className = 'leaderboard-tabs';
-  ages.forEach(age => {
+  MODES.forEach(mode => {
     const btn = document.createElement('button');
     btn.className = 'leaderboard-tab';
-    if (age === selectedLeaderboardAge) btn.classList.add('active');
-    btn.textContent = age === state.age ? `Age ${age} (you)` : `Age ${age}`;
+    if (mode === selectedLeaderboardMode) btn.classList.add('active');
+    btn.textContent = mode === state.mode ? `${MODE_LABELS[mode]} (you)` : MODE_LABELS[mode];
     btn.onclick = () => {
-      selectedLeaderboardAge = age;
+      selectedLeaderboardMode = mode;
       renderLeaderboard();
     };
     tabsEl.appendChild(btn);
   });
   el.appendChild(tabsEl);
 
-  // Entries for the selected age only
-  const entries = topForAge(selectedLeaderboardAge, 10);
+  // Entries for the selected mode only
+  const entries = topForMode(selectedLeaderboardMode, 10);
   if (entries.length === 0) {
     const empty = document.createElement('p');
     empty.style.textAlign = 'center';
     empty.style.padding = '20px';
-    empty.innerHTML = `<em>No scores for Age ${selectedLeaderboardAge} yet — be the first!</em>`;
+    empty.innerHTML = `<em>No ${MODE_LABELS[selectedLeaderboardMode]} scores yet — be the first!</em>`;
     el.appendChild(empty);
     return;
   }
@@ -2565,7 +1847,7 @@ async function renderLeaderboard() {
     const row = document.createElement('div');
     row.className = 'stat-row';
     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
-    const isMe = e.name === state.name && e.age === state.age;
+    const isMe = e.name === state.name && e.mode === state.mode;
     const nameDisplay = isMe
       ? `<strong style="color:#065f46;">${escapeHtml(e.name)} (you)</strong>`
       : escapeHtml(e.name);
@@ -2582,13 +1864,14 @@ async function renderLeaderboard() {
 function renderLevels() {
   const grid = document.getElementById('level-grid');
   grid.innerHTML = '';
+  const highest = highestForMode();
   LEVEL_NAMES.forEach((name, i) => {
     const btn = document.createElement('button');
     btn.className = 'level-btn';
-    if (i > state.highestLevel) btn.classList.add('locked');
+    if (i > highest) btn.classList.add('locked');
     if (i === state.level) btn.classList.add('current');
-    // Show 3 random sample words from THIS player's pool at THIS level — gives a feel for difficulty
-    const pool = poolForAgeAndLevel(state.age || 7, i);
+    // Show 3 random sample words from this mode's pool at this level — gives a feel for difficulty
+    const pool = poolFor(state.mode, i);
     const sampled = [];
     const seen = new Set();
     while (sampled.length < 3 && seen.size < pool.length) {
@@ -2599,12 +1882,12 @@ function renderLevels() {
     }
     const sampleText = sampled.length ? sampled.join(', ') + '…' : '—';
     btn.innerHTML = `
-      <span class="level-num">${i + 1}${i > state.highestLevel ? ' 🔒' : ''}</span>
+      <span class="level-num">${i + 1}${i > highest ? ' 🔒' : ''}</span>
       <strong>${name}</strong><br>
       <small>${sampleText}</small>
     `;
     btn.onclick = () => {
-      if (i > state.highestLevel) return;
+      if (i > highest) return;
       state.level = i;
       saveState();
       startRound();
@@ -2614,203 +1897,25 @@ function renderLevels() {
 }
 
 // ============================================================
-// COMPETITION WORD LIST UI
-// ============================================================
-function showImportFeedback(msg, isError) {
-  const el = document.getElementById('import-feedback');
-  if (!el) return;
-  el.textContent = msg || '';
-  el.style.color = isError ? '#991b1b' : '#065f46';
-}
-
-function renderWordlistSection() {
-  const label = document.getElementById('active-list-label');
-  const psbDiv = document.getElementById('psb-levels');
-  if (!label || !psbDiv) return;
-
-  if (psbList && psbLevelKeys().length) {
-    psbDiv.style.display = 'block';
-    label.innerHTML = (state.wordSource === 'psb')
-      ? `<strong>🐝 ${escapeHtml(psbList.name)}</strong> · Level ${state.psbLevel}`
-      : `<strong>Standard</strong> (by age)`;
-
-    const grid = document.getElementById('psb-level-grid');
-    grid.innerHTML = '';
-    psbLevelKeys().forEach(k => {
-      const words = psbList.levels[k];
-      const btn = document.createElement('button');
-      btn.className = 'level-btn';
-      if (state.wordSource === 'psb' && state.psbLevel === k) btn.classList.add('current');
-      const sample = words.slice(0, 3).join(', ');
-      btn.innerHTML = `
-        <span class="level-num">Lv ${k}</span>
-        <strong>${words.length} words</strong><br>
-        <small>${escapeHtml(sample)}…</small>
-      `;
-      btn.onclick = () => {
-        state.wordSource = 'psb';
-        state.psbLevel = k;
-        saveState();
-        renderWordlistSection();
-        startRound();
-      };
-      grid.appendChild(btn);
-    });
-  } else {
-    psbDiv.style.display = 'none';
-    label.innerHTML = `<strong>Standard</strong> (by age)`;
-  }
-}
-
-// Parse raw text (file contents or pasted text) into a { name, levels } list.
-// Accepts two formats:
-//   1. JSON: { name?, levels: { "2": [...], ... } }  (or a bare {levels} object)
-//   2. Plain text with "Level N" headings, e.g.
-//        Level 2
-//        abide accord acute, alcove
-//        Level 3
-//        abdomen, accomplished ...
-//      Words split on commas / whitespace / newlines.
-function parseWordlistText(text) {
-  text = (text || '').trim();
-  if (!text) throw new Error('nothing to load');
-
-  // Try JSON first
-  if (text[0] === '{' || text[0] === '[') {
-    const data = JSON.parse(text);
-    const src = data.levels && typeof data.levels === 'object' ? data.levels : data;
-    const levels = {};
-    let count = 0;
-    for (const rawKey of Object.keys(src)) {
-      const arr = src[rawKey];
-      if (!Array.isArray(arr)) continue;
-      const words = arr.filter(x => typeof x === 'string' && x.trim()).map(x => x.trim());
-      if (!words.length) continue;
-      const m = String(rawKey).match(/\d+/);
-      levels[m ? m[0] : String(rawKey)] = (levels[m ? m[0] : String(rawKey)] || []).concat(words);
-      count += words.length;
-    }
-    if (!count) throw new Error('no words found in JSON');
-    return { name: data.name || data.source || 'Competition word list', levels, count };
-  }
-
-  // Plain text with "Level N" headings
-  const levels = {};
-  let current = '1', count = 0;
-  for (const rawLine of text.split('\n')) {
-    const line = rawLine.trim();
-    if (!line) continue;
-    const lvl = line.match(/^level\s*([0-9]+)/i);
-    if (lvl) { current = lvl[1]; if (!levels[current]) levels[current] = []; continue; }
-    const words = line.split(/[,\s]+/).map(w => w.trim()).filter(Boolean);
-    if (!words.length) continue;
-    levels[current] = (levels[current] || []).concat(words);
-    count += words.length;
-  }
-  if (!count) throw new Error('no words found — add "Level 2" style headings');
-  return { name: 'Competition word list', levels, count };
-}
-
-function applyImportedList(parsed) {
-  psbList = { name: parsed.name, levels: parsed.levels };
-  savePSBList(psbList);
-  state.wordSource = 'psb';
-  state.psbLevel = psbLevelKeys()[0];
-  saveState();
-  renderWordlistSection();
-  showImportFeedback(`✓ Loaded ${parsed.count} words across ${psbLevelKeys().length} levels. Tap a level to start.`);
-}
-
-// File import — stored ONLY in this browser, never uploaded.
-document.getElementById('import-list-btn').addEventListener('click', () => {
-  document.getElementById('import-file').click();
-});
-document.getElementById('import-file').addEventListener('change', (e) => {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try { applyImportedList(parseWordlistText(reader.result)); }
-    catch (err) {
-      console.error('[spelling-bee] import failed', err);
-      showImportFeedback('Could not read that file: ' + err.message, true);
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-});
-
-// Paste import — no file picker, works on any device.
-document.getElementById('paste-list-btn').addEventListener('click', () => {
-  const box = document.getElementById('paste-box');
-  box.style.display = box.style.display === 'none' ? 'block' : 'none';
-  if (box.style.display === 'block') document.getElementById('paste-area').focus();
-});
-document.getElementById('cancel-paste-btn').addEventListener('click', () => {
-  document.getElementById('paste-box').style.display = 'none';
-  document.getElementById('paste-area').value = '';
-});
-document.getElementById('load-paste-btn').addEventListener('click', () => {
-  try {
-    applyImportedList(parseWordlistText(document.getElementById('paste-area').value));
-    document.getElementById('paste-box').style.display = 'none';
-    document.getElementById('paste-area').value = '';
-  } catch (err) {
-    console.error('[spelling-bee] paste import failed', err);
-    showImportFeedback('Could not read that: ' + err.message, true);
-  }
-});
-
-document.getElementById('use-standard-btn').addEventListener('click', () => {
-  state.wordSource = 'standard';
-  saveState();
-  renderWordlistSection();
-  renderLevels();
-  showImportFeedback('Switched to standard (age-based) words.');
-});
-
-document.getElementById('remove-list-btn').addEventListener('click', () => {
-  if (!confirm('Remove the imported competition word list from this device?')) return;
-  clearPSBList();
-  psbList = null;
-  state.wordSource = 'standard';
-  saveState();
-  renderWordlistSection();
-  showImportFeedback('Removed. Using standard words.');
-});
-
-// ============================================================
 // EVENTS
 // ============================================================
 document.getElementById('play-btn').addEventListener('click', () => {
   speak(wordTextFor(round.words[round.index]));
 });
-document.getElementById('slower-btn').addEventListener('click', () => {
-  speak(wordTextFor(round.words[round.index]), { rate: 0.55 });
-});
-document.getElementById('sentence-btn').addEventListener('click', () => {
-  speak(sentenceFormFor(round.words[round.index]), { rate: state.rate });
-});
 document.getElementById('answer-form').addEventListener('submit', checkAnswer);
 
 document.getElementById('menu-btn').addEventListener('click', () => {
+  if (!state.name || !state.mode) return;   // can't open the menu before a player + mode is chosen
   renderLevels();
-  renderWordlistSection();
   document.getElementById('current-player').textContent =
-    state.name ? `${state.name} (age ${state.age || 7})` : `Age ${state.age || 7}`;
+    state.name ? `${state.name} (${modeLabel()})` : modeLabel();
   showScreen('level');
 });
 
 document.getElementById('next-round-btn').addEventListener('click', startRound);
 document.getElementById('level-up-btn').addEventListener('click', () => {
-  if (state.wordSource === 'psb') {
-    const keys = psbLevelKeys();
-    const idx = keys.indexOf(state.psbLevel);
-    if (idx >= 0 && idx < keys.length - 1) state.psbLevel = keys[idx + 1];
-  } else {
-    state.level = Math.min(state.level + 1, LEVEL_NAMES.length - 1);
-    if (state.level > state.highestLevel) state.highestLevel = state.level;
-  }
+  state.level = Math.min(state.level + 1, LEVEL_NAMES.length - 1);
+  bumpHighest(state.level);
   saveState();
   startRound();
 });
@@ -2828,10 +1933,10 @@ document.getElementById('back-from-level').addEventListener('click', () => showS
 
 document.getElementById('reset-btn').addEventListener('click', async () => {
   if (!confirm('Reset ALL progress — local stats AND the shared leaderboard on the server. This cannot be undone.')) return;
-  // Reset local state (per-word stats, level, leaderboard, recent words, name+age stay so kid keeps playing)
+  // Reset local state (per-word stats, levels, leaderboard, recent words; name+mode stay so kid keeps playing)
   const keepName = state.name;
-  const keepAge = state.age;
-  state = { ...defaultState, name: keepName, age: keepAge, migrationVersion: state.migrationVersion };
+  const keepMode = state.mode;
+  state = { ...defaultState, highestLevel: { junior: 0, senior: 0 }, name: keepName, mode: keepMode, migrationVersion: state.migrationVersion };
   saveState();
   // Wipe the shared leaderboard on the server (best effort — local reset
   // still happens even if the DELETE fails)
@@ -2866,17 +1971,16 @@ document.getElementById('rate-select').addEventListener('change', e => {
 });
 
 // --- Welcome screen ---
-document.getElementById('start-from-welcome').addEventListener('click', () => {
+function startAs(mode) {
   const nameRaw = document.getElementById('name-input').value.trim();
   if (!nameRaw) {
     document.getElementById('name-input').focus();
     document.getElementById('name-input').style.borderColor = '#ef4444';
     return;
   }
-  const v = parseInt(document.getElementById('age-input').value, 10);
-  const age = isNaN(v) ? 7 : Math.max(7, Math.min(16, v));
   state.name = nameRaw.slice(0, 20);
-  state.age = age;
+  state.mode = mode;
+  state.level = Math.min(state.level || 0, highestForMode());   // clamp to this mode's unlocked range
   saveState();
   // A new player session is a fresh start — clear any leftover Gemini
   // rate-limit cooldown so the kid gets an AI voice attempt immediately
@@ -2885,7 +1989,9 @@ document.getElementById('start-from-welcome').addEventListener('click', () => {
   geminiConsecutive429s = 0;
   lastTTSError = null;
   startRound();
-});
+}
+document.getElementById('start-junior').addEventListener('click', () => startAs('junior'));
+document.getElementById('start-senior').addEventListener('click', () => startAs('senior'));
 
 // --- Leaderboard + Switch Player ---
 document.getElementById('open-leaderboard-btn').addEventListener('click', () => {
@@ -2897,31 +2003,9 @@ document.getElementById('back-from-leaderboard').addEventListener('click', () =>
 document.getElementById('switch-player-btn').addEventListener('click', () => {
   if (!confirm("Switch player? Scores stay saved in the leaderboard.")) return;
   showScreen('welcome');
-  // Pre-fill so re-entering is fast for known kids
   document.getElementById('name-input').value = '';
   document.getElementById('name-input').style.borderColor = '';
-  document.getElementById('age-input').value = state.age || 7;
   document.getElementById('name-input').focus();
-});
-
-// --- Age setting (mid-game adjustment) ---
-// Changing age shifts the difficulty pool but keeps the current level number.
-// E.g. Level 5 for age 7 ≠ Level 5 for age 10 — the words come from different pools.
-document.getElementById('age-setting').addEventListener('change', e => {
-  const v = parseInt(e.target.value, 10);
-  if (isNaN(v) || v < 7 || v > 16) {
-    e.target.value = state.age || 7;
-    return;
-  }
-  state.age = v;
-  saveState();
-  // Re-pick the current round's words from the new age's pool so going Back
-  // to game uses the new difficulty (the in-progress round otherwise has old words).
-  round = { words: pickRoundWords(), index: 0, correct: 0, results: [] };
-  document.getElementById('level-tag').textContent =
-    `Age ${state.age} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
-  renderLevels();
-  if (state.useAI) ensurePrefetch();
 });
 
 // --- AI voice settings ---
@@ -3139,34 +2223,16 @@ window.setTimeout(loadVoices, 500);
 
 // Initial values into form controls
 document.getElementById('rate-select').value = String(state.rate);
-document.getElementById('age-setting').value = state.age || 7;
 useAIEl.checked = state.useAI;
 voiceIdEl.value = state.aiVoiceId || defaultState.aiVoiceId;
 refreshAIStatus();
 updateVoiceUIVisibility();
 
-// Competition list bootstrap: if state says 'psb' but the list is gone
-// (removed, or different device), fall back to standard so nothing breaks.
-if (state.wordSource === 'psb' && (!psbList || !psbList.levels[state.psbLevel])) {
-  if (psbList && psbLevelKeys().length) {
-    state.psbLevel = psbLevelKeys()[0];   // list exists but level key stale
-  } else {
-    state.wordSource = 'standard';
-  }
-  saveState();
-}
-renderWordlistSection();
-
 // GO!
-if (state.age == null || !state.name) {
+if (!state.mode || !state.name) {
   showScreen('welcome');
   document.getElementById('name-input').value = state.name || '';
-  document.getElementById('age-input').value = state.age || 7;
-  // Focus the first empty field
-  setTimeout(() => {
-    const target = !state.name ? 'name-input' : 'age-input';
-    document.getElementById(target).focus();
-  }, 100);
+  setTimeout(() => document.getElementById('name-input').focus(), 100);
 } else {
   startRound();
 }

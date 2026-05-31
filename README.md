@@ -1,133 +1,126 @@
 # Spelling Bee
 
-A browser-based spelling-bee game for kids aged 7–16. The game reads a word
-aloud and the child types it — same format as a real spelling-bee contest.
+A browser-based spelling-bee game for kids, with two modes — **Junior** and
+**Senior**. The game reads a word aloud and the child types it, same format as
+a real spelling-bee contest.
 
 Live: **https://spelling-game-henna.vercel.app**
 
 ## Play
 
 Open `index.html` in any modern browser, or visit the deployed version.
+Enter your name, pick **🐝 Junior** or **🎓 Senior**, and spell.
 
-## Features
+## How it works
 
-- **Achernar AI voice (Australian female)** — high-quality Gemini 3.1 Flash
-  TTS Preview, fetched per word and cached locally so repeats are free.
-- **Native Aussie fallback** — Karen / Lee on macOS, iOS, and Edge work
-  without any setup or network.
-- **Multiplayer leaderboard** — name + age on the welcome screen. Scores
-  from completed rounds are saved to a shared leaderboard (Vercel KV)
-  grouped by age. Falls back to a per-device leaderboard if KV isn't set up
-  or the device is offline.
-- **Age-based difficulty** — pick an age (7–16) and the word pool adjusts.
-  Every age has 10 difficulty levels, from *Warm up* to *Master*. Hard
-  words at a younger age overlap with easy words at an older age.
-- **Spelling-bee format** — tap 🔊 to hear the word, 🐢 for it slower, or
-  💬 to hear it used in a sentence.
-- **Persistent audio cache** — generated audio is stored in IndexedDB so it
-  survives page reloads. A background loop prefetches upcoming words so the
-  child never waits.
-- **Progress tracking** — per-word right/wrong counts kept in `localStorage`.
-  Stats screen shows mastered words and tricky words to practise.
-- **Level-up mechanic** — score 8 / 10 in a round to unlock the next level.
+- **Two modes, five levels each.** Junior and Senior each have levels 1–5
+  (*Warm-up → Easy → Steady → Tricky → Champion*). Levels unlock as you go.
+- **10 words per level.** Score **9 / 10** (90%) to unlock the next level.
+- **Hear the word.** Tap 🔊 to hear it (Australian voice). Type it, check it.
+- **Per-mode progress.** Junior and Senior track their own unlocked levels.
+- **Leaderboard.** Name on the welcome screen; completed rounds post to a
+  shared leaderboard (Vercel KV) with separate **Junior** and **Senior**
+  boards. Falls back to per-device scores if KV isn't set up or you're offline.
+- **Progress tracking.** Per-word right/wrong counts in `localStorage`; the
+  stats screen shows mastered and tricky words.
+
+## Voice
+
+- **Achernar AI voice (Australian female)** — Google Gemini Flash TTS, fetched
+  per word and cached in IndexedDB so repeats are free. Audio for the whole
+  word list is pre-generated and served as static files (see below), so the
+  deployed game costs **$0 ongoing** in Gemini fees.
+- **Native fallback** — if `/api/tts` is unavailable, the app uses the
+  device's built-in Australian voice (Karen / Lee on macOS, iOS, Edge), so
+  the child never gets silence.
 
 ## Word lists
 
-Master pool of ~470 words tagged by spelling age (5 → 17), sourced from:
+~2,101 words from the **NSW Premier's Spelling Bee**, in two plain-text files
+at the repo root:
 
-- Schonell Graded Word Spelling Test
-- Australian curriculum word lists (Years 2 – 11)
-- Dolch sight words
-- Scripps National Spelling Bee material
+- `junior_wordlist.txt` — levels 1–5 (→ Junior levels 1–5)
+- `senior_wordlist.txt` — levels 2–6 (→ Senior levels 1–5, renumbered so
+  there's no gap)
+
+These are single words with no example sentence, so the game presents the word
+by audio only. To change the words, edit the `.txt` files **and** the
+`WORD_LISTS` literal in `index.html` (they must agree), then re-generate audio.
 
 ## Tech
 
-Single-page HTML game (`index.html`) plus two Vercel Serverless Functions:
+Single-page vanilla-JS game (`index.html`, no build step) plus two Vercel
+serverless functions:
 
-- `api/tts.js` — proxies Google Gemini 3.1 Flash TTS Preview (Achernar voice, en-AU).
-  Used as a fallback for any word that isn't in the pre-generated static set below.
-- `api/leaderboard.js` — shared leaderboard backed by Vercel KV / Upstash Redis
+- `api/tts.js` — proxies Gemini Flash TTS (Achernar, en-AU). Used only as a
+  fallback for any word not in the pre-generated static set.
+- `api/leaderboard.js` — shared leaderboard backed by Vercel KV / Upstash
+  Redis, keyed by mode (`junior` / `senior`).
 
-Static audio for every known word is pre-generated and served from
-`public/audio/<sha1>.wav`. The frontend tries the static URL first, falls
-back to the API only for new words. This means the app costs **$0 ongoing
-in Gemini fees** for the standard word lists.
-
-Vanilla JS, no build step, Web Speech API for native browser voices.
+Static audio for every word lives at `public/audio/<sha1("gemini_achernar::word.")>.wav`.
+The frontend tries the static file first and only calls `/api/tts` for misses.
 
 ## Deploying
 
-Push to GitHub → Vercel picks it up automatically. To enable the two server
+Push to GitHub → Vercel deploys automatically. To enable the two server
 features:
 
 ### 1. Gemini AI voice (~2 min, one-time)
 
-1. Get a free key at [aistudio.google.com](https://aistudio.google.com).
-   *If Safari's iCloud Keychain misbehaves with the Google login, use Chrome
-   for this step.*
-2. In Vercel → spelling-game → **Settings → Environment Variables**, add:
-   - **Name**: `GEMINI_API_KEY`
-   - **Value**: `<your key>`
-   - **Apply to**: Production + Preview + Development
-3. Redeploy (next push, or "Redeploy" in the Deployments tab).
+1. Get a key at [aistudio.google.com](https://aistudio.google.com).
+2. In Vercel → spelling-game → **Settings → Environment Variables**, add
+   `GEMINI_API_KEY = <your key>` (Production + Preview + Development).
+3. Redeploy.
 
-Until this is set, `/api/tts` returns 503 and the app uses the device's
-native Aussie voice (Karen / Lee on macOS / iOS / Edge).
+Until this is set, `/api/tts` returns 503 and the app uses the device's native
+voice.
 
 ### 2. Shared leaderboard (~2 min, one-time)
 
-1. Vercel → spelling-game → **Storage** → **Create Database**
+1. Vercel → spelling-game → **Storage → Create Database**
 2. Choose **KV** (Marketplace → Upstash Redis), free Hobby tier
 3. **Connect to project** — Vercel injects `KV_REST_API_URL` and
    `KV_REST_API_TOKEN` automatically.
 
 Until this is set, scores save per-device only.
 
-## Pre-generating audio (run once, then never again)
+## Pre-generating audio
 
-The single biggest cost saving is pre-generating audio for every word in
-`MASTER_WORDS` and committing the .wav files to the repo. Vercel then
-serves them from its CDN — no Gemini API calls at runtime.
-
-Estimated one-time cost: ~$2 of Gemini quota (≈940 audio files).
-Estimated ongoing cost: **$0**.
-
-### Steps
+Pre-generating audio for every word and committing the `.wav` files lets
+Vercel's CDN serve them — no Gemini calls at runtime.
 
 ```bash
-# 1. Clone the repo locally (Node 18+ required)
-git clone https://github.com/robertcmorton/spelling-game.git
-cd spelling-game
-
-# 2. Put your Gemini key in .env.local
+# 1. Clone (Node 18+), then add your Gemini key:
 cp .env.local.example .env.local
-# edit .env.local — paste your key from https://aistudio.google.com
+#    edit .env.local — paste your key from https://aistudio.google.com
 
-# 3. Run the generation script (15-30 min, paced to avoid rate limits)
+# 2. Generate (resumable, paced ~7s/request):
 npm run generate-audio
 
-# 4. Commit the audio + index and push
-git add public/audio/
-git commit -m "Pre-generated audio"
-git push
+# 3. Commit + push the audio:
+git add public/audio/ && git commit -m "Pre-generated audio" && git push
 ```
 
-The script is **resumable** — re-running it skips files that already exist.
-If a word fails (rate limit, network blip), just re-run; it'll pick up where
-it left off.
+This downloads one short clip per word (~2,101 total) into `public/audio/` and
+writes `public/audio/index.json` (the list of hashes the frontend looks up).
 
-### Adding new words later
+The Gemini **3.1 Flash TTS Preview** model is capped at **10 requests/minute and
+100/day**, so a full run takes **~22 days**. The script is resumable (it skips
+files that already exist) and stops ~5 short of the daily cap each run. For an
+unattended multi-day run that sleeps until the next quota reset:
 
-If you edit `MASTER_WORDS` in `index.html` to add words, re-run the script.
-It only generates the new ones. Then commit and push as usual.
+```bash
+AUTO_GIT=true node scripts/keep-updating-from-gemini.js
+```
+
+Both scripts read the words from `junior_wordlist.txt` + `senior_wordlist.txt`,
+so after editing those, just re-run — only the new words are generated.
 
 ## Cost
 
-- **Gemini 3.1 Flash TTS Preview**: free tier is generous; beyond it, audio is billed
-  per character — pennies for a family-scale game. IndexedDB cache means each
-  word is fetched exactly once.
-- **Vercel KV (Upstash)**: free Hobby tier covers ~10k commands/day — fine.
-- **Vercel hosting**: free Hobby tier.
+- **Gemini Flash TTS**: free tier is generous; pre-generated audio + IndexedDB
+  cache mean each word is fetched at most once.
+- **Vercel KV (Upstash)** and **Vercel hosting**: free Hobby tiers.
 
 ## Made by
 

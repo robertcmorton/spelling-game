@@ -84,25 +84,25 @@ export default async function handler(req, res) {
 
       const body = req.body || {};
       const name  = cleanName(body.name);
-      const age   = parseInt(body.age, 10);
+      const mode  = (body.mode === 'junior' || body.mode === 'senior') ? body.mode : null;
       const score = parseInt(body.score, 10);
       const total = parseInt(body.total, 10);
       const level = parseInt(body.level, 10);
 
       if (!name)
         return res.status(400).json({ error: 'invalid name (letters/numbers only, ≤20 chars, no profanity)' });
-      if (!Number.isFinite(age) || age < 4 || age > 99)
-        return res.status(400).json({ error: 'invalid age' });
+      if (!mode)
+        return res.status(400).json({ error: 'invalid mode (junior or senior)' });
       if (!Number.isFinite(score) || score < 0 || score > 100)
         return res.status(400).json({ error: 'invalid score' });
       if (!Number.isFinite(total) || total < 1 || total > 100)
         return res.status(400).json({ error: 'invalid total' });
       if (score > total)
         return res.status(400).json({ error: 'score > total' });
-      if (!Number.isFinite(level) || level < 0 || level > 9)
+      if (!Number.isFinite(level) || level < 0 || level > 4)
         return res.status(400).json({ error: 'invalid level' });
 
-      const entry = { name, age, score, total, level, date: new Date().toISOString() };
+      const entry = { name, mode, score, total, level, date: new Date().toISOString() };
 
       // RPUSH then trim — keep at most MAX_ENTRIES (most recent)
       await redis.rpush(LEADERBOARD_KEY, JSON.stringify(entry));
