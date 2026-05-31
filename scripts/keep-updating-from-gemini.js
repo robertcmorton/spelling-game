@@ -228,13 +228,13 @@ while (true) {
     break;
   }
 
-  let generated = 0, errors = 0;
+  let generated = 0, errors = 0, hitCap = false;
   for (const task of todo) {
     if (generated >= MAX_PER_CYCLE) { console.log(`  Reached MAX_PER_CYCLE (${MAX_PER_CYCLE}).`); break; }
     process.stdout.write(`  [${(generated + 1).toString().padStart(3)}] ${task.label} → ${task.hash.slice(0, 8)}.wav ... `);
     const result = await generateOne(task);
     if (result === 'ok') { generated++; console.log('ok'); }
-    else if (result === 'capped') { console.log('capped (daily limit)'); break; }
+    else if (result === 'capped') { console.log('capped (daily limit)'); hitCap = true; break; }
     else {
       errors++; console.log('error');
       if (errors >= MAX_ERRORS_PER_CYCLE) { console.log(`  ${MAX_ERRORS_PER_CYCLE} errors — stopping cycle.`); break; }
@@ -248,8 +248,11 @@ while (true) {
 
   if (todoTasks().length === 0) { console.log('🎉 All audio generated.'); break; }
 
+  // Only wait for the daily quota reset if we actually hit a daily cap (429).
+  // Models without a daily cap (e.g. gemini-2.5-flash-preview-tts) keep going.
+  if (!hitCap) { console.log('Continuing to the next batch…'); continue; }
   const sleepMs = msUntilNextPacificMidnight();
-  console.log(`Sleeping ${fmtDuration(sleepMs)} until ${new Date(Date.now() + sleepMs).toLocaleString()} (next Pacific midnight + ${PACIFIC_BUFFER_MIN}min).`);
+  console.log(`Daily cap reached. Sleeping ${fmtDuration(sleepMs)} until ${new Date(Date.now() + sleepMs).toLocaleString()} (next Pacific midnight + ${PACIFIC_BUFFER_MIN}min).`);
   if (!AUTO_GIT) console.log('You can commit + push the new audio now if you like — the script keeps its place.');
   await sleep(sleepMs);
 }

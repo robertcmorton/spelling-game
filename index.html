@@ -568,9 +568,9 @@ select {
     <div class="stat-row">
       <span>Speed</span>
       <select id="rate-select">
-        <option value="0.7">Slow</option>
-        <option value="0.85" selected>Normal</option>
-        <option value="1">Fast</option>
+        <option value="0.8">Slow</option>
+        <option value="1" selected>Normal</option>
+        <option value="1.25">Fast</option>
       </select>
     </div>
 
@@ -2775,7 +2775,7 @@ const defaultState = {
   mode: null,            // 'junior' | 'senior'
   level: 0,
   highestLevel: { junior: 0, senior: 0 },   // furthest unlocked level, per mode
-  rate: 0.85,
+  rate: 1.0,
   voiceName: null,
   useAI: true,
   aiVoiceId: 'gemini_achernar',
@@ -3288,10 +3288,11 @@ async function speak(text, opts = {}) {
         try {
           await audio.play();
         } catch (playErr) {
+          // iOS/Safari blocks programmatic Audio playback when no user gesture is
+          // active (autoplay, or after the async fetch). Fall back to the device's
+          // native voice so the child always hears the word (no need to disable AI).
           console.warn('[spelling-bee] Audio.play() rejected:', playErr.name, playErr.message);
-          if (playErr && playErr.name === 'NotAllowedError') {
-            showAIFeedback('Autoplay was blocked — tap 🔊 to hear it (audio is cached now, so it will be instant).', true);
-          }
+          speakBrowser(text, opts);
         }
         return;
       } catch (e) {
