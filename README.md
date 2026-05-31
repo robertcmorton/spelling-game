@@ -33,12 +33,16 @@ Open `index.html` in any modern browser, or visit the deployed version.
 
 ## Word lists
 
-Master pool of ~470 words tagged by spelling age (5 → 17), sourced from:
+Master pool of ~2,500 words tagged by spelling age (5 → 17), sourced from:
 
 - Schonell Graded Word Spelling Test
 - Australian curriculum word lists (Years 2 – 11)
 - Dolch sight words
 - Scripps National Spelling Bee material
+- NSW Premier's Spelling Bee word lists (junior & senior divisions)
+
+Words from the imported NSW lists are single words without an example
+sentence, so the **💬 In a sentence** button is hidden for them.
 
 ## Tech
 
@@ -89,7 +93,8 @@ The single biggest cost saving is pre-generating audio for every word in
 `MASTER_WORDS` and committing the .wav files to the repo. Vercel then
 serves them from its CDN — no Gemini API calls at runtime.
 
-Estimated one-time cost: ~$2 of Gemini quota (≈940 audio files).
+Estimated one-time cost: a few dollars of Gemini quota (≈2,900 audio files;
+the script skips sentence audio for the single-word NSW entries).
 Estimated ongoing cost: **$0**.
 
 ### Steps

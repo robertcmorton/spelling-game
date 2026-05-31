@@ -102,7 +102,7 @@ function addTask(text, label) {
 for (const age of Object.keys(MASTER_WORDS)) {
   for (const w of MASTER_WORDS[age]) {
     addTask(wordTextFor(w), w.word);
-    addTask(sentenceFormFor(w), `${w.word} (sentence)`);
+    if (w.sentence) addTask(sentenceFormFor(w), `${w.word} (sentence)`);   // no sentence audio for sentence-less words
   }
 }
 addTask("G'day! I'll say words for you to spell.", 'test phrase');

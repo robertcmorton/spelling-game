@@ -113,8 +113,8 @@ function add(text, label) {
 }
 for (const age of Object.keys(MASTER_WORDS)) {
   for (const w of MASTER_WORDS[age]) {
-    add(wordTextFor(w),     `${w.word}`);
-    add(sentenceFormFor(w), `${w.word} (sentence)`);
+    add(wordTextFor(w), `${w.word}`);
+    if (w.sentence) add(sentenceFormFor(w), `${w.word} (sentence)`);   // no sentence audio for sentence-less words
   }
 }
 // Also pre-generate the welcome test phrase
