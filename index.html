@@ -464,6 +464,7 @@ select {
     <h1><span class="bee">🐝</span> Spelling Bee</h1>
     <div class="tag-row">
       <span class="tag" id="level-tag">Level 1</span>
+      <button class="btn" id="new-game-top-btn" style="padding:8px 14px; font-size:0.9em;">🔄 New Game</button>
       <button class="btn btn-ghost" id="menu-btn">☰ Menu</button>
     </div>
   </header>
@@ -552,20 +553,7 @@ select {
   <!-- LEVEL PICKER -->
   <section class="card" id="level-screen">
     <button class="btn btn-primary" id="back-from-level" style="width:100%; margin-bottom:16px;">⬅ Back to game</button>
-    <div class="parent-section" style="margin-top:0; background:#d1fae5; border-color:#065f46;">
-      <h2 style="margin-top:0;">👤 Player</h2>
-      <div class="stat-row" style="border:none; padding:6px 0;">
-        <span><strong id="current-player">—</strong></span>
-        <button class="btn btn-ghost" id="switch-player-btn" style="padding:6px 14px; font-size:0.9em;">Switch player</button>
-      </div>
-      <button class="btn btn-primary" id="open-leaderboard-btn" style="width:100%; margin-top:8px;">🏆 Leaderboard</button>
-    </div>
-
-    <h2>🎚 Choose a level</h2>
-    <p style="margin-bottom:8px;">Levels unlock as you get 9 out of 10 right.</p>
-    <div class="level-grid" id="level-grid"></div>
-
-    <h2 style="margin-top:14px;">⚙ Settings</h2>
+    <h2 style="margin-top:0;">⚙ Settings</h2>
     <div class="stat-row">
       <span>Speed</span>
       <select id="rate-select">
@@ -2767,7 +2755,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.2.1';   // + every new game starts at Level 1
+const APP_VERSION = '2.3.0';   // + simplified menu, New Game in the top bar
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -3833,9 +3821,6 @@ document.getElementById('answer-form').addEventListener('submit', checkAnswer);
 
 document.getElementById('menu-btn').addEventListener('click', () => {
   if (!state.name || !state.mode) return;   // can't open the menu before a player + mode is chosen
-  renderLevels();
-  document.getElementById('current-player').textContent =
-    state.name ? `${state.name} (${modeLabel()})` : modeLabel();
   showScreen('level');
 });
 
@@ -3848,7 +3833,7 @@ document.getElementById('level-up-btn').addEventListener('click', () => {
 });
 document.getElementById('new-game-btn').addEventListener('click', () => {
   // Game over → start a brand-new game from the welcome gate (name + mode).
-  showScreen('welcome');
+  startNewGame();
 });
 document.getElementById('see-stats-btn').addEventListener('click', () => {
   renderStats();
@@ -3886,7 +3871,7 @@ document.getElementById('reset-btn').addEventListener('click', async () => {
   await idbClear();
   audioCache.clear();
   renderStats();
-  renderLevels();
+  state.level = 0;
   startRound();
 });
 
@@ -3924,24 +3909,26 @@ function startAs(mode) {
 document.getElementById('start-junior').addEventListener('click', () => startAs('junior'));
 document.getElementById('start-senior').addEventListener('click', () => startAs('senior'));
 
-// --- Leaderboard + Switch Player ---
-document.getElementById('open-leaderboard-btn').addEventListener('click', () => {
-  renderLeaderboard();
-  showScreen('leaderboard');
-});
+// --- New Game (top bar) ---
 document.getElementById('back-from-leaderboard').addEventListener('click', () => showScreen('game'));
 
-document.getElementById('switch-player-btn').addEventListener('click', () => {
-  if (!confirm("Switch player? Scores stay saved in the leaderboard.")) return;
-  // Clear the active player and persist it, so a browser refresh stays on the
-  // welcome screen instead of reloading the previous player's game.
+// Start a brand-new game: clear the active player (so a browser refresh stays on
+// the welcome screen instead of reloading the old player's game), then show the
+// welcome gate to enter a name + pick Junior/Senior. New games begin at Level 1.
+function startNewGame() {
   state.name = null;
   state.mode = null;
   saveState();
   showScreen('welcome');
-  document.getElementById('name-input').value = '';
-  document.getElementById('name-input').style.borderColor = '';
-  document.getElementById('name-input').focus();
+  const ni = document.getElementById('name-input');
+  ni.value = '';
+  ni.style.borderColor = '';
+  ni.focus();
+}
+document.getElementById('new-game-top-btn').addEventListener('click', () => {
+  // Mid-round, confirm — a child shouldn't be able to bail out of a bad round silently.
+  if (roundActive && !confirm("Start a new game? Your current round won't be saved.")) return;
+  startNewGame();
 });
 
 // --- AI voice settings ---
