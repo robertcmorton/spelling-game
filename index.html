@@ -2767,7 +2767,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.2.0';   // + Leda voice (Gemini en-AU)
+const APP_VERSION = '2.2.1';   // + every new game starts at Level 1
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -3911,7 +3911,7 @@ function startAs(mode) {
   }
   state.name = nameRaw.slice(0, 20);
   state.mode = mode;
-  state.level = Math.min(state.level || 0, highestForMode());   // clamp to this mode's unlocked range
+  state.level = 0;   // every new game starts at Level 1 (climb up via "Move up")
   saveState();
   // A new player session is a fresh start — clear any leftover Gemini
   // rate-limit cooldown so the kid gets an AI voice attempt immediately
