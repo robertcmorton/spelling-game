@@ -1195,3 +1195,263 @@ video|We watched a funny video about cats.
 virus|A virus can make your computer run slowly.
 voucher|We won a voucher for a free meal.
 Winton|Winton is a small town in outback Queensland.
+
+# ===== SENIOR — Level 2 =====
+abdomen|A spider's body has a head and an abdomen.
+accomplished|She is an accomplished violinist.
+accost|A stranger tried to accost us in the street.
+acoustics|The concert hall has wonderful acoustics.
+affluent|They live in an affluent part of town.
+agile|The agile gymnast flipped across the mat.
+Amazon|The Amazon is the largest rainforest on Earth.
+Amsterdam|Amsterdam is famous for its canals.
+amusement|The clowns provided great amusement.
+animation|We watched a clever animation about space.
+arboreal|Koalas are arboreal and live in trees.
+archery|She hit the bullseye in archery.
+aromatic|The kitchen filled with aromatic spices.
+athletics|He competes in athletics at school.
+Auckland|Auckland is the largest city in New Zealand.
+backgammon|Grandpa taught me to play backgammon.
+balcony|We waved from the hotel balcony.
+betrayal|The spy's betrayal shocked everyone.
+bettong|A bettong is a small, hopping marsupial.
+biome|A desert is a dry biome.
+bionics|Bionics can give people robotic limbs.
+blithely|She skipped blithely down the lane.
+bobsleigh|The team raced down the icy bobsleigh track.
+bonsai|He carefully trimmed his tiny bonsai tree.
+brackish|The brackish water was part salt and part fresh.
+bravado|His bravado hid how nervous he really was.
+brusque|The busy clerk gave a brusque reply.
+bushel|We picked a whole bushel of apples.
+butte|A flat-topped butte rose from the desert.
+calculator|I used a calculator for the hard sums.
+calorie|A single grape has barely a calorie.
+canyoning|We went canyoning down the rocky gorge.
+carnivore|A lion is a meat-eating carnivore.
+cautious|Be cautious when crossing the busy road.
+cavernous|The empty hall felt cavernous and echoey.
+celebrant|The celebrant led the wedding ceremony.
+centimetre|My pencil is about one centimetre wide.
+ceramics|She makes bowls and mugs in ceramics class.
+clearance|There was just enough clearance under the bridge.
+cleaver|The chef chopped the meat with a cleaver.
+clerk|The clerk stamped our forms.
+clique|They formed a small, closed clique.
+compere|The compere introduced each act on stage.
+competition|She entered the spelling competition.
+component|Each component of the engine matters.
+concerted|We made a concerted effort to tidy up.
+concourse|We met by the station concourse.
+condiment|Tomato sauce is my favourite condiment.
+conservation|Conservation helps protect endangered animals.
+contestant|Each contestant answered three questions.
+correlate|The two graphs seem to correlate.
+culinary|The chef has amazing culinary skills.
+Cyprus|Cyprus is a sunny island in the Mediterranean.
+deuce|The tennis score was tied at deuce.
+diagonal|We folded the paper along the diagonal.
+dialect|People here speak a local dialect.
+dictionary|Look the word up in the dictionary.
+dimensions|We measured the box's three dimensions.
+enjoyment|Reading brings me great enjoyment.
+environment|We should all protect the environment.
+epidemic|The town faced a nasty flu epidemic.
+epoch|The dinosaurs lived in a distant epoch.
+equipment|We packed all our camping equipment.
+Everest|Mount Everest is the tallest mountain on Earth.
+festivity|The whole town joined the festivity.
+forthright|She gave a forthright and honest answer.
+genetics|Genetics explains why you look like your parents.
+geometry|We studied shapes and angles in geometry.
+glucose|Your body uses glucose for energy.
+goalkeeper|The goalkeeper dived to save the shot.
+habitat|A pond is the frog's natural habitat.
+hinterland|We drove into the green hinterland.
+hoary|The old wizard had a long, hoary beard.
+imagery|The poem was full of vivid imagery.
+integer|Seven is a whole number, or integer.
+irony|There was a touch of irony in her smile.
+Istanbul|Istanbul sits on two continents.
+juncture|At this juncture, we had to make a choice.
+khaki|The soldiers wore khaki uniforms.
+kilojoule|This light snack has very few kilojoules.
+Kimberley|The Kimberley is a rugged region in Australia.
+kimono|She wore a beautiful silk kimono.
+leotard|The dancer wore a sparkly leotard.
+lifeguard|The lifeguard watched the swimmers closely.
+lullaby|Mum sang a soft lullaby to the baby.
+manifesto|The club wrote a manifesto of its goals.
+marsupial|A kangaroo is a marsupial with a pouch.
+matcha|She whisked a cup of green matcha tea.
+medium|The artist's favourite medium is watercolour.
+metallic|The car had a shiny metallic finish.
+microphone|She spoke clearly into the microphone.
+molecule|A water molecule has three atoms.
+momentum|The rolling ball gathered momentum.
+Mongolia|Many people in Mongolia live in round tents.
+monotony|The long drive was pure monotony.
+monotreme|A platypus is an egg-laying monotreme.
+monstrosity|The clumsy building was a real monstrosity.
+Morocco|We rode camels in Morocco.
+nachos|We shared a plate of cheesy nachos.
+narrative|The film had an exciting narrative.
+nautilus|A nautilus has a beautiful spiral shell.
+nicety|She explained every nicety of the rules.
+nightingale|A nightingale sang sweetly at dusk.
+nominee|She was a nominee for the award.
+nourish|Good food will nourish your body.
+novella|I read a short novella over the weekend.
+obviously|He was obviously delighted with the gift.
+operative|Only one rule is still operative.
+oregano|Sprinkle some oregano on the pizza.
+organic|We buy organic vegetables from the farm.
+origami|She folded a paper crane in origami.
+Pakistan|Pakistan is a country in South Asia.
+palatable|The plain soup was barely palatable.
+paradox|It is a paradox that less can sometimes be more.
+paragraph|Write a short paragraph about your day.
+paramedic|The paramedic treated the injured runner.
+parody|The skit was a funny parody of the news.
+patronage|The little shop thrives on local patronage.
+pedestal|The statue stood on a tall pedestal.
+penance|He did penance for his mistake.
+pergola|Vines climbed over the garden pergola.
+periodical|She read a science periodical.
+perishable|Milk is a perishable food.
+permanent|The mark on the wall was permanent.
+personality|My puppy has a cheerful personality.
+perspiration|The runner wiped the perspiration from his brow.
+perverse|It seemed perverse to refuse free cake.
+petunia|A purple petunia bloomed in the pot.
+phantom|A ghostly phantom drifted through the hall.
+pide|We shared a warm Turkish pide.
+pillage|The invaders began to pillage the village.
+pittance|He was paid a mere pittance for the work.
+plague|A plague of locusts swept across the fields.
+plantation|Bananas grow on the tropical plantation.
+plasticine|We sculpted little animals from plasticine.
+pleasantry|They exchanged a quick pleasantry.
+pliable|The soft clay was warm and pliable.
+polarity|A magnet's two poles show its polarity.
+possessive|The toddler was possessive of his toys.
+pragmatic|She took a practical, pragmatic approach.
+precaution|We packed raincoats as a precaution.
+premiership|Our team won the premiership.
+president|The club elected a new president.
+prevalent|Colds are prevalent in winter.
+principled|She is a fair and principled leader.
+procedure|We followed the safety procedure.
+prolific|The author is a prolific writer.
+prologue|The book begins with a short prologue.
+promoter|The promoter advertised the big concert.
+prospector|The prospector panned for gold in the creek.
+protection|A helmet gives your head protection.
+protein|Eggs are a good source of protein.
+punitive|The cheater faced a punitive fine.
+quadruped|A horse is a four-legged quadruped.
+queasy|The bumpy ride made me feel queasy.
+recognition|Her hard work earned her recognition.
+refreshment|We stopped for a cool refreshment.
+reluctant|He was reluctant to share his secret.
+rendering|The artist made a detailed rendering of the house.
+renovate|They plan to renovate the old cottage.
+reprimand|The coach gave the team a stern reprimand.
+republican|A republican country has no king or queen.
+residual|A residual smell of paint lingered.
+respiration|Plants release oxygen during respiration.
+restaurant|We ate dinner at a new restaurant.
+restraint|She showed great restraint and stayed calm.
+reticent|He was reticent about his weekend plans.
+retrospect|In retrospect, we should have left earlier.
+revulsion|She felt revulsion at the rotten smell.
+rhubarb|We baked a tart rhubarb pie.
+risotto|The chef stirred the creamy risotto.
+royalty|The royalty waved from the golden coach.
+ruminate|Cows ruminate as they chew their cud.
+sachet|She tore open a sachet of sugar.
+sacrifice|He made a sacrifice to help his friend.
+salivate|The smell of bacon made me salivate.
+sarcastic|"Nice weather," he said in a sarcastic tone.
+scalpel|The surgeon held a sharp scalpel.
+sedentary|A sedentary lifestyle means too much sitting.
+seminar|We attended a science seminar.
+sensei|The sensei bowed to the karate class.
+sensitive|My eyes are sensitive to bright light.
+sepia|The old photo had a sepia tint.
+sequel|We can't wait for the movie's sequel.
+serviette|She folded a serviette by each plate.
+sheriff|The sheriff kept order in the old town.
+simplistic|His answer was too simplistic.
+sincere|She gave a sincere apology.
+situation|We handled the tricky situation calmly.
+skydiving|He went skydiving from a tiny plane.
+slalom|The skier zigzagged through the slalom.
+solitude|She enjoys the solitude of the library.
+soloist|The soloist sang a beautiful song.
+sporadic|There was only sporadic rain today.
+squalor|The neglected house was full of squalor.
+straight|Draw a straight line with the ruler.
+strait|Ships sailed through the narrow strait.
+stupidity|It was sheer stupidity to skip the helmet.
+substantial|We ate a substantial breakfast.
+substitute|We need a substitute player today.
+superfluous|The extra words were superfluous.
+supersonic|The jet flew at supersonic speed.
+tarmac|The plane taxied across the tarmac.
+tendency|He has a tendency to arrive late.
+tentacle|The octopus reached out a long tentacle.
+terrible|That was a terrible storm.
+terrify|Spiders absolutely terrify my brother.
+theology|She studies religion and theology.
+thespian|The talented thespian acted in many plays.
+thoughtful|It was thoughtful of you to call.
+threaten|Dark clouds threaten rain.
+thyroid|The thyroid is a gland in your neck.
+tradition|Eating turkey is a holiday tradition.
+trampoline|We bounced high on the trampoline.
+transition|The transition from summer to autumn was slow.
+treasury|The coins were kept in the royal treasury.
+tremendous|The crowd gave a tremendous cheer.
+trident|The sea god carried a three-pronged trident.
+trivial|It was a trivial problem, easily fixed.
+troublesome|The squeaky door was troublesome.
+turmoil|The sudden change caused great turmoil.
+turnstile|We pushed through the turnstile at the gate.
+tutorial|I watched a tutorial on drawing dragons.
+twilight|Bats appear at twilight.
+typhoon|The typhoon battered the coast.
+ultimate|Winning the cup was the ultimate goal.
+Uluru|Uluru is a giant red rock in central Australia.
+umbrella|I opened my umbrella in the rain.
+underlying|There was an underlying reason for the delay.
+unicycle|The clown balanced on a unicycle.
+unison|The choir sang in perfect unison.
+universal|Kindness is a universal language.
+unusual|It is unusual to see snow here.
+urgency|There was a sense of urgency in her voice.
+utensil|A whisk is a handy kitchen utensil.
+vacation|We are going on vacation next week.
+variable|The weather has been very variable.
+vertigo|Looking down from the tower gave him vertigo.
+vestige|Not a vestige of the old fort remains.
+vibrato|The singer added a gentle vibrato.
+vindicate|The new facts will vindicate her.
+vintage|Grandpa drives a vintage car.
+violence|The film had too much violence.
+vitality|The puppy was full of vitality.
+voluntary|Helping out was completely voluntary.
+voyage|The ship set off on a long voyage.
+wallaroo|A wallaroo is bigger than a wallaby.
+wastage|We try to reduce food wastage.
+wavelength|Red light has a long wavelength.
+whetstone|He sharpened the blade on a whetstone.
+wholesome|We ate a wholesome, healthy meal.
+widespread|The news caused widespread excitement.
+windcheater|Wear a windcheater on the breezy hill.
+wondrous|The night sky was a wondrous sight.
+wreath|We hung a wreath on the front door.
+yesteryear|Grandma told tales of yesteryear.
+zodiac|There are twelve signs in the zodiac.
+zoology|She studies animals in zoology.
