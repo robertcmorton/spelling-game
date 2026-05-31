@@ -1776,3 +1776,350 @@ velodrome|The cyclists raced around the velodrome.
 vengeance|The hero sought no vengeance, only peace.
 vulnerable|The baby bird was small and vulnerable.
 xylophone|She tapped out a tune on the xylophone.
+
+# ===== SENIOR — Level 4 =====
+abominable|The yeti is sometimes called the abominable snowman.
+accolade|She received an accolade for her bravery.
+acquaintance|He is an old acquaintance of my dad.
+acquisition|The museum's new acquisition was a rare gem.
+acrimony|The debate ended with surprising acrimony.
+acrobatically|The cat leapt acrobatically onto the shelf.
+adjacent|Our seats were adjacent to each other.
+adjourn|The judge will adjourn the court until morning.
+advantageous|A tall player has an advantageous reach.
+aerodynamic|The race car has an aerodynamic shape.
+Afghanistan|Afghanistan is a mountainous country in Asia.
+alchemist|The alchemist tried to turn lead into gold.
+alkaline|Baking soda is an alkaline powder.
+allargando|The music slowed down at the allargando.
+alleviate|A cool drink will alleviate your thirst.
+alliteration|"Big blue ball" is an example of alliteration.
+amalgamate|The two clubs will amalgamate into one.
+amateurish|The first draft looked a little amateurish.
+ambidextrous|She is ambidextrous and writes with both hands.
+ambiguity|The unclear note caused some ambiguity.
+ambivalent|He felt ambivalent about the long trip.
+ambrosia|The dessert tasted like sweet ambrosia.
+analogous|A heart is analogous to a pump.
+ancillary|The map was an ancillary part of the lesson.
+Annapurna|Annapurna is a towering mountain in Nepal.
+anomaly|The strange reading was an anomaly.
+antiquated|The antiquated phone still had a dial.
+antiseptic|The nurse cleaned the cut with antiseptic.
+apprehensive|She felt apprehensive before the test.
+Arafura|The Arafura Sea lies north of Australia.
+arbitration|The two sides settled by arbitration.
+architecture|We admired the city's grand architecture.
+aristocracy|The aristocracy lived in grand castles.
+asthma|He uses an inhaler for his asthma.
+aubergine|We roasted a purple aubergine for dinner.
+basilica|The ancient basilica had towering columns.
+behemoth|The truck was a behemoth on the road.
+benevolent|A benevolent stranger paid for our meal.
+bibliography|List your sources in the bibliography.
+blasphemy|In the old tale, his words were called blasphemy.
+bouzouki|He strummed a tune on the bouzouki.
+brigadier|The brigadier inspected the troops.
+broccolini|We steamed some tender broccolini.
+Bucharest|Bucharest is the capital of Romania.
+budgerigar|Our pet budgerigar can whistle a tune.
+buoyant|The cork stayed buoyant on the water.
+cabaret|We watched a lively cabaret show.
+cadaverous|The ghost had a pale, cadaverous face.
+cadenza|The pianist dazzled us with a cadenza.
+calligraphy|She wrote the invitations in beautiful calligraphy.
+candelabra|A golden candelabra lit the dining table.
+cannula|The nurse fitted a thin cannula for the drip.
+caribou|A herd of caribou crossed the snow.
+cassowary|The cassowary is a large, flightless bird.
+catastrophic|The flood caused catastrophic damage.
+centrifugal|The spin creates a centrifugal force.
+cerise|She wore a bright cerise scarf.
+chancellor|The chancellor gave a speech to the school.
+chateau|We toured an old French chateau.
+chimerical|His plan to fly to the Moon was chimerical.
+chiropractor|The chiropractor eased his sore back.
+cholera|Clean water helps prevent cholera.
+chorizo|We added spicy chorizo to the stew.
+ciabatta|We made sandwiches with crusty ciabatta.
+circumnavigate|The explorers set out to circumnavigate the globe.
+citronella|We lit a citronella candle to keep bugs away.
+coalition|Several groups formed a coalition.
+collocation|"Strong coffee" is a common collocation.
+colloquialism|"G'day" is an Australian colloquialism.
+cologne|He dabbed on a little cologne.
+commemorate|We commemorate the heroes each year.
+commission|The artist took a commission to paint a mural.
+conceptualise|It is hard to conceptualise such huge numbers.
+connotation|The word "home" has a warm connotation.
+consensus|The team reached a consensus.
+contemptuous|He gave a contemptuous sneer.
+continuum|Time stretches along a continuum.
+Copernicus|Copernicus showed that Earth orbits the Sun.
+coulomb|A coulomb measures electric charge.
+counsellor|The camp counsellor led the games.
+creche|The baby stayed at the creche.
+crustacean|A crab is a crustacean.
+cybernetics|Cybernetics studies machines and control.
+Dardanelles|Ships pass through the narrow Dardanelles.
+decrescendo|The music faded in a soft decrescendo.
+deforestation|Deforestation harms the rainforest.
+delirium|The high fever left him in a delirium.
+delphinium|A tall blue delphinium grew in the garden.
+diagnosis|The doctor gave a quick diagnosis.
+Diamantina|The Diamantina River winds through outback Queensland.
+differential|There was a big differential between the scores.
+discourteous|It is discourteous to interrupt.
+discrepancy|There was a discrepancy in the numbers.
+duress|He signed the note only under duress.
+Ecuador|Ecuador sits right on the equator.
+edamame|We snacked on a bowl of edamame.
+elixir|The wizard brewed a magic elixir.
+elocution|She took elocution lessons to speak clearly.
+embryo|The chick grows from an embryo inside the egg.
+entourage|The singer arrived with a large entourage.
+equilibrium|The seesaw reached a perfect equilibrium.
+equivocal|He gave an equivocal, uncertain answer.
+espadrille|She slipped on a comfy espadrille.
+eucalyptus|Koalas munch on eucalyptus leaves.
+excruciating|The toothache was excruciating.
+exorbitant|The fancy hotel charged an exorbitant price.
+extortionate|The ticket scalper asked an extortionate fee.
+extraordinaire|He is a kite-maker extraordinaire.
+extrapolate|We can extrapolate the trend from the chart.
+Fahrenheit|Water boils at 212 degrees Fahrenheit.
+felicitations|She sent her felicitations on the wedding.
+glockenspiel|He tapped a tune on the glockenspiel.
+Guatemala|Guatemala is a country in Central America.
+guernsey|The footballer pulled on his team guernsey.
+gymkhana|We rode our ponies at the gymkhana.
+hollandaise|We poured hollandaise sauce over the eggs.
+humerus|The humerus is the bone in your upper arm.
+hyperbola|The curve on the graph is a hyperbola.
+hypnotherapy|She tried hypnotherapy to relax.
+impeccable|His manners were impeccable.
+inappropriate|It was inappropriate to shout in the library.
+inaugural|We attended the club's inaugural meeting.
+inconceivable|It seemed inconceivable that we would lose.
+inconsiderate|It was inconsiderate to play loud music late at night.
+iridescent|The bubble shone with iridescent colours.
+irreproachable|Her behaviour was irreproachable.
+irresistible|The smell of cake was irresistible.
+juggernaut|The huge juggernaut rolled down the highway.
+julienne|The chef cut the carrots into julienne strips.
+jurisdiction|The case was outside the court's jurisdiction.
+karaoke|We sang karaoke at the party.
+liaison|She acts as a liaison between the two teams.
+ligature|The doctor closed the wound with a ligature.
+liniment|He rubbed liniment on his sore muscle.
+madrigal|The choir sang a gentle madrigal.
+maintenance|The car needs regular maintenance.
+malapropism|Saying "dance a flamingo" is a funny malapropism.
+malevolent|The story's malevolent witch cast a spell.
+marionette|She pulled the strings of the marionette.
+mascarpone|The dessert used creamy mascarpone.
+masquerade|We wore masks to the masquerade ball.
+Mauritius|Mauritius is an island in the Indian Ocean.
+mediocre|The film was mediocre, not great.
+meningitis|A vaccine protects against meningitis.
+metabolism|Exercise can boost your metabolism.
+mezzanine|We sat on the mezzanine above the lobby.
+Michelangelo|Michelangelo painted a famous ceiling.
+millennium|A millennium is a thousand years.
+minestrone|We had a warm bowl of minestrone soup.
+moussaka|We baked a layered moussaka.
+nanotechnology|Nanotechnology works with tiny machines.
+narcissus|A yellow narcissus bloomed in spring.
+negotiation|After a long negotiation, they agreed.
+neuralgia|The neuralgia gave her sharp face pain.
+palazzo|We toured a grand Italian palazzo.
+paparazzi|The paparazzi chased the famous star.
+parabola|A thrown ball follows a parabola.
+parachute|The skydiver opened her parachute.
+paradigm|The discovery created a new paradigm.
+percentile|She scored in the top percentile.
+permissible|Running is not permissible by the pool.
+personification|"The wind whispered" is a personification.
+pharmaceutical|The pharmaceutical company makes medicines.
+phoenix|The phoenix rose from the ashes.
+physicality|The sport demands great physicality.
+picturesque|We stayed in a picturesque village.
+pilgrimage|They made a long pilgrimage to the temple.
+planetarium|We watched the stars at the planetarium.
+polyunsaturated|Fish oil has polyunsaturated fats.
+pomegranate|I scooped the seeds from the pomegranate.
+predecessor|The new captain thanked her predecessor.
+prejudicial|The unfair rumour was prejudicial.
+preponderance|There was a preponderance of evidence.
+primordial|Life began in a primordial sea.
+profiterole|We ate a chocolate profiterole.
+propitious|It was a propitious day to begin.
+prospectus|The school sent us a prospectus.
+pugilist|The pugilist trained hard for the bout.
+purveyor|He is a purveyor of fine cheeses.
+putrefaction|The rotten log showed signs of putrefaction.
+Pyrenees|The Pyrenees lie between France and Spain.
+quadrille|They danced a lively quadrille.
+quarantine|The new puppy stayed in quarantine.
+quidditch|They played quidditch on flying broomsticks.
+raconteur|Grandpa is a wonderful raconteur of tales.
+rebellious|The rebellious colt would not be tamed.
+recession|The shops struggled during the recession.
+refrigeration|Refrigeration keeps the milk fresh.
+rejuvenation|A holiday brought him real rejuvenation.
+relegation|The losing team faced relegation.
+resuscitation|The lifeguard performed resuscitation.
+revolution|The Earth makes one revolution each year.
+rhetorical|"Who knows?" was just a rhetorical question.
+rhomboid|The kite was a flat rhomboid shape.
+rogaining|We went rogaining with a map and compass.
+sabbatical|The teacher took a year's sabbatical.
+salmonella|Cook the chicken well to avoid salmonella.
+scoliosis|The doctor checked her spine for scoliosis.
+seismograph|The seismograph recorded the earthquake.
+Seychelles|The Seychelles are islands near Africa.
+shipwright|The shipwright repaired the wooden hull.
+simultaneous|The two runners made a simultaneous finish.
+sojourn|We enjoyed a short sojourn by the sea.
+solicitous|She was solicitous about her sick friend.
+souvlaki|We ate souvlaki wrapped in pita bread.
+spelunker|The spelunker explored the deep cave.
+spherical|A marble is perfectly spherical.
+spinnaker|The yacht raised its colourful spinnaker.
+statistician|The statistician studied the survey numbers.
+stereophonic|The song played in rich stereophonic sound.
+straitlaced|The straitlaced butler never broke a rule.
+subcutaneous|The vet gave a subcutaneous injection under the skin.
+subliminal|The advert had a subliminal message.
+surfeit|There was a surfeit of cake at the fair.
+sycamore|A tall sycamore shaded the yard.
+syllabus|The teacher handed out the syllabus.
+symposium|Scientists gathered for a symposium.
+symptomatic|A cough is symptomatic of a cold.
+syncopation|The jazz tune had a catchy syncopation.
+synopsis|She read a quick synopsis of the book.
+teleprompter|The host read from a teleprompter.
+temperamental|The old engine is rather temperamental.
+thermodynamics|Thermodynamics is the study of heat.
+tinnitus|The loud concert left a ringing tinnitus.
+topiary|The garden had a topiary shaped like a bird.
+tortellini|We had cheese tortellini for dinner.
+tourmaline|The ring held a green tourmaline.
+trajectory|We tracked the rocket's trajectory.
+trattoria|We dined at a cosy Italian trattoria.
+troposphere|Weather happens in the troposphere.
+tumultuous|The crowd gave a tumultuous cheer.
+uncommunicative|He was tired and uncommunicative.
+unfathomable|The deep ocean is almost unfathomable.
+vandalism|The graffiti was an act of vandalism.
+velocity|The car reached a high velocity.
+Vesuvius|Mount Vesuvius once buried a Roman city.
+vivacious|She has a bright, vivacious smile.
+
+# ===== SENIOR — Level 5 =====
+abalone|Divers found an abalone shell on the reef.
+algebraic|We solved an algebraic equation.
+algorithm|The app uses a clever algorithm to sort photos.
+Appalachian|The Appalachian mountains run down eastern America.
+arabesque|The ballerina held a graceful arabesque.
+archipelago|We sailed around the island archipelago.
+balalaika|He played a Russian tune on the balalaika.
+cacophony|The traffic made a terrible cacophony.
+cannellini|We added cannellini beans to the soup.
+cholesterol|Healthy food helps keep cholesterol low.
+coefficient|We found the coefficient in the equation.
+connoisseur|She is a connoisseur of fine cheese.
+conquistador|The conquistador sailed in search of gold.
+convalescence|He spent his convalescence resting at home.
+courgette|We grilled some sliced courgette.
+cryptocurrency|Some people trade digital cryptocurrency.
+cumulonimbus|A huge cumulonimbus cloud warned of a storm.
+cunjevoi|A cunjevoi plant grew in the shady gully.
+decoupage|She decorated the box with decoupage.
+defibrillator|The defibrillator helped restart his heart.
+degustation|The restaurant offered a degustation menu.
+diagnostician|The clever diagnostician found the problem.
+ecclesiastical|The old building had an ecclesiastical look.
+echelon|She rose to the top echelon of the company.
+ecotourism|Ecotourism helps protect wild places.
+effervescent|The drink was bubbly and effervescent.
+embouchure|The trumpeter has a strong embouchure.
+enchilada|We rolled the beans into an enchilada.
+entrepreneur|The young entrepreneur started her own shop.
+epidemiology|Epidemiology studies how diseases spread.
+euphonium|He plays the euphonium in the band.
+Euphrates|The Euphrates is a great river in the Middle East.
+fluoridation|Fluoridation helps protect our teeth.
+fossiliferous|The fossiliferous rock was full of shells.
+frontispiece|A map filled the book's frontispiece.
+fugue|The organist played a grand fugue.
+gastroenterologist|A gastroenterologist looks after your stomach.
+gelateria|We chose our ice cream at the gelateria.
+guillotine|The paper guillotine cut a neat edge.
+hieroglyphics|Ancient Egyptians wrote in hieroglyphics.
+hiragana|She is learning to read Japanese hiragana.
+hypochondriac|The hypochondriac thought every sniffle was serious.
+hypotenuse|The hypotenuse is the longest side of the triangle.
+hypothalamus|The hypothalamus helps control your temperature.
+ikebana|She arranged the flowers in the art of ikebana.
+infinitesimal|The speck was infinitesimal under the microscope.
+jodhpurs|The rider wore tan jodhpurs.
+Kilimanjaro|Kilimanjaro is the tallest mountain in Africa.
+lackadaisical|His lackadaisical effort annoyed the coach.
+lepidopterist|The lepidopterist studies butterflies.
+lithosphere|The lithosphere is Earth's rocky outer layer.
+loquacious|The loquacious parrot never stopped chattering.
+lugubrious|The hound had a long, lugubrious face.
+mademoiselle|The waiter greeted the young mademoiselle.
+manoeuvre|The pilot made a tricky manoeuvre.
+melaleuca|A melaleuca tree grew by the wetland.
+metamorphosis|A caterpillar's metamorphosis makes a butterfly.
+mozzarella|We sprinkled mozzarella on the pizza.
+musculoskeletal|Exercise keeps your musculoskeletal system strong.
+Namatjira|Albert Namatjira painted famous outback scenes.
+Navratilova|Martina Navratilova was a tennis champion.
+Nicaragua|Nicaragua is a country in Central America.
+nomenclature|Scientists use Latin nomenclature for plants.
+omniscient|The story has an omniscient narrator who knows all.
+opprobrium|The cheater faced public opprobrium.
+orienteering|We used a map and compass for orienteering.
+oscillation|The pendulum's oscillation kept steady time.
+osteoporosis|Milk helps guard against osteoporosis.
+paracetamol|She took paracetamol for her headache.
+paraphernalia|He carried all his fishing paraphernalia.
+patisserie|We bought cakes from the French patisserie.
+penicillin|The doctor prescribed penicillin for the infection.
+pertinacious|Her pertinacious effort finally paid off.
+petanque|We played petanque on the gravel court.
+petroglyph|An ancient petroglyph was carved in the rock.
+phantasmagorical|The dream was wild and phantasmagorical.
+phosphorescent|The waves glowed with phosphorescent light.
+photosynthesis|Plants make food through photosynthesis.
+physique|The athlete had a powerful physique.
+pirouette|The dancer spun in a perfect pirouette.
+potpourri|A bowl of potpourri scented the room.
+pseudonym|The author wrote under a pseudonym.
+puerile|His puerile prank annoyed the class.
+Pythagoras|Pythagoras discovered a rule about triangles.
+quorum|We need a quorum before the meeting can start.
+ratatouille|We simmered a vegetable ratatouille.
+reveille|The bugle played reveille at dawn.
+rheumatism|Grandpa's rheumatism aches in the cold.
+saboteur|A saboteur damaged the machine.
+sarcophagus|The pharaoh lay in a stone sarcophagus.
+sauerkraut|We topped the hot dog with sauerkraut.
+sclerophyll|The bush is a dry sclerophyll forest.
+segue|She made a smooth segue to the next topic.
+sequoia|The giant sequoia tree was ancient and huge.
+soliloquy|The actor delivered a famous soliloquy.
+subpoena|The court sent a subpoena to the witness.
+subterranean|We explored the subterranean cave.
+thoroughbred|The thoroughbred horse won the race.
+thylacine|The thylacine was a striped marsupial, now extinct.
+tourniquet|They tied a tourniquet to stop the bleeding.
+Tszyu|Kostya Tszyu was a champion boxer.
+tuberculosis|A vaccine helps prevent tuberculosis.
+velociraptor|The velociraptor was a small, fast dinosaur.
+vermilion|The artist painted the sky a bright vermilion.
+viscera|The animal's viscera are its inner organs.
+Yangtze|The Yangtze is the longest river in Asia.
