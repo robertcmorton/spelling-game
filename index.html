@@ -79,14 +79,17 @@ h1 {
   font-size: 0.95em;
 }
 
-.app-title { text-align: center; margin: 0 0 12px; }
 .nav-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 10px;
 }
-.nav-row #level-tag { flex: 1; text-align: center; min-width: 0; }
+.nav-row #new-game-top-btn { grid-column: 1; justify-self: start; }
+.nav-row .app-title { grid-column: 2; justify-self: center; text-align: center; margin: 0; }
+.nav-row #menu-btn { grid-column: 3; justify-self: end; }
 .nav-row .btn { padding: 8px 16px; font-size: 0.95em; white-space: nowrap; }
+.tag-row { display: flex; justify-content: center; margin-top: 10px; }
 
 button {
   font-family: inherit;
@@ -464,11 +467,13 @@ select {
 <div id="app">
 
   <header class="card">
-    <h1 class="app-title"><span class="bee">🐝</span> Spelling Bee</h1>
     <div class="nav-row" id="nav-row">
       <button class="btn" id="new-game-top-btn">🔄 New Game</button>
-      <span class="tag" id="level-tag">Level 1</span>
+      <h1 class="app-title"><span class="bee">🐝</span> Spelling Bee</h1>
       <button class="btn btn-ghost" id="menu-btn">☰ Menu</button>
+    </div>
+    <div class="tag-row" id="tag-row">
+      <span class="tag" id="level-tag">Level 1</span>
     </div>
   </header>
 
@@ -2759,7 +2764,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.5.0';   // + Gemini 3.1 voice; nav row = New Game | player | Menu
+const APP_VERSION = '2.5.1';   // top row = New Game | title | Menu; player tag centered below
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
@@ -3582,7 +3587,10 @@ function showScreen(name) {
   // No level tag / Menu button on the welcome screen — the Menu must not be a
   // way to skip the welcome gate (which would start an unnamed player in Junior).
   const onWelcome = (name === 'welcome');
-  document.getElementById('nav-row').style.display = onWelcome ? 'none' : 'flex';
+  // Title stays centered on every screen; hide the buttons + player tag on the welcome gate.
+  document.getElementById('new-game-top-btn').style.display = onWelcome ? 'none' : '';
+  document.getElementById('menu-btn').style.display = onWelcome ? 'none' : '';
+  document.getElementById('tag-row').style.display = onWelcome ? 'none' : 'flex';
   const playerPrefix = state.name ? `${state.name} · ` : '';
   document.getElementById('level-tag').textContent =
     `${playerPrefix}${modeLabel()} · Lv ${state.level + 1}: ${LEVEL_NAMES[state.level]}`;
