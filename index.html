@@ -42,11 +42,7 @@ body {
 }
 
 header.card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  display: block;   /* nav-row (grid) + tag-row are full-width rows that stack */
 }
 
 h1 {
@@ -2764,7 +2760,7 @@ function bumpHighest(lvl) {
 // ============================================================
 const STORAGE_KEY = 'spelling-bee-leo-v2';   // v2: Junior/Senior modes (replaces age-based v1)
 
-const APP_VERSION = '2.5.1';   // top row = New Game | title | Menu; player tag centered below
+const APP_VERSION = '2.5.2';   // header full-width: Menu hard-right, title + tag centered
 const TEST_PHRASE = "G'day! I'll say words for you to spell.";
 document.getElementById('version-stamp').textContent = 'v' + APP_VERSION;
 
