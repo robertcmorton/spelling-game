@@ -3657,23 +3657,23 @@ async function submitScore(entry) {
   }
 }
 
-// Best entry per name within a mode, ranked by score then level then recency.
+// Cumulative points per name within a mode: the sum of every completed round
+// (e.g. 9/10 then 9/10 = 18/20), ranked by total score.
 function topForMode(mode, limit = 10) {
   const inMode = (state.leaderboard || []).filter(e => e.mode === mode);
   const byName = new Map();
   for (const e of inMode) {
-    const cur = byName.get(e.name);
-    if (!cur ||
-        e.score > cur.score ||
-        (e.score === cur.score && e.level > cur.level) ||
-        (e.score === cur.score && e.level === cur.level && (e.date || '') > (cur.date || ''))) {
-      byName.set(e.name, e);
-    }
+    const cur = byName.get(e.name) || { name: e.name, mode, score: 0, total: 0, rounds: 0, date: '' };
+    cur.score += Number(e.score) || 0;
+    cur.total += Number(e.total) || 0;
+    cur.rounds += 1;
+    if ((e.date || '') > cur.date) cur.date = e.date || '';
+    byName.set(e.name, cur);
   }
   return Array.from(byName.values())
     .sort((a, b) =>
       b.score - a.score ||
-      b.level - a.level ||
+      b.rounds - a.rounds ||
       (b.date || '').localeCompare(a.date || ''))
     .slice(0, limit);
 }
@@ -3744,7 +3744,7 @@ async function renderLeaderboard() {
       : escapeHtml(e.name);
     row.innerHTML =
       `<span>${medal} ${nameDisplay}</span>` +
-      `<strong>${e.score}/${e.total} · Lv ${e.level + 1}</strong>`;
+      `<strong>${e.score}/${e.total} · ${e.rounds} ${e.rounds === 1 ? 'round' : 'rounds'}</strong>`;
     el.appendChild(row);
   });
 }
@@ -3761,21 +3761,10 @@ function renderLevels() {
     btn.className = 'level-btn';
     if (i > highest) btn.classList.add('locked');
     if (i === state.level) btn.classList.add('current');
-    // Show 3 random sample words from this mode's pool at this level — gives a feel for difficulty
-    const pool = poolFor(state.mode, i);
-    const sampled = [];
-    const seen = new Set();
-    while (sampled.length < 3 && seen.size < pool.length) {
-      const w = pool[Math.floor(Math.random() * pool.length)];
-      if (!w || seen.has(w.word)) continue;
-      seen.add(w.word);
-      sampled.push(w.word);
-    }
-    const sampleText = sampled.length ? sampled.join(', ') + '…' : '—';
+    // No word previews here — showing the actual words would spoil the spelling.
     btn.innerHTML = `
       <span class="level-num">${i + 1}${i > highest ? ' 🔒' : ''}</span>
-      <strong>${name}</strong><br>
-      <small>${sampleText}</small>
+      <strong>${name}</strong>
     `;
     btn.onclick = () => {
       if (i > highest) return;

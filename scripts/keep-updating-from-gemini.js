@@ -40,7 +40,7 @@ if (!GEMINI_KEY) {
 }
 
 // ---------- Config (MUST match the frontend + /api/tts) ----------
-const GEMINI_MODEL = 'gemini-3.1-flash-tts-preview';
+const GEMINI_MODEL = 'gemini-2.5-flash-preview-tts';   // swap back to 3.1 when it's GA
 const VOICE_NAME   = 'Achernar';
 const LANG_CODE    = 'en-AU';
 const VOICE_ID     = 'gemini_achernar';
