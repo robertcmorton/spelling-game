@@ -180,7 +180,14 @@ for (let n = 0; n < tasks.length; n++) {
       }
       const data = await res.json();
       const inline = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-      if (!inline?.data) { console.log('FAIL (no audio)'); failed++; consecutiveFails++; break; }
+      if (!inline?.data) {
+        // 3.1 preview intermittently returns HTTP 200 with no audio. Retry a
+        // couple of times (paced) before giving up — usually the next try works.
+        if (attempt > MAX_429_PER_TASK) { console.log('no audio (gave up)'); failed++; consecutiveFails++; break; }
+        console.log(`no audio (retry ${attempt}/${MAX_429_PER_TASK})`);
+        await new Promise(r => setTimeout(r, PACE_MS));
+        continue;
+      }
       const pcm = Buffer.from(inline.data, 'base64');
       const m = (inline.mimeType || '').match(/rate=(\d+)/);
       const wav = pcmToWav(pcm, m ? parseInt(m[1], 10) : 24000);
@@ -199,7 +206,9 @@ for (let n = 0; n < tasks.length; n++) {
     break;
   }
 
-  if (succeeded && n < tasks.length - 1) await new Promise(r => setTimeout(r, PACE_MS));
+  // Pace between every request (success OR failure) so a flaky burst gets time
+  // to recover instead of hammering the API into a 5-in-a-row bail-out.
+  if (n < tasks.length - 1) await new Promise(r => setTimeout(r, PACE_MS));
 }
 
 // index.json lists only files that exist on disk, so the frontend tries the CDN
