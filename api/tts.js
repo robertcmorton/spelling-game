@@ -64,6 +64,35 @@ function pcmToWav(pcmBuf, sampleRate = 24000) {
   return wav;
 }
 
+// One Gemini TTS call. Returns the inlineData (audio) or null when the model
+// answers 200 with no audio. Throws with .status/.detail on an HTTP error.
+async function askGemini(apiKey, text) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const gRes = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text }] }],
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: DEFAULT_VOICE } },
+          languageCode: DEFAULT_LANG
+        }
+      }
+    })
+  });
+  if (!gRes.ok) {
+    const errBody = await gRes.text().catch(() => '');
+    const err = new Error(`Gemini ${gRes.status}`);
+    err.status = gRes.status;
+    err.detail = errBody.slice(0, 300);
+    throw err;
+  }
+  const data = await gRes.json();
+  return data?.candidates?.[0]?.content?.parts?.[0]?.inlineData || null;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -101,36 +130,15 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const gRes = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text }] }],
-        generationConfig: {
-          responseModalities: ['AUDIO'],
-          speechConfig: {
-            voiceConfig: {
-              prebuiltVoiceConfig: { voiceName: DEFAULT_VOICE }
-            },
-            languageCode: DEFAULT_LANG
-          }
-        }
-      })
-    });
-
-    if (!gRes.ok) {
-      const errBody = await gRes.text().catch(() => '');
-      console.error('[tts] Gemini', gRes.status, errBody.slice(0, 400));
-      return res.status(502).json({
-        error: `Gemini ${gRes.status}`,
-        detail: errBody.slice(0, 300)
-      });
+    let inline = await askGemini(apiKey, text);
+    if (!inline?.data) {
+      // Some words double as TTS control keywords (tone, style, stage, scene,
+      // bashful…) so the bare word is read as an instruction → empty audio.
+      // Retry with a framed prompt that forces speech — same trick the
+      // pre-generation script uses.
+      console.warn('[tts] no audio for', JSON.stringify(text), '— retrying framed');
+      inline = await askGemini(apiKey, 'The word is ' + text);
     }
-
-    const data = await gRes.json();
-    const part = data?.candidates?.[0]?.content?.parts?.[0];
-    const inline = part?.inlineData;
     if (!inline?.data) {
       return res.status(502).json({ error: 'No audio in Gemini response' });
     }
@@ -144,6 +152,10 @@ export default async function handler(req, res) {
     res.setHeader('Content-Length', wav.length.toString());
     return res.status(200).send(wav);
   } catch (e) {
+    if (e.status) {
+      console.error('[tts] Gemini', e.status, e.detail);
+      return res.status(502).json({ error: `Gemini ${e.status}`, detail: e.detail });
+    }
     console.error('[tts] handler error', e);
     return res.status(500).json({ error: e.message || 'TTS failure' });
   }
