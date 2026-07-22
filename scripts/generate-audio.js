@@ -181,12 +181,25 @@ for (let n = 0; n < tasks.length; n++) {
       const data = await res.json();
       const inline = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
       if (!inline?.data) {
-        // 3.1 preview intermittently returns HTTP 200 with no audio. Retry a
-        // couple of times (paced) before giving up — usually the next try works.
-        if (attempt > MAX_429_PER_TASK) { console.log('no audio (gave up)'); failed++; consecutiveFails++; break; }
-        console.log(`no audio (retry ${attempt}/${MAX_429_PER_TASK})`);
+        // Some words double as TTS control keywords (tone, style, stage, scene,
+        // bashful…) so the bare word is read as an instruction → empty audio,
+        // deterministically. Fall back to a framed "The word is X." prompt that
+        // forces speech, saved under the SAME hash so the frontend (which asks for
+        // the bare word) still finds it — no frontend change needed.
+        console.log('no audio → "The word is X." fallback');
         await new Promise(r => setTimeout(r, PACE_MS));
-        continue;
+        const fRes = await fetchGemini('The word is ' + task.text);
+        const fData = fRes.ok ? await fRes.json().catch(() => null) : null;
+        const fInline = fData?.candidates?.[0]?.content?.parts?.[0]?.inlineData;
+        if (fInline?.data) {
+          const fpcm = Buffer.from(fInline.data, 'base64');
+          const fm = (fInline.mimeType || '').match(/rate=(\d+)/);
+          const fwav = pcmToWav(fpcm, fm ? parseInt(fm[1], 10) : 24000);
+          await writeFile(outPath, fwav);
+          console.log(`ok via framed (${(fwav.length / 1024).toFixed(0)} KB)`);
+          generated++; consecutiveFails = 0; succeeded = true; break;
+        }
+        console.log('FAIL (no audio, even framed)'); failed++; consecutiveFails++; break;
       }
       const pcm = Buffer.from(inline.data, 'base64');
       const m = (inline.mimeType || '').match(/rate=(\d+)/);
